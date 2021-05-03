@@ -3,4 +3,4 @@ A simple GUI to process and plot bulk cytokine, surface marker, and single cell 
 
 To use this package:
 1. Install via PyPi: pip install plateypus
-2. In an anaconda environment, type python3 plateypus 
+2. In an anaconda environment, type python3 plateypus
