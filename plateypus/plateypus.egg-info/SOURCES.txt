@@ -4,8 +4,6 @@ README.md
 pyproject.toml
 setup.cfg
 plateypus/dataprocessing/__init__.py
-plateypus/dataprocessing/automateCBA.py
-plateypus/dataprocessing/automatedCBAProcessingGUI.py
 plateypus/dataprocessing/cellDataProcessing.py
 plateypus/dataprocessing/cytokineDataProcessing.py
 plateypus/dataprocessing/dataProcessingGUI.py
