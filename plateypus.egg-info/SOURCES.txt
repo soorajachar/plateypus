@@ -2,7 +2,15 @@ LICENSE.txt
 MANIFEST.in
 README.md
 pyproject.toml
-setup.cfg
+setup.py
+plateypus/__init__.py
+plateypus/__main__.py
+plateypus.egg-info/PKG-INFO
+plateypus.egg-info/SOURCES.txt
+plateypus.egg-info/dependency_links.txt
+plateypus.egg-info/entry_points.txt
+plateypus.egg-info/requires.txt
+plateypus.egg-info/top_level.txt
 plateypus/dataprocessing/__init__.py
 plateypus/dataprocessing/cellDataProcessing.py
 plateypus/dataprocessing/cytokineDataProcessing.py
@@ -11,10 +19,6 @@ plateypus/dataprocessing/initialDataProcessing.py
 plateypus/dataprocessing/miscFunctions.py
 plateypus/dataprocessing/proliferationDataProcessing.py
 plateypus/dataprocessing/singleCellDataProcessing.py
-plateypus/plateypus.egg-info/PKG-INFO
-plateypus/plateypus.egg-info/SOURCES.txt
-plateypus/plateypus.egg-info/dependency_links.txt
-plateypus/plateypus.egg-info/top_level.txt
 plateypus/plotting/__init__.py
 plateypus/plotting/facetPlot1D.py
 plateypus/plotting/facetPlot2D.py

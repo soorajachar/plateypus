@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 import pickle,os,subprocess
 import tkinter as tk
 import tkinter.ttk
@@ -206,3 +206,7 @@ class ExperimentActionWindow(tk.Frame):
         tk.Button(buttonWindow, text="OK",command=lambda: collectInput()).pack(side=tk.LEFT)
         tk.Button(buttonWindow, text="Back",command=lambda: backCommand()).pack(side=tk.LEFT)
         tk.Button(buttonWindow, text="Quit",command=lambda: quit()).pack(side=tk.LEFT)
+
+if __name__== "__main__":
+    app = MainApp()
+    app.mainloop()
