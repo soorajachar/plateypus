@@ -15,13 +15,19 @@ classifiers = [
     'Intended Audience :: Science/Research'
 ]
 
+# read the contents of your README file
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 setup(
     name="plateypus",
-    version="0.1.6",
+    version="0.1.7",
     author = "Sooraj Achar",
     author_email = "acharsr@nih.gov",
     description = "Processes and plots high throughput cytometry experiments through a GUI",
-    long_description = "file: README.md",
+    long_description = long_description,
     long_description_content_type = "text/markdown",
     url = "https://github.com/soorajachar/plateypus",
     classifiers = classifiers,

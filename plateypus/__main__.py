@@ -3,6 +3,7 @@ import pickle,os,subprocess
 import tkinter as tk
 import tkinter.ttk
 import pandas as pd
+import plateypus
 from plateypus.setup.experimentCreationGUI import NewExperimentWindow,NewProjectWindow,RemoveProjectWindow
 from plateypus.setup.experimentSetupGUI import ExperimentSetupStartPage
 from plateypus.dataprocessing.miscFunctions import setMaxWidth
@@ -14,7 +15,7 @@ class MainApp(tk.Tk):
     def __init__(self):
         self.root = tk.Tk.__init__(self)
         self._frame = None
-        self.homedirectory = os.getcwd()
+        self.homedirectory = '/'.join(os.path.abspath(plateypus.__file__).split('/')[:-1])
         if self.homedirectory[-1] != '/':
             self.homedirectory+='/'
         self.switch_frame(ExperimentSelectionPage)
@@ -62,7 +63,7 @@ class ExperimentSelectionPage(tk.Frame):
                 self.experimentMenu.set(self.experimentMenu['values'][0])
             self.experimentMenu['width'] = len(max(experiments,key=len))
         
-        if 'misc' not in os.listdir():
+        if 'misc' not in os.listdir(master.homedirectory):
             subprocess.run(['mkdir','misc'])
         if 'pathDict.pkl' not in os.listdir(master.homedirectory+'misc'):
             self.pathDict = {}
