@@ -1,3 +1,0 @@
-[console_scripts]
-plateypus = plateypus.__main__:main
-

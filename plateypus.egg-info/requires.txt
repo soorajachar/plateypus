@@ -1,4 +1,0 @@
-pandas
-seaborn
-scipy
-pillow
