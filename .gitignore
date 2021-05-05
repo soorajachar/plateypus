@@ -1,2 +1,7 @@
 misc/*
 .DS_Store
+build/
+dist/
+plateypus.egg-info/
+.pytest_cache/
+__pycache__/
