@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: plateypus
-Version: 0.1.10
+Version: 0.1.11
 Summary: Processes and plots high throughput cytometry experiments through a GUI
 Home-page: https://github.com/soorajachar/plateypus
 Author: Sooraj Achar

@@ -71,7 +71,7 @@ class ExperimentSelectionPage(tk.Frame):
             self.experimentMenu['width'] = len(max(experiments,key=len))
         
         if 'misc' not in os.listdir(master.homedirectory):
-            subprocess.run(['mkdir','misc'])
+            subprocess.run(['mkdir',master.homedirectory+'misc'])
         if 'pathDict.pkl' not in os.listdir(master.homedirectory+'misc'):
             self.pathDict = {}
         else:

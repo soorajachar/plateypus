@@ -3,5 +3,17 @@
 A GUI to process and plot high throughput bulk cytokine, surface marker, and single cell data exported from flowjo
 
 To use this package:
-1. Install via PyPi: pip install plateypus
-2. In an anaconda environment, type python3 plateypus to start the GUI
+1. If anaconda is not installed, follow installation instructions here: https://docs.anaconda.com/anaconda/install/
+2. Start terminal, type in and enter:
+```
+conda activate
+```
+3. Now install plateypus via PyPi by typing the following line in the terminal:
+```
+pip install plateypus
+```
+4. In this anaconda environment, type: 
+```
+python3 -m plateypus
+```
+to start the GUI
