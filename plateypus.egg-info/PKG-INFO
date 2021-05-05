@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: plateypus
+Version: 0.1.10
+Summary: Processes and plots high throughput cytometry experiments through a GUI
+Home-page: https://github.com/soorajachar/plateypus
+Author: Sooraj Achar
+Author-email: acharsr@nih.gov
+License: UNKNOWN
+Description: ![PLATEypusLogo](https://user-images.githubusercontent.com/49458891/116960335-185c1500-ac6e-11eb-92e0-369334eb7882.png)
+        
+        A GUI to process and plot high throughput bulk cytokine, surface marker, and single cell data exported from flowjo
+        
+        To use this package:
+        1. Install via PyPi: pip install plateypus
+        2. In an anaconda environment, type python3 plateypus to start the GUI
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Intended Audience :: Science/Research
+Description-Content-Type: text/markdown
