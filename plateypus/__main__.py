@@ -10,15 +10,19 @@ from plateypus.dataprocessing.miscFunctions import setMaxWidth
 from plateypus.dataprocessing.dataProcessingGUI import DataProcessingStartPage
 from plateypus.plotting.plottingGUI import PlotExperimentWindow 
 from PIL import Image,ImageTk
+from importlib_metadata import version
 
 #Root class; handles frame switching in gui
 class MainApp(tk.Tk):
     def __init__(self):
         self.root = tk.Tk.__init__(self)
+
+        self.title('plateypus '+version('plateypus'))
         self._frame = None
         self.homedirectory = '/'.join(os.path.abspath(plateypus.__file__).split('/')[:-1])
         if self.homedirectory[-1] != '/':
             self.homedirectory+='/'
+        print('plateypus location: '+self.homedirectory)
         self.switch_frame(ExperimentSelectionPage)
 
     def switch_frame(self, frame_class,*args):
