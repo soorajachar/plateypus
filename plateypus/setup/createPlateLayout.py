@@ -176,8 +176,8 @@ class BlankSelectionPage(tk.Frame):
             #Remove all axis elements
             fig_ax1.set_xlim((0, max(baseLayoutDf['x'])+1))
             fig_ax1.set_ylim((0, max(baseLayoutDf['y'])+1))
-            fig_ax1.set_xticks([], [])
-            fig_ax1.set_yticks([], [])
+            fig_ax1.set_xticks([])
+            fig_ax1.set_yticks([])
             fig_ax1.set_xlabel('')
             fig_ax1.set_ylabel('')
             #Add plate dividing lines
@@ -213,12 +213,9 @@ class BlankSelectionPage(tk.Frame):
             x2, y2 = erelease.xdata, erelease.ydata
 
         def toggle_selector(event):
-            print(' Key pressed.')
             if event.key in ['Q', 'q'] and toggle_selector.RS.active:
-                print(' RectangleSelector deactivated.')
                 toggle_selector.RS.set_active(False)
             if event.key in ['A', 'a'] and not toggle_selector.RS.active:
-                print(' RectangleSelector activated.')
                 toggle_selector.RS.set_active(True)
          
         rectpropsdict = {'facecolor':'#FF0000','alpha':0.2,'edgecolor':'#FF0000'}
@@ -521,12 +518,9 @@ class PlateLayoutPage(tk.Frame):
             x2, y2 = erelease.xdata, erelease.ydata
 
         def toggle_selector(event):
-            print(' Key pressed.')
             if event.key in ['Q', 'q'] and toggle_selector.RS.active:
-                print(' RectangleSelector deactivated.')
                 toggle_selector.RS.set_active(False)
             if event.key in ['A', 'a'] and not toggle_selector.RS.active:
-                print(' RectangleSelector activated.')
                 toggle_selector.RS.set_active(True)
          
         rectpropsdict = {'facecolor':self.currentpalette[self.levelValueIndex+1],'alpha':0.2,'edgecolor':self.currentpalette[self.levelValueIndex+1]}
@@ -732,7 +726,6 @@ class PlateLayoutPage(tk.Frame):
                     levelValue = levelValues[self.levelIndex][j]
                     currentlabel.configure(text=levelValue,fg = self.currentpalette[j+1])
                     if j == self.levelValueIndex:
-                        print(currentlabel['text'])
                         currentlabel.configure(font='Helvetica 18',borderwidth=2, relief="solid")
                     else:
                         currentlabel.configure(font='Helvetica 18',borderwidth=0, relief="solid")
@@ -798,7 +791,6 @@ class PlateLayoutPage(tk.Frame):
         def operateOnSelection(action,area,direction):
             
             keyMatrix = np.matrix(np.reshape(self.currentLayout['key'].values,(plateDimensions[0]*numRowPlates,plateDimensions[1]*numColumnPlates)))
-            print(keyMatrix)
             selectedElements = np.where(keyMatrix != -1)
             selectionToOperateOn = keyMatrix[np.ix_(np.unique(selectedElements[0]),np.unique(selectedElements[1]))]
             offset = [1,1]
@@ -812,8 +804,6 @@ class PlateLayoutPage(tk.Frame):
                 blankColumns = self.blankPlateColumnsToDisregard
             blankArray = [blankRows,blankColumns]
             tiledLevelLayout = np.ones(keyMatrix.shape)*-1
-            print('tll')
-            print(selectionToOperateOn)
             tilingMatrixList = []
             if action == 'tile':
                 if direction == 'h':
@@ -858,14 +848,10 @@ class PlateLayoutPage(tk.Frame):
             else:
                 if direction == 'h':
                     numRepeats = int((areashape[1]-len(self.blankColumnsToDisregard))/selectionToOperateOn.shape[1])
-                    print(numRepeats)
                     fullTilingMatrix = np.tile(selectionToOperateOn,numRepeats)
                 else:
                     numRepeats = int((areashape[0]-len(self.blankRowsToDisregard))/selectionToOperateOn.shape[0])
-                    print(numRepeats)
                     fullTilingMatrix = np.tile(selectionToOperateOn,(numRepeats,1))
-            print(keyMatrix)
-            print(fullTilingMatrix)
             tilerow = 0
             if area == 'plate':
                 if direction == 'h':
@@ -915,8 +901,6 @@ class PlateLayoutPage(tk.Frame):
                     tilerow += 1
             fullTiledLevelLayout = tiledLevelLayout.copy()
             """
-            print(keyMatrix)
-            print(fullTiledLevelLayout)
             unrolledKeys = fullTiledLevelLayout.flatten()
             if action == 'tile':
                 self.currentLayout['key'] = unrolledKeys

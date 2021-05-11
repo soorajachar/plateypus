@@ -129,7 +129,6 @@ def parseCommandLineNNString(inputString):
         return experimentNumbers
 
 def reorderDfByInputOrder(experimentParameters,df):
-    print(experimentParameters)
     levelDict = experimentParameters['levelLabelDict'].copy()
     del levelDict[list(levelDict.keys())[-1]]
     levels = list(levelDict.keys())
@@ -296,7 +295,6 @@ def rainbow_text(x, y, strings, colors, ax=None, **kw):
         text = ax.text(x, y, " " + s + " ", color=c, transform=t,ha='center', **kw)
         text.draw(canvas.get_renderer())
         ex = text.get_window_extent()
-        print(ex.width)
         t = transforms.offset_copy(text._transform, x=ex.width*2, units='dots')
 
 def get_cluster_centroids(plottingDf,singleCluster=False):

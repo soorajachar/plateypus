@@ -42,7 +42,7 @@ class NewProjectWindow(tk.Frame):
             pathDict[projectName] = rawPathName
             with open(master.homedirectory+'misc/pathDict.pkl','wb') as f:
                 pickle.dump(pathDict,f)
-            print('Project created!')
+            tk.messagebox.showinfo("Project Created", "Project\n"+projectName+"\nhas been created.")
 
         b = tk.Button(mainWindow,text='Create new project',command=lambda:createProject())
         
@@ -76,7 +76,7 @@ class RemoveProjectWindow(tk.Frame):
             del pathDict[projectName]
             with open(master.homedirectory+'misc/pathDict.pkl','wb') as f:
                 pickle.dump(pathDict,f)
-            print('Project removed!')
+            tk.messagebox.showinfo("Project Removed", "Project\n"+projectName+"\nhas been removed.")
 
         b = tk.Button(mainWindow,text='REMOVE project',command=lambda:removeProject())
         
@@ -132,7 +132,7 @@ class NewExperimentWindow(tk.Frame):
                             for subsubsubfolder in subsubsubfolders:
                                 subprocess.run(['mkdir',pathName+projectName+'/'+experimentName+'/'+subfolder+'/'+subsubfolder+'/'+subsubsubfolder])
             
-            print('Experiment created!')
+            tk.messagebox.showinfo("Experiment Created", "Experiment\n"+experimentName+"\nin Project \n"+projectName+"\nhas been created.")
 
         b = tk.Button(mainWindow,text='Create experiment',command=lambda:createExperiment())
         

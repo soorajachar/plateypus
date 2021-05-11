@@ -152,7 +152,6 @@ class TubeLayoutPage(tk.Frame):
             for row in range(emptydf.shape[0]):
                 for col in range(emptydf.shape[1]):
                     timepoint = df2.columns[col]
-                    print(xsdf.index.tolist()[row])
                     if not isinstance(xsdf.index.tolist()[row],str) and not isinstance(xsdf.index.tolist()[row],float):
                         conditions = list(xsdf.index.tolist()[row])
                     else:

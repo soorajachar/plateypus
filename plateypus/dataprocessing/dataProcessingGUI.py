@@ -101,7 +101,6 @@ class DataProcessingStartPage(tk.Frame):
         tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
 
 def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells):
-    print('Creating Dataframes for: '+str(folderName))
     if dataType == 'singlecell' or dataType == 'prolif':
         parameterExtension = 'cell'
     else:
@@ -134,4 +133,5 @@ def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells):
             scdp.createPlateSingleCellDataFrame(folderName,experimentParameters,experimentLevelLayoutDict,useBlankWells)
         else:
             scdf = scdp.createTubeSingleCellDataFrame(folderName,experimentParameters,experimentLevelLayoutDict)
-    print(dataType+' dataframe created!')
+    niceDatatypeNameDict = {'cyt':'Cytokine','cell':'Bulk cell','prolif':'Proliferation','singlecell':'Single cell','killing':'Killing'}
+    tk.messagebox.showinfo("Dataframe Created", niceDatatypeNameDict[dataType]+" dataframe created!")

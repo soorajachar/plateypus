@@ -37,7 +37,6 @@ def produceSubsettedDataFrames(fulldf,withinFigureBoolean,specificValueBooleanLi
             for levelValue,specificBoolean in zip(currentLevelValues,specificValueBooleanList[realLevelIndex]):
                 if specificBoolean:
                     levelValues.append(levelValue)
-            print(levelValues)
             #If we will include this level within the figure
             if withinFigureBoolean[realLevelIndex]:
                 withinFigureSubsettedLevelValues.append(levelValues)
@@ -46,7 +45,6 @@ def produceSubsettedDataFrames(fulldf,withinFigureBoolean,specificValueBooleanLi
                         levelValuesPlottedIndividually.append(levelValue)
             #Only need to add level values to figure list; will be xs'd out of the full dataframe in the subsetted, within figure dataframes
             else:
-                print('wat')
                 figureSubsettedLevelValues.append(levelValues)
                 figureLevelNames.append(currentLevelName)
                 figureLevelIndices.append(levelIndex)
@@ -128,11 +126,8 @@ def produceSubsettedDataFrames(fulldf,withinFigureBoolean,specificValueBooleanLi
                 newSubset = list(pd.unique(subset))
                 realSubsettingList.append(newSubset)
             actualSubsettingList = []
-            print(realSubsettingList)
             realsubset = 0
             for subset,levelName in enumerate(possibleSubsettedDf.index.names):
-                print(levelName)
-                print(subset)
                 if levelName == 'Event':
                     actualSubsettingList.append(slice(None))
                 else:
@@ -158,14 +153,11 @@ def createFacetPlotName(folderName,dataType,plotType,subPlotType,legendParameter
     legendParameterString = delimiter2.join(list(legendParameterToLevelNameDict.keys()))
 
     flattened_list = []
-    print(legendParameterToLevelNameDict)
     for val in legendParameterToLevelNameDict.values():
         if isinstance(val, (list,)):
-            print('wat')
             for val2 in val:
                 flattened_list.append(val2)
         else:
-            print('wat2')
             flattened_list.append(val)
 
     levelNameString = delimiter2.join(flattened_list)
@@ -254,7 +246,6 @@ def plotFacetedFigures(folderName,plotType,subPlotType,dataType,subsettedDfList,
                     kwargs['y'] = legendParameterToLevelNameDict[parameter]
             else:
                 currentLevel = legendParameterToLevelNameDict[parameter]
-            print(originalLevelValueOrders)
             if parameter == 'Color':
                 kwargs['hue'] = currentLevel
                 if len(originalLevelValueOrders) != 0 and currentLevel in originalLevelValueOrders.keys():
@@ -332,7 +323,6 @@ def plotFacetedFigures(folderName,plotType,subPlotType,dataType,subsettedDfList,
             plottingDf = subsettedDf.copy()
         #Converts wide form dataframe into long form required for cat/relplot
         plottingDf = plottingDf.reset_index()
-        print(plottingDf)
         #Use plot options file to initialize numeric x axis ordering
         #NEED TO GET WORKING WITH HEATMAPS
         if subPlotType != 'heatmap':
@@ -443,8 +433,6 @@ def plotSubsettedFigure(subsettedDf,plottingDf,kwargs,facetgridkwargs,plotSpecif
     
     #Add in sharex/sharey options
     if plotType != '1d':
-        print(plotOptions['X']['share'])
-        print(plotOptions['Y']['share'])
         facetKwargs = {'sharex':plotOptions['X']['share'],'sharey':plotOptions['Y']['share']}
     else:
         facetKwargs = {'sharex':False,'sharey':plotOptions['Y']['share']}

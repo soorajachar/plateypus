@@ -170,7 +170,6 @@ def returnOriginalOrders(trueLabelDict,plottingDf,kwargs,dimensionality):
         newkwargs = kwargs.copy()
     orderDict = {}
     for kwarg in newkwargs:
-        print(plottingDf[newkwargs[kwarg]])
         if newkwargs[kwarg] == 'Cluster' and '$' not in str(plottingDf[newkwargs[kwarg]][0]):
             orderedValues = list(map(str,sorted(list(map(int,list(pd.unique(plottingDf['Cluster'])))))))
         else:
@@ -226,7 +225,6 @@ def addCountYAxis(axis,subplotValuesList):
     keepIncreasing = True
     while keepIncreasing:
         tickspaces = [1*factor,2*factor,2.5*factor,5*factor,10*factor]
-        print(tickspaces)
         for j,tickspace in enumerate(tickspaces):
             numticks = int(trueMax/tickspace)
             #uncomment if you want the min tick number to be "minticknumber"
@@ -339,8 +337,6 @@ def updateDropdownControlledCompositionPlot(frameCanvas,plotAxis,plottingDf,true
             else:
                 modifiedNewKwargs = newkwargs.copy()
                 featureBool = False
-            print(modifiedNewKwargs)
-            print(newkwargs)
             orderDict = returnOriginalOrders(trueLabelDict,plottingDf,modifiedNewKwargs,'1.5d')
             if not featureBool:
                 palette = sns.color_palette(sns.color_palette(),len(pd.unique(plottingDf['Cluster'])))
@@ -459,7 +455,6 @@ def getDefaultKwargs(df):
         if sortedNumUniqueElements[1] < 7:
             secondMaxUniqueElementsColumn = list(sortedTempDict.keys())[1]
             #secondMaxUniqueElementsColumn = responseColumns[numUniqueElements.index(sortedNumUniqueElements[1])]
-            print(responseColumns[numUniqueElements.index(sortedNumUniqueElements[1])])
             kwargs['style'] = secondMaxUniqueElementsColumn
             columnsLeftToAssign.remove(secondMaxUniqueElementsColumn)
             numUniqueElements2.remove(sortedNumUniqueElements2[0])
@@ -519,11 +514,9 @@ def updateDropdownControlledPlot(frameCanvas,plotAxis,plottingDf,levelVars,xColu
         orderDict = {}
     if 'hue' in newkwargs.keys():
         if not isinstance(plottingDf[newkwargs['hue']][0],str):
-            print('COOLWARM')
             palette = 'coolwarm'
             newkwargs['palette'] = palette
         else:
-            print('NONE')
             palette = sns.color_palette(sns.color_palette(),len(pd.unique(plottingDf[newkwargs['hue']]))) 
             newkwargs['palette'] = palette
     if 'hue' in newkwargs.keys():

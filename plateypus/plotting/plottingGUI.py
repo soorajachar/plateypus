@@ -106,14 +106,12 @@ class PlotExperimentWindow(tk.Frame):
             global experimentDf
             if dataType != 'singlecell':
                 experimentDf = pd.read_pickle('outputData/pickleFiles/'+idp.dataTypeDataFrameFileNames[dataType]+'-'+folderName+modifiedString+'.pkl')
-                print(experimentDf)
             else:
                 if 'initialSingleCellDf-channel-'+folderName+modifiedString+'.pkl' in os.listdir('outputData/pickleFiles/'):
                     experimentDf = pickle.load(open('outputData/pickleFiles/'+'initialSingleCellDf-channel-'+folderName+modifiedString+'.pkl','rb'))
                 else:
                     experimentDf = pd.read_hdf('outputData/pickleFiles/'+'initialSingleCellDf-channel-'+folderName+modifiedString+'.h5', 'df')
                 if 'CellType' != experimentDf.index.names[0]:
-                    print('wat')
                     experimentDf = pd.concat([experimentDf], keys=['TCells'], names=['CellType'])
             global trueLabelDict
             trueLabelDict = {}
@@ -358,11 +356,6 @@ class selectLevelValuesPage(tk.Frame):
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
         
-        print('wat-plotting')
-        print(fName)
-        print(backPage)
-        print(shp)
-        
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=maxNumLevelValues+4,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(backPage,fsp,fName,secondaryBackPage,pt,shp)).grid(row=maxNumLevelValues+4,column=1)
         tk.Button(buttonWindow, text="Quit",command=lambda: quitCommand()).grid(row=maxNumLevelValues+4,column=2)
@@ -468,7 +461,6 @@ class plotElementsGUIPage(tk.Frame):
         else:
             dataType = ''
         """
-        print('TLD 1')
         self.tld = trueLabelDict
 
         axisDict = {'categorical':['X','Y'],'1d':['Y'],'2d':['X','Y'],'3d':['X','Y','Colorbar']}

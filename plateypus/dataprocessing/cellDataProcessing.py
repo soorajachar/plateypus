@@ -255,8 +255,6 @@ def parseCellCSVHeaders(columns,panelData=[]):
                         statistic = '% Positive'
                     else:
                         statistic = 'Count'
-            print(column)
-            print([cellType,marker,statistic])
             newMultiIndexList.append([cellType,marker,statistic])
     
     commonBranchesIndices = []

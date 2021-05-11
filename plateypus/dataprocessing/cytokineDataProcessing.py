@@ -90,7 +90,6 @@ def parseCytokineCSVHeaders(columns):
             cytokine = populationNameVsStatisticSplit[0].split('/')[-1]
         else:
             cytokine = populationNameVsStatisticSplit[0].split('/')[-2]
-        print(cytokine)
         newMultiIndexList.append([cytokine])
     return newMultiIndexList
 
@@ -107,14 +106,12 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
     #Get cytokine calibration curve data
     tempExperimentParameters = {'overallPlateDimensions':[8,12]}
     calibrationFileNames = glob.glob('inputData/bulkCSVFiles/Calibration*')
-    print(calibrationFileNames)
     calibrationNames = []
     kitNames = []
     for calibrationFileName in calibrationFileNames:
         #performCommaCheck(calibrationFileName.split('/')[-1])
         newName = calibrationFileName.split('.')[0].split('_')[0].split('/')[-1]
         kitNames.append(newName)
-    print(kitNames)
     sortedData,sortedFiles = cleanUpFlowjoCSV(kitNames,folderName,'cyt',tempExperimentParameters)
     for i,newName in enumerate(kitNames):
         if '-' in newName:
@@ -140,9 +137,6 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
         for cytokine in cytokines:
             if cytokine[0] not in completeCytokineMWDict:
                 allCytokinesHaveMWInDict = False
-                print(cytokine[0])
-    print('wat')
-    print(allCytokinesHaveMWInDict)
 
     for calibration in sortedData:
         data = np.array(calibration.values[:,1:-1],dtype=float)
@@ -164,8 +158,6 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
         cbaStandardsMFIMatrix = np.zeros([len(cytokines),cbaStandardsConcentrations.shape[0]]) 
         cbaStandardsMFIPlotPointsMatrix = np.zeros([len(cytokines),cbaStandardsConcentrationsPlotPoints.shape[0]])
         color_list = sns.color_palette(sns.color_palette(),len(cytokines))
-        print(cytokines)
-        print(data)
         for i,cytokineList in enumerate(cytokines):
             cytokine = cytokineList[0]
             #amplitude bounded from range/2 to range*2, EC50 bounded from minimum to maximum standard concentration tested, Hill coefficient bounded from 0 to 2, Background bounded from 0 to minimum GFI*2
@@ -174,7 +166,6 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
             #use scipy curve fit to determine best hill equation fit for data, searching within the bounds given above
             popt,pcov = curve_fit(Hill, cbaStandardsConcentrations,np.log10(data[:,i]),sigma=np.log10(data[:,i]),bounds=(lowerCurveFitBounds,upperCurveFitBounds))
             rsquared = round(r_squared(cbaStandardsConcentrations,np.log10(data[:,i]),Hill,popt),3)
-            print(rsquared)
             rsquaredList.append(rsquared)
             for j in range(len(popt)):  
                 #Convert just ec50 value to desired units (nM,uM etc) if cytokine has a molar mass in dict
@@ -192,7 +183,6 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
                 cbaStandardsConcentrationMatrix[i,:] = cbaStandardsConcentrations
                 cbaStandardsConcentrationPlotPointsMatrix[i,:] = cbaStandardsConcentrationsPlotPoints
             cbaStandardsMFIMatrix[i,:] = data[:,i]
-            print(fittingParameters[i,:])
             cbaStandardsMFIPlotPointsMatrix[i,:] = np.power(10,Hill(cbaStandardsConcentrationPlotPointsMatrix[i,:],*fittingParameters[i,:]))
             #Plot on log-log scale the experimental points and the curve fit line with previously determined curve fitting parameters
             #plt.loglog(cbaStandardsConcentrations,data[:,i],'o',color=color_list[i,:],label=listOfCytokines[i])
@@ -243,8 +233,6 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
         currentCBAStandardsConcentrationDf.columns.name = 'Cytokine' 
         currentCBAPlotPointsConcentrationDf.columns.name = 'Cytokine'
         mic1 = pd.MultiIndex.from_tuples(cytokines,names=['Cytokine'])
-        print(cytokines)
-        print(mic1)
         fittingParametersDf = pd.DataFrame(fittingParameters,index=mic1,columns=['Amplitude','EC50','HillCoeff','Background'])
         mic2 = pd.MultiIndex.from_tuples([['MFI','Lower'],['MFI','Upper'],['Concentration','Lower'],['Concentration','Upper']])
         concLODDf = pd.DataFrame(concLOD,index=mic1,columns=mic2)
@@ -261,9 +249,6 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
     fullFittingParametersDf = pd.concat(fittingParametersList)
     fullConcLODDf = pd.concat(concLODList)
     
-    print(fullFittingParametersDf)
-    print(fullConcLODDf)
-
     fullCBAStandardsMFIDf = pd.concat(cbaStandardsMFIList,keys=kitNames,names=['Kit Name'],axis=1)
     fullCBAPlotPointsMFIDf = pd.concat(cbaPlotPointsMFIList,keys=kitNames,names=['Kit Name'],axis=1)
     fullCBAStandardsConcentrationDf = pd.concat(cbaStandardsConcentrationList,keys=kitNames,names=['Kit Name'],axis=1)
@@ -312,17 +297,6 @@ def createCytokineDataFrame(folderName,finalDataFrame,concUnitPrefix):
         
         fittingParameters = pickle.load(open('misc/fittingParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "rb"))
         LODParameters = pickle.load(open('misc/LODParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "rb"))
-        #listOfCytokines = list(pd.unique(LODParameters.index.get_level_values('Cytokine')))
-        #fittingParameters1 = pickle.load(open('semiProcessedData/fittingParameters-'+folderName+'-'+concUnitPrefix+'-Th1,2,17.pkl', "rb"))
-        #LODParameters1 = pickle.load(open('semiProcessedData/LODParameters-'+folderName+'-'+concUnitPrefix+'-Th1,2,17.pkl', "rb"))
-        #fittingParameters2 = pickle.load(open('semiProcessedData/fittingParameters-'+folderName+'-'+concUnitPrefix+'-Inflammatory.pkl', "rb"))
-        #LODParameters2 = pickle.load(open('semiProcessedData/LODParameters-'+folderName+'-'+concUnitPrefix+'-Inflammatory.pkl', "rb"))
-        #fittingParameters = np.vstack([fittingParameters1,fittingParameters2])
-        #LODParameters1.update(LODParameters2)
-        #LODParameters = LODParameters1.copy()
-        #listOfCytokines = listOfCytokines1+listOfCytokines2
-        print(fittingParameters)
-        print(LODParameters)
         #Begin converting GFI dataframe into corresponding concentration dataframe
         concentrationList = []
         #Step through dataframe one cytokine at a time

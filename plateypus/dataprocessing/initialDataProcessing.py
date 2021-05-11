@@ -260,8 +260,6 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
                         level = levels[levelID]
                         levelValue = allLevelValues[level][levelValueID]
                         tupleList.append(levelValue)
-                    else:
-                        print('wat2')
                 if len(tupleList) != 0:
                     fullTupleList.append(tupleList)
                 index+=1
@@ -310,15 +308,11 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
     fullExperimentDf = reorderDfByInputOrder(experimentParameters,fullExperimentDf)
     return fullExperimentDf
 
-def convertDataFramesToExcel(folderName,secondPath,dataType,df,useModifiedDf):
-    if useModifiedDf:
-        modifiedString = '-modified'
-    else:
-        modifiedString = ''
-    writer = pd.ExcelWriter('outputData/excelFiles/excelFile-'+folderName+'-'+dataType+modifiedString+'.xlsx')
+def convertDataFramesToExcel(folderName,secondPath,dataType,df):
+    writer = pd.ExcelWriter('outputData/excelFiles/excelFile-'+folderName+'-'+dataType+'.xlsx')
     if dataType == 'cyt':
         dfg = pickle.load(open('outputData/pickleFiles/cytokineGFIPickleFile-'+folderName+'.pkl','rb'))
-        dfc = pickle.load(open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+modifiedString+'.pkl','rb'))
+        dfc = pickle.load(open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
         dfg.to_excel(writer,'GFI')
         dfc.to_excel(writer,'Concentration')
     else:
@@ -326,17 +320,11 @@ def convertDataFramesToExcel(folderName,secondPath,dataType,df,useModifiedDf):
             statisticDf = df.xs(statistic,level='Statistic')
             statisticDf.to_excel(writer,statistic)
     writer.save()
-    print(dataType[0].upper()+dataType[1:]+' Excel file Saved')
+    #print(dataType[0].upper()+dataType[1:]+' Excel file Saved')
 
 def saveFinalDataFrames(folderName,secondPath,experimentNumber,dataType,fullExperimentDf,excel_data):
     fullExperimentDf = fullExperimentDf.astype(float)
     with open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl', "wb") as f:
         pickle.dump(fullExperimentDf, f)
-    convertDataFramesToExcel(folderName,secondPath,dataType,fullExperimentDf,False)
+    convertDataFramesToExcel(folderName,secondPath,dataType,fullExperimentDf)
     print(fullExperimentDf)
-    
-    modifiedFullExperimentDf = fullExperimentDf.copy() 
-    with open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'-modified.pkl', "wb") as f:
-        pickle.dump(modifiedFullExperimentDf, f)
-    convertDataFramesToExcel(folderName,secondPath,dataType,modifiedFullExperimentDf,True)
-    print(modifiedFullExperimentDf)

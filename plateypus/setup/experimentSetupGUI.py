@@ -290,7 +290,6 @@ class BarcodingPage(tk.Frame):
             plateStart = combinedPlateNum*totalPlatesPerBarcodedPlate+1
             plateEnd = (combinedPlateNum+1)*totalPlatesPerBarcodedPlate
             allPlateIndices = list(range(plateStart,plateEnd+2,plateSkip))
-            print(allPlateIndices)
             combinedEntry.grid(row=combinedPlateNum*numberOfBarcodedPlates+1,column=0)
             plateBarcodingVarList,plateEntryList = [],[]
             for plateNum in range(numberOfBarcodedPlates):
