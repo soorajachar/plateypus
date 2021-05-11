@@ -418,7 +418,7 @@ class allLevelNamePage(tk.Frame):
         numericCheckBoxes = []
         numericCheckBoxVars = []
 
-        mainWindow = Frame(self)
+        mainWindow = tk.Frame(self)
         mainWindow.pack(side=tk.TOP,padx=10,pady=10)
         
         lt1 = tk.Label(mainWindow, text="Level Name").grid(row=0,column=1)
@@ -507,7 +507,7 @@ class allLevelNamePage(tk.Frame):
             else:
                 master.switch_frame(PlateExperimentParameterPage,folderName)
         
-        buttonWindow = Frame(self)
+        buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
         
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=numAllLevels+1,column=0)
@@ -520,7 +520,7 @@ class columnLevelValuesPage(tk.Frame):
         
         tk.Frame.__init__(self, master)
         
-        mainWindow = Frame(self)
+        mainWindow = tk.Frame(self)
         mainWindow.pack(side=tk.TOP,padx=10,pady=10)
         
         lt = tk.Label(mainWindow,text=experimentParameters['columnVariableName']+':').grid(row=0,column=0)
@@ -551,7 +551,7 @@ class columnLevelValuesPage(tk.Frame):
             experimentParameters['columnLevelValues'] = columnLevelValues
             master.switch_frame(conditionLevelValuesPage,folderName)
         
-        buttonWindow = Frame(self)
+        buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
         
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=2*int(numColumnLevelValues/col_wrap)+2,column=5)
@@ -575,7 +575,7 @@ class conditionLevelValuesPage(tk.Frame):
         
         tk.Frame.__init__(self, master)
         
-        mainWindow = Frame(self)
+        mainWindow = tk.Frame(self)
         mainWindow.pack(side=tk.TOP,padx=10,pady=10)
         
         entryWrap = 16
@@ -657,7 +657,7 @@ class conditionLevelValuesPage(tk.Frame):
                             subprocess.run(['mkdir','inputData/singleCellCSVFiles/A'+str(plateNum)])
             master.switch_frame(ExperimentSetupStartPage,folderName,backPage)
 
-        buttonWindow = Frame(self)
+        buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
         
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=numConditionLevels+1,column=int(maxLevelValues/2))
