@@ -81,21 +81,15 @@ class PlotExperimentWindow(tk.Frame):
         rb2c = tk.Radiobutton(mainWindow,text="Proliferation",padx = 20, variable=v2, value='prolif')
         rb2d = tk.Radiobutton(mainWindow,text="Single Cell",padx = 20, variable=v2, value='singlecell')
         
-        v3 = tk.BooleanVar(value=False)
-        cb = tk.Checkbutton(mainWindow,padx = 20, variable=v3)
-
         l2.grid(row=0,column=0)
         rb2a.grid(row=1,column=0,sticky=tk.W)
         rb2b.grid(row=2,column=0,sticky=tk.W)
         rb2c.grid(row=3,column=0,sticky=tk.W)
         rb2d.grid(row=4,column=0,sticky=tk.W)
         
-        l3 = tk.Label(mainWindow,text='Modified?').grid(row=0,column=1,sticky=tk.W)
-        cb.grid(row=1,column=1,sticky=tk.W)
-        
         def collectInputs():
             global useModifiedDf
-            modified = v3.get()
+            modified = False 
             useModifiedDf = modified
             if modified:
                 modifiedString = '-modified'

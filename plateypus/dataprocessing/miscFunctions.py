@@ -67,10 +67,15 @@ def cleanUpFlowjoCSV(fileArray,folderName,dataType,experimentParameters):
         temp2 = [] 
         for i in range(0,temp.shape[0]):
             fullfilename = 'inputData/singleCellCSVFiles/'+name+'/'+temp.iloc[i,0][:temp.iloc[i,0].find('.')]
-            if '_' in temp.iloc[i,0]:
-                wellID = temp.iloc[i,0].split('.')[0].split('_')[-3]
+            #CyTEK Explorer
+            if ' Well' in temp.iloc[i,0]:
+                wellID = temp.iloc[i,0] .split(' ')[0]
+            #FACS Diva
             else:
-                wellID = temp.iloc[i,0]
+                if '_' in temp.iloc[i,0]:
+                    wellID = temp.iloc[i,0].split('.')[0].split('_')[-3]
+                else:
+                    wellID = temp.iloc[i,0]
             temp.iloc[i,0] = orderWellID[wellID]
             #temp2.append([orderWellID[wellID],fullfilename])
             temp2.append([str(temp.iloc[i,0]).zfill(3),fullfilename])

@@ -292,7 +292,7 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
         #Remove blanks
         for i,level in enumerate(fullExperimentDf.index.names):
             tempLevelValues = pd.unique(fullExperimentDf.index.get_level_values(level))
-            if 'Blank' in tempLevelValues:
+            if 'Blank' in tempLevelValues.tolist():
                 fullExperimentDf = fullExperimentDf.drop('Blank',level=i)
         temp = []
         temp2 = []
