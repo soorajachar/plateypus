@@ -5,3 +5,7 @@ dist/
 plateypus.egg-info/
 .pytest_cache/
 __pycache__/
+plateypus/__pycache__/
+plateypus/dataprocessing/__pycache__/
+plateypus/setup/__pycache__/
+plateypus/plotting/__pycache__/
