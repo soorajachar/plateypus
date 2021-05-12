@@ -25,7 +25,8 @@ Full_Detector_Dict = {'FACS':FACS_Detector_Names,'CyTOF':CyTOF_Detector_Names}
 class DataProcessingStartPage(tk.Frame):
     def __init__(self, master,folderName,expNum,ex_data,bPage):
         tk.Frame.__init__(self, master)
-            
+        
+        print('wat')
         #os.chdir(master.homedirectory+'/'+folderName)
         backPage = bPage
 

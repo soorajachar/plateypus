@@ -3,12 +3,12 @@ import pickle,os,subprocess
 import tkinter as tk
 import tkinter.ttk
 import pandas as pd
-import plateypus
 from plateypus.setup.experimentCreationGUI import NewExperimentWindow,NewProjectWindow,RemoveProjectWindow
 from plateypus.setup.experimentSetupGUI import ExperimentSetupStartPage
 from plateypus.dataprocessing.miscFunctions import setMaxWidth
 from plateypus.dataprocessing.dataProcessingGUI import DataProcessingStartPage
 from plateypus.plotting.plottingGUI import PlotExperimentWindow 
+import plateypus
 from PIL import Image,ImageTk
 from importlib_metadata import version
 
