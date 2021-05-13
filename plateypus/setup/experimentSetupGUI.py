@@ -8,6 +8,7 @@ from plateypus.setup.createPlateLayout import BlankSelectionPage
 
 experimentParameters = {}
 parametersUpdatedByGridGUI = {}
+dataTypeDict = {'Cytokine':'cyt','Bulk/Single cell':'cell','Killing':'killing'}
 
 class ExperimentSetupStartPage(tk.Frame):
     def __init__(self, master,fName,bPage):
@@ -28,26 +29,39 @@ class ExperimentSetupStartPage(tk.Frame):
         rb2a.grid(row=0,column=0,sticky=tk.W)
         rb2b.grid(row=1,column=0,sticky=tk.W)
         
-        v3 = tk.StringVar(value='both')
-        l3 = tk.Label(mainWindow, text="for:     ")
-        l3.grid(row=0,column=1,rowspan=2,sticky=tk.EW)
-        rb3a = tk.Radiobutton(mainWindow, text="Cells",padx = 20, variable=v3, value='cell')
-        rb3b = tk.Radiobutton(mainWindow,text="Cytokines",padx = 20, variable=v3, value='cyt')
-        rb3c = tk.Radiobutton(mainWindow,text="Cells and Cytokines",padx = 20, variable=v3, value='both')
-        rb3a.grid(row=0,column=2,sticky=tk.W)
-        rb3b.grid(row=1,column=2,sticky=tk.W)
-        rb3c.grid(row=2,column=2,sticky=tk.W)
+        #v3 = tk.StringVar(value='both')
+        #l3 = tk.Label(mainWindow, text="for:     ")
+        #l3.grid(row=0,column=1,rowspan=2,sticky=tk.EW)
+        #rb3a = tk.Radiobutton(mainWindow, text="Cells",padx = 20, variable=v3, value='cell')
+        #rb3b = tk.Radiobutton(mainWindow,text="Cytokines",padx = 20, variable=v3, value='cyt')
+        #rb3c = tk.Radiobutton(mainWindow,text="Cells and Cytokines",padx = 20, variable=v3, value='both')
+        #rb3a.grid(row=0,column=2,sticky=tk.W)
+        #rb3b.grid(row=1,column=2,sticky=tk.W)
+        #rb3c.grid(row=2,column=2,sticky=tk.W)
+        
+        labelList,cbList,cbVarList = [],[],[]
+        for i,dataT in enumerate(list(dataTypeDict.keys())):
+            l = tk.Label(mainWindow,text=dataT).grid(row=i,column=3,sticky=tk.W)
+            v = tk.BooleanVar(value=False)
+            cb = tk.Checkbutton(mainWindow, variable=v)
+            cb.grid(row=i,column=1,sticky=tk.W)
+            cbList.append(cb)
+            cbVarList.append(v)
         
         def experimentLayout():
-            if v3.get() == 'both':
-                if 'experimentParameters-'+folderName+'-cyt.json' in os.listdir('misc'):
-                    experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-cyt.json','r'))
-                elif 'experimentParameters-'+folderName+'-cell.json' in os.listdir('misc'):
-                    experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-cell.json','r'))
-                else:
-                    experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'.json','r'))
-            else:
-                experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-'+v3.get()+'.json','r'))
+            #if v3.get() == 'both':
+            #    if 'experimentParameters-'+folderName+'-cyt.json' in os.listdir('misc'):
+            #        experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-cyt.json','r'))
+            #    elif 'experimentParameters-'+folderName+'-cell.json' in os.listdir('misc'):
+            #        experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-cell.json','r'))
+            #    else:
+            #        experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'.json','r'))
+            #else:
+            #    experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-'+v3.get()+'.json','r'))
+            for dataType in dataTypeList:
+                if 'experimentParameters-'+folderName+'-'+dataType+'.json' in os.listdir('misc'):
+                    experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-'+dataType+'.json','r'))
+                    break
             if 'format' not in experimentParameters.keys():
                 experimentParameters['format'] = 'plate'
             if experimentParameters['format'] == 'plate':
@@ -60,7 +74,7 @@ class ExperimentSetupStartPage(tk.Frame):
                     levelValues.append(experimentParameters['levelLabelDict'][level])
                 maxNumLevelValues = len(max(levelValues,key=len))
                 levels = list(experimentParameters['levelLabelDict'].keys())
-                master.switch_frame(BlankSelectionPage,folderName,levels,levelValues,maxNumLevelValues,experimentParameters['numPlates'],plateDimensions,v3.get(),ExperimentSetupStartPage,bPage)
+                master.switch_frame(BlankSelectionPage,folderName,levels,levelValues,maxNumLevelValues,experimentParameters['numPlates'],plateDimensions,dataTypeList,ExperimentSetupStartPage,bPage)
             #Tube mode
             else:
                 fcsFiles = []
@@ -83,12 +97,12 @@ class ExperimentSetupStartPage(tk.Frame):
                 master.switch_frame(TubeLayoutPage,folderName,experimentParameters['levelLabelDict'],len(fcsFiles),v3.get(),ExperimentSetupStartPage,bPage)
         
         def collectInput():
-            global dataType
-            dataType = v3.get()
+            global dataTypeList
+            dataTypeList = [list(dataTypeDict.values())[i] for i,x in enumerate(cbVarList) if x.get()]
             if v2.get() == 'inpt':
                 master.switch_frame(ExperimentFormatPage,folderName)
-            elif v2.get() == 'pl':
-                experimentLayout()
+            #elif v2.get() == 'pl':
+            #    experimentLayout()
 
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
@@ -629,17 +643,12 @@ class conditionLevelValuesPage(tk.Frame):
                 if keyToKeep in list(experimentParameters.keys()):
                     shortenedExperimentParameters[keyToKeep] = experimentParameters[keyToKeep]
             shortenedExperimentParameters['levelLabelDict'] = experimentParameters['allLevelValues']
-            if dataType == 'both':
-                with open('misc/experimentParameters-'+folderName+'-cell.json', 'w') as fp:
-                    json.dump(shortenedExperimentParameters, fp)
-                with open('misc/experimentParameters-'+folderName+'-cyt.json', 'w') as fp:
-                    json.dump(shortenedExperimentParameters, fp)
-            else:
+            for dataType in dataTypeList:
                 with open('misc/experimentParameters-'+folderName+'-'+dataType+'.json', 'w') as fp:
                     json.dump(shortenedExperimentParameters, fp)
             #{"A1-12": {"A1-4": ["Barcode 1-", "Barcode 2-"], "A5-8": ["Barcode 1+", "Barcode 2-"], "A9-12": ["Barcode 1-", "Barcode 2+"]}}
             #{"A1-4": ["A1", "A2", "A4", "A3"], "A5-8": ["A5", "A6", "A8", "A7"], "A9-12": ["A9", "A10", "A12", "A11"]}
-            if (dataType == 'both' or dataType == 'cell') and experimentParameters['format'] == 'plate':
+            if 'cell' in dataTypeList and experimentParameters['format'] == 'plate':
                 #Both
                 if '+' in globalMultiplexingVar:
                     for plate in experimentParameters['barcodingDict']:
