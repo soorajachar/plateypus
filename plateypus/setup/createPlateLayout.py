@@ -411,7 +411,8 @@ def createLayoutVisual(baseLayoutDf,currentLayout,levelIndex,currentLevel,levelV
         #Skips the style legend handles
         if i < len(currentLevelValues)+1:
             if i == 0:
-                modifiedLevel = currentLevel.translate(str.maketrans({"-":  "-","]":  r"\]","\\": r"\\","^":  r"\^","$":  r"\$","*":  r"\*",".":  r"\.","_":  r"\_","(":  r"\(",")":  r"\)","[":  r"\[","%": r"\%"}))
+                #modifiedLevel = currentLevel.translate(str.maketrans({"-":  r"\-","]":  r"\]","\\": r"\\","^":  r"\^","$":  r"\$","*":  r"\*",".":  r"\.","_":  r"\_","(":  r"\(",")":  r"\)","[":  r"\[","%": r"\%"}))
+                modifiedLevel = currentLevel
                 newLegendLabels.append('$\\bf'+modifiedLevel+'$')
                 newLegendHandles.append(legendHandle)
             else:
