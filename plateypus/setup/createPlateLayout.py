@@ -761,6 +761,9 @@ class PlateLayoutPage(tk.Frame):
                 changedInbox['key'] = -1
                 self.currentLayout.loc[inidx] = changedInbox 
                 updatePlatePlot(changedInbox,0)
+                toggle_selector.RS.background = self.background 
+                fig_ax1.draw_artist(self.path)
+                self.canvas.blit(fig_ax1.bbox)
 
         def copySelection():
             wellSelectionBox = toggle_selector.RS.corners
