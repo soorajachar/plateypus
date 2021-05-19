@@ -5,6 +5,8 @@ install_requires = [
 'pandas',
 'seaborn',
 'scipy',
+'openpyxl',
+'tables',
 'pillow',
 'importlib_metadata'
 ]

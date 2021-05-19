@@ -313,7 +313,7 @@ def convertDataFramesToExcel(folderName,secondPath,dataType,df):
     if dataType == 'cyt':
         dfg = pickle.load(open('outputData/pickleFiles/cytokineGFIPickleFile-'+folderName+'.pkl','rb'))
         dfc = pickle.load(open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
-        dfg.to_excel(writer,'GFI')
+        dfg.to_excel(writer,'MFI')
         dfc.to_excel(writer,'Concentration')
     else:
         for statistic in list(pd.unique(df.index.get_level_values('Statistic'))):
