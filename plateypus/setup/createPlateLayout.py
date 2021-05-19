@@ -411,7 +411,7 @@ def createLayoutVisual(baseLayoutDf,currentLayout,levelIndex,currentLevel,levelV
         #Skips the style legend handles
         if i < len(currentLevelValues)+1:
             if i == 0:
-                modifiedLevel = currentLevel.translate(str.maketrans({"-":  r"\-","]":  r"\]","\\": r"\\","^":  r"\^","$":  r"\$","*":  r"\*",".":  r"\.","_":  r"\_","(":  r"\(",")":  r"\)","[":  r"\[","%": r"\%"}))
+                modifiedLevel = currentLevel.translate(str.maketrans({"-":  "-","]":  r"\]","\\": r"\\","^":  r"\^","$":  r"\$","*":  r"\*",".":  r"\.","_":  r"\_","(":  r"\(",")":  r"\)","[":  r"\[","%": r"\%"}))
                 newLegendLabels.append('$\\bf'+modifiedLevel+'$')
                 newLegendHandles.append(legendHandle)
             else:
@@ -575,7 +575,7 @@ class PlateLayoutPage(tk.Frame):
             #self.canvas.draw()
         
         def updateExperimentPlot():
-            g1 = sns.scatterplot(data=baseLayoutDf,x='x',y='y',ax=fig_ax1,color='#ffffff',s=200,marker='o')
+            self.path = sns.scatterplot(data=baseLayoutDf,x='x',y='y',ax=fig_ax1,color='#ffffff',s=200,marker='o')
             if -1 in list(self.currentLayout['key']):
                 hueorder = [-1]
                 modifiedPalette = ['#808080']
@@ -588,6 +588,7 @@ class PlateLayoutPage(tk.Frame):
                     modifiedPalette.append(self.currentpalette[i+1])
             self.path = sns.scatterplot(data=self.currentLayout,x='x',y='y',ax=fig_ax1,hue='key',hue_order=hueorder,palette=modifiedPalette,s=200,markers=['o','X'],alpha=0.5,style='blank',style_order=[-1,0])
             fig_ax1.legend_.remove()
+            toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,drawtype='box',button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
             fig_ax1.draw_artist(self.path)
             self.canvas.blit(fig_ax1.bbox)
             self.background = self.canvas.copy_from_bbox(fig_ax1.bbox)
@@ -624,8 +625,8 @@ class PlateLayoutPage(tk.Frame):
             
             changeLevelInLevelLabelList()
             changeLevelInLevelValueLabelList()
-            rectpropsdict = {'facecolor':self.currentpalette[self.levelValueIndex+1],'alpha':0.2,'edgecolor':self.currentpalette[self.levelValueIndex+1]}
-            toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback,drawtype='box', useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
+            #rectpropsdict = {'facecolor':self.currentpalette[self.levelValueIndex+1],'alpha':0.2,'edgecolor':self.currentpalette[self.levelValueIndex+1]}
+            #toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback,drawtype='box', useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
             updateExperimentPlot()
 
         #Level labels
@@ -754,9 +755,12 @@ class PlateLayoutPage(tk.Frame):
                 if immediate == 'yes' and self.levelValueIndex != maxNumLevelValues-1:
                     changeLevelValue(True) 
                 else:
-                    toggle_selector.RS.background = self.background 
+                    rectpropsdict = {'facecolor':self.currentpalette[self.levelValueIndex+1],'alpha':0.2,'edgecolor':self.currentpalette[self.levelValueIndex+1]}
+                    toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,drawtype='box',button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
                     fig_ax1.draw_artist(self.path)
                     self.canvas.blit(fig_ax1.bbox)
+                    self.background = self.canvas.copy_from_bbox(fig_ax1.bbox)
+                    toggle_selector.RS.background = self.background 
             else:
                 changedInbox['key'] = -1
                 self.currentLayout.loc[inidx] = changedInbox 
