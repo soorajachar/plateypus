@@ -423,7 +423,7 @@ def createLayoutVisual(baseLayoutDf,currentLayout,levelIndex,currentLevel,levelV
     plt.clf()
 
 class PlateLayoutPage(tk.Frame):
-    def __init__(self, master,folderName,blankWells,levels,levelValues,maxNumLevelValues,numRowPlates,numColumnPlates,plateDimensions,dataType='cyt'):
+    def __init__(self, master,folderName,blankWells,levels,levelValues,maxNumLevelValues,numRowPlates,numColumnPlates,plateDimensions):
         
         self.root = master.root
         tk.Frame.__init__(self, master)
