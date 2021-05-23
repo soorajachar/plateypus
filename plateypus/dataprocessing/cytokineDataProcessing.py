@@ -273,7 +273,7 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
         colorDict[cytokine] = fullpalette[j]
     for axis,kitName in zip(g.axes.flat,pd.unique(plottingPointsDf['Kit Name'])):
         currentpalette = []
-        for cytokine in pd.unique(plottingStandardsDf[plottingPointsDf['Kit Name'] == kitName]['Cytokine']):
+        for cytokine in pd.unique(plottingStandardsDf.query("`Kit Name` == @kitName")['Cytokine']):
             currentColor = colorDict[cytokine]
             currentpalette.append(currentColor)
             cytokineLODValues = fullConcLODDf.loc[cytokine,:]['Concentration']

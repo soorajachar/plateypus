@@ -173,6 +173,17 @@ def demultiplexSingleCellData(experimentParameters):
 def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,useBlankWells):
     
     path = 'inputData/singleCellCSVFiles/'
+    #Change CyTEK file names to match BD file names
+    for folder in os.listdir(path):
+        if '.DS' not in folder:
+            for fileName in os.listdir(path+folder):
+                if '.DS' not in fileName:
+                    if ' Well' in fileName:
+                        newFileNameComponents = fileName.split(' Well')
+                        newFileName = newFileNameComponents[0].split('_')[0]+'_Specimen_001_'+newFileNameComponents[0].split('_')[1]+'_'+newFileNameComponents[0].split('_')[1][0]+newFileNameComponents[0].split('_')[1][1:].zfill(3)+newFileNameComponents[1]
+                        #print('singleCellCSVFiles/'+folder+'/'+fileName+'->'+'singleCellCSVFiles/'+folder+'/'+newFileName)
+                        subprocess.run(['mv',path+folder+'/'+fileName,path+folder+'/'+newFileName])
+
     if 'unpackingDict' in experimentParameters:
         demultiplexSingleCellData(experimentParameters)
     
