@@ -52,7 +52,7 @@ def label_columns(ax,df):
     xpos=0
     for timepoint in df.columns.values:
         add_vline(ax,xpos,ypos*0.8,ypos*-1*0.8)
-        if timepoint.replace('.','',1).isdigit():
+        if str(timepoint).replace('.','',1).isdigit():
             if int(timepoint) % 1 == 0:
                 timepoint = int(timepoint)
         ax.text(xpos+scale/2, ypos/2, str(timepoint), ha='center', va='center',transform=ax.transAxes)
