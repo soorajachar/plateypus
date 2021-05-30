@@ -7,6 +7,7 @@ if sys_pf == 'darwin':
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+pd.options.mode.chained_assignment = None
 import seaborn as sns
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -133,7 +134,7 @@ def returnBaseLayout(plateDimensions,conditionPlateRows,timepointPlateColumns):
     return pointDf,infoDf,vlineList,hlineList
 
 class BlankSelectionPage(tk.Frame):
-    def __init__(self, master,folderName,levels,levelValues,maxNumLevelValues,numPlates,plateDimensions,dt,shp,bPage):
+    def __init__(self, master,folderName,levels,levelValues,maxNumLevelValues,numPlates,plateDimensions,dtl,shp,bPage):
         numRowPlates = 1
         numColumnPlates = numPlates
         if numRowPlates == 1 and numColumnPlates > colwrap:
@@ -144,9 +145,9 @@ class BlankSelectionPage(tk.Frame):
         self.root = master.root
         tk.Frame.__init__(self, master)
         
-        global secondaryhomepage,dataType,backPage
+        global secondaryhomepage,dataTypeList,backPage
         secondaryhomepage = shp
-        dataType = dt
+        dataTypeList = dtl
         backPage = bPage
 
         tk.Label(self,text='Blank Selection Page:',font=('Arial',20)).grid(row=0,column=0)
@@ -265,7 +266,7 @@ class BlankSelectionPage(tk.Frame):
                 #self.canvas.draw()
         
         def collectInputs():
-            master.switch_frame(PlateLayoutPage,folderName,self.currentLayout['key'],levels,levelValues,maxNumLevelValues,numRowPlates,numColumnPlates,plateDimensions)
+            master.switch_frame(PlateLayoutPage,folderName,self.currentLayout['key'],levels,levelValues,maxNumLevelValues,numRowPlates,numColumnPlates,plateDimensions,dataTypeList)
 
         def updateExperimentPlot():
             self.path = sns.scatterplot(data=self.currentLayout,x='x',y='y',ax=fig_ax1,s=200,marker='o',color=['#ffffff'])
@@ -424,7 +425,11 @@ def createLayoutVisual(baseLayoutDf,currentLayout,levelIndex,currentLevel,levelV
     plt.clf()
 
 class PlateLayoutPage(tk.Frame):
+<<<<<<< HEAD
     def __init__(self, master,folderName,blankWells,levels,levelValues,maxNumLevelValues,numRowPlates,numColumnPlates,plateDimensions):
+=======
+    def __init__(self, master,folderName,blankWells,levels,levelValues,maxNumLevelValues,numRowPlates,numColumnPlates,plateDimensions,dataTypeList):
+>>>>>>> incucyteProcessing
         
         self.root = master.root
         tk.Frame.__init__(self, master)
@@ -965,16 +970,12 @@ class PlateLayoutPage(tk.Frame):
                                 nonUniquePositions.append(plateID+'/'+wellID)
                 
                 if len(nonUniquePositions) == 0:
-                    if dataType == 'both':
-                        dataTypes = ['cell','cyt']
-                    else:
-                        dataTypes = [dataType]
-                    for dt in dataTypes:
+                    for dt in dataTypeList:
                         with open('misc/layoutDict-'+folderName+'-'+dt+'.pkl','wb') as f:
                             pickle.dump(finalLayoutDict,f)
                         for i in finalLayoutDict['keys']:
                             level = levels[i]
-                            createLayoutVisual(baseLayoutDf,finalLayoutDict['keys'][i],i,level,levelValues,plateDimensions,numRowPlates,numColumnPlates,dt,infoDf,vlinelist,hlinelist)
+                            createLayoutVisual(baseLayoutDf,finalLayoutDict['keys'][i],i,level,levelValues,plateDimensions,numRowPlates,numColumnPlates,','.join(dataTypeList),infoDf,vlinelist,hlinelist)
                     master.switch_frame(backPage,folderName)
                 else:
                     tk.messagebox.showinfo("Duplicate well labels", "These wells (plateID/wellID) have duplicate labels. Please correct them and try again:\n\n"+', '.join(nonUniquePositions))
@@ -1030,5 +1031,5 @@ class PlateLayoutPage(tk.Frame):
         self.FinishButton.grid(row=0,column=0)
         self.FinishButton['state'] = 'disabled'
         #(self, master,folderName,levels,levelValues,maxNumLevelValues,numRowPlates,numColumnPlates,plateDimensions,dataType,shp)
-        tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(BlankSelectionPage,folderName,levels,levelValues,maxNumLevelValues,numColumnPlates,plateDimensions,dataType,secondaryhomepage,backPage)).grid(row=0,column=1)
+        tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(BlankSelectionPage,folderName,levels,levelValues,maxNumLevelValues,numColumnPlates,plateDimensions,dataTypeList,secondaryhomepage,backPage)).grid(row=0,column=1)
         tk.Button(buttonWindow, text="Quit",command=lambda: quit()).grid(row=0,column=2)

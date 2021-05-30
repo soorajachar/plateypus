@@ -8,7 +8,7 @@ import plateypus.dataprocessing.miscFunctions as mf
 import plateypus.plotting.facetPlotLibrary as fpl 
 import plateypus.plotting.interactiveGUIElements as ipe
 
-expParamDict = {'cyt':'cyt','cell':'cell','prolif':'cell','singlecell':'cell'}
+expParamDict = {'cyt':'cyt','cell':'cell','prolif':'cell','singlecell':'cell','killing':'killing'}
 
 #Get level names and values into an easily accessible dictionary
 def createLabelDict(df):
@@ -31,12 +31,10 @@ def createLabelDictWithExperimentParameters(df,experimentParameters):
             if 'allLevelValues' in list(experimentParameters.keys()):
                 experimentParameters['levelLabelDict'] = experimentParameters['allLevelValues']
             if levelName in experimentParameters['levelLabelDict'].keys():
-                #tempList = []
-                #for levelVal in experimentParameters['allLevelValues'][levelName]:
-                #    if levelVal in list(pd.unique(fulldf.index.get_level_values(levelName))):
-                #        tempList.append(levelVal)
-                #labelDict[levelName] = tempList 
-                labelDict[levelName] = experimentParameters['levelLabelDict'][levelName]
+                if len(experimentParameters['levelLabelDict'][levelName]) > 0:
+                    labelDict[levelName] = experimentParameters['levelLabelDict'][levelName]
+                else:
+                    labelDict[levelName] = list(pd.unique(fulldf.index.get_level_values(levelName)))
             else:
                 labelDict[levelName] = list(pd.unique(fulldf.index.get_level_values(levelName)))
     return labelDict
@@ -80,12 +78,14 @@ class PlotExperimentWindow(tk.Frame):
         rb2b = tk.Radiobutton(mainWindow,text="Cell",padx = 20, variable=v2, value='cell')
         rb2c = tk.Radiobutton(mainWindow,text="Proliferation",padx = 20, variable=v2, value='prolif')
         rb2d = tk.Radiobutton(mainWindow,text="Single Cell",padx = 20, variable=v2, value='singlecell')
+        rb2e = tk.Radiobutton(mainWindow,text="Killing",padx = 20, variable=v2, value='killing')
         
         l2.grid(row=0,column=0)
         rb2a.grid(row=1,column=0,sticky=tk.W)
         rb2b.grid(row=2,column=0,sticky=tk.W)
         rb2c.grid(row=3,column=0,sticky=tk.W)
         rb2d.grid(row=4,column=0,sticky=tk.W)
+        rb2e.grid(row=5,column=0,sticky=tk.W)
         
         def collectInputs():
             global useModifiedDf

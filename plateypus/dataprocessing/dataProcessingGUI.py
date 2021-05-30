@@ -7,25 +7,21 @@ from plateypus.dataprocessing import initialDataProcessing as idp
 from plateypus.dataprocessing import cytokineDataProcessing as cydp
 from plateypus.dataprocessing import cellDataProcessing as cdp
 from plateypus.dataprocessing import proliferationDataProcessing as pdp
+from plateypus.dataprocessing import killingDataProcessing as kdp
 from plateypus.dataprocessing import singleCellDataProcessing as scdp
 #import automatedCBAProcessingGUI as autoCBA
 
 
-pathToExperimentSpreadsheet = '../../experiments/'
 secondPath = '../../outputData'
 
 concUnit = 1e9
 unitPrefixDictionary = {1e12:'pM',1e9:'nM',1e6:'uM',1e3:'mM',1e0:'M'}
 concUnitPrefix = unitPrefixDictionary[concUnit]
 
-FACS_Detector_Names = ['BV421-A','BV510-A','BV605-A','BV605-A','BV650-A','BV711-A','BV786-A','BUV396-A','DAPI-A','BUV737-A','APC-A','Alexa Fluor 700-A','APC-Cy7-A','FITC-A','PerCP-Cy5-5-A','PE ( 561 )-A','PE-CF594-A','PE-Cy5-A','PE-Cy7-A']
-CyTOF_Detector_Names = []
-Full_Detector_Dict = {'FACS':FACS_Detector_Names,'CyTOF':CyTOF_Detector_Names}
-
 class DataProcessingStartPage(tk.Frame):
     def __init__(self, master,folderName,expNum,ex_data,bPage):
         tk.Frame.__init__(self, master)
-            
+        
         #os.chdir(master.homedirectory+'/'+folderName)
         backPage = bPage
 
@@ -40,7 +36,8 @@ class DataProcessingStartPage(tk.Frame):
         l2a = tk.Label(mainWindow, text="Cytokine:",padx = 20).grid(row=1,column=0,sticky=tk.W)
         l2b = tk.Label(mainWindow,text="Cell:",padx = 20).grid(row=2,column=0,sticky=tk.W)
         l2c = tk.Label(mainWindow,text="Proliferation:",padx = 20).grid(row=3,column=0,sticky=tk.W)
-        l2d = tk.Label(mainWindow,text="Single Cell:",padx = 20).grid(row=4,column=0,sticky=tk.W)
+        l2e = tk.Label(mainWindow,text="Killing:",padx = 20).grid(row=4,column=0,sticky=tk.W)
+        l2d = tk.Label(mainWindow,text="Single Cell:",padx = 20).grid(row=5,column=0,sticky=tk.W)
         
         def createDataFrame(dataType):
             dataProcessingMaster(folderName,expNum,dataType,ex_data,v3.get())
@@ -63,32 +60,30 @@ class DataProcessingStartPage(tk.Frame):
         prolifGenerationGatesButton.grid(row=3,column=1,sticky=tk.W)
         prolifDfButton = tk.Button(mainWindow,text='Create dataframe',command=lambda: createDataFrame('prolif'))
         prolifDfButton.grid(row=3,column=2,sticky=tk.W)
+        
+        killingDfButton = tk.Button(mainWindow,text='Create dataframe',command=lambda: createDataFrame('killing'))
+        killingDfButton.grid(row=4,column=2,sticky=tk.W)
 
         #completeSingleCellDfButton = tk.Button(mainWindow,text='Create complete dataframes')
         #completeSingleCellDfButton.grid(row=4,column=2,sticky=tk.W)
         singleCellDfButton = tk.Button(mainWindow,text='Create dataframe',command=lambda: createDataFrame('singlecell'))
-        singleCellDfButton.grid(row=4,column=2,sticky=tk.W)
+        singleCellDfButton.grid(row=5,column=2,sticky=tk.W)
         cbWindow = tk.Frame(mainWindow)
-        cbWindow.grid(row=4,column=1,sticky=tk.W)
+        cbWindow.grid(row=5,column=1,sticky=tk.W)
         l3 = tk.Label(cbWindow,text='Use empty wells?').grid(row=0,column=0,sticky=tk.W)
         v3 = tk.BooleanVar(value=False)
         cb = tk.Checkbutton(cbWindow, variable=v3)
         cb.grid(row=0,column=1,sticky=tk.W)
 
-        for i,button in enumerate([cytDfButton,cellDfButton,prolifDfButton,prolifGenerationGatesButton,singleCellDfButton]):
+        for i,button in enumerate([cytDfButton,cellDfButton,prolifDfButton,prolifGenerationGatesButton,singleCellDfButton,killingDfButton]):
             if i == 0:
                 requiredFiles = ['CBAcalibrationParameters-'+folderName+'.json']
-            elif i == 1:
-                requiredFiles = []
             elif i == 2:
                 requiredFiles = ['singleCellDataFrame-proliferation-'+folderName+'.pkl']
             elif i == 3:
                 requiredFiles = ['logicleProliferationDf.pkl','rawProliferationDf.pkl']
-            elif i ==4:
-                requiredFiles = []
-                #requiredFiles = ['A1_cell.csv']
             else:
-                requiredFiles = ['initialSingleCellDf-channel-'+folderName+'.pkl']
+                requiredFiles = []
             for requiredFile in requiredFiles:
                 if requiredFile not in os.listdir('misc')+os.listdir('inputData/bulkCSVFiles')+os.listdir('outputData/pickleFiles'):
                     button.config(state=tk.DISABLED)
@@ -127,6 +122,17 @@ def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells):
     elif(dataType == 'prolif'):
         prolifdf = pdp.generateBulkProliferationStatistics(folderName,expNum)
         idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,prolifdf,ex_data) 
+    elif(dataType == 'killing'):
+        killingdf = kdp.generateBulkKillingStatistics(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
+        idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,killingdf,ex_data) 
+        
+        #Re-add parsed time values back into experiment parameter file
+        #levelLabelDict = experimentParameters['levelLabelDict']
+        #levelLabelDict['Time'] = list(killingDf.columns) 
+        #experimentParameters['levelLabelDict'] = levelLabelDict
+        #with open('misc/experimentParameters-'+folderName+'-'+dataType+'.json', 'w') as fp:
+        #    json.dump(experimentParameters, fp)
+
     elif(dataType == 'singlecell'):
         dataType = 'singlecell'
         if experimentFormat == 'plate':

@@ -4,9 +4,17 @@ build/
 dist/
 plateypus.egg-info/
 .pytest_cache/
+**/__pycache__
 __pycache__/
+<<<<<<< HEAD
 **/__pycache__
 plateypus/__pycache__/
 plateypus/dataprocessing/__pycache__/
 plateypus/setup/__pycache__/
 platypus/plotting/__pycache__/
+=======
+plateypus/__pycache__/
+plateypus/dataprocessing/__pycache__/
+plateypus/setup/__pycache__/
+plateypus/plotting/__pycache__/
+>>>>>>> incucyteProcessing

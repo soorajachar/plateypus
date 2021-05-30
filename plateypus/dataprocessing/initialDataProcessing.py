@@ -7,7 +7,7 @@ from plateypus.dataprocessing.miscFunctions import cleanUpFlowjoCSV,reorderDfByI
 from plateypus.dataprocessing import cytokineDataProcessing,singleCellDataProcessing,cellDataProcessing
 
 dataTypeLevelNames = {'cyt':['Cytokine'],'cell':['CellType','Marker','Statistic'],'prolif':['Statistic'],'singlecell':['CellType']}
-dataTypeDataFrameFileNames = {'cyt':'cytokineConcentrationPickleFile','cell':'cellStatisticPickleFile','prolif':'proliferationStatisticPickleFile','singlecell':'initialSingleCellPickleFile'}
+dataTypeDataFrameFileNames = {'cyt':'cytokineConcentrationPickleFile','cell':'cellStatisticPickleFile','prolif':'proliferationStatisticPickleFile','singlecell':'initialSingleCellPickleFile','killing':'killingIndexPickleFile'}
 plateRowLetters = list(string.ascii_uppercase)[:16]
 plateColumnNumbers = list(range(1,25))
 
@@ -237,10 +237,10 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
         conditionLevelValues = levelLabelDict.copy()
         del conditionLevelValues[list(levelLabelDict.keys())[-1]]
         allLevelValues = experimentParameters['levelLabelDict']
-            
+        
         sortedData,sortedFiles = cleanUpFlowjoCSV(plateNames,folderName,dataType,experimentParameters)
         allRawData,newLevelList = returnMultiIndex(sortedData,sortedFiles,realDataType,folderName)
-        
+
         #print(allRawData)
         dfList = []
         for rawData,plateID in zip(allRawData,plateNames):
@@ -315,12 +315,14 @@ def convertDataFramesToExcel(folderName,secondPath,dataType,df):
         dfc = pickle.load(open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
         dfg.to_excel(writer,'MFI')
         dfc.to_excel(writer,'Concentration')
+    elif dataType == 'killing':
+        dfk = pickle.load(open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
+        dfk.to_excel(writer,'Killing Index')
     else:
         for statistic in list(pd.unique(df.index.get_level_values('Statistic'))):
             statisticDf = df.xs(statistic,level='Statistic')
             statisticDf.to_excel(writer,statistic)
     writer.save()
-    #print(dataType[0].upper()+dataType[1:]+' Excel file Saved')
 
 def saveFinalDataFrames(folderName,secondPath,experimentNumber,dataType,fullExperimentDf,excel_data):
     fullExperimentDf = fullExperimentDf.astype(float)
