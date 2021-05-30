@@ -4,6 +4,7 @@ build/
 dist/
 plateypus.egg-info/
 .pytest_cache/
+**/__pycache__
 __pycache__/
 plateypus/__pycache__/
 plateypus/dataprocessing/__pycache__/

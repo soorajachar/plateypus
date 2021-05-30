@@ -12,16 +12,11 @@ from plateypus.dataprocessing import singleCellDataProcessing as scdp
 #import automatedCBAProcessingGUI as autoCBA
 
 
-pathToExperimentSpreadsheet = '../../experiments/'
 secondPath = '../../outputData'
 
 concUnit = 1e9
 unitPrefixDictionary = {1e12:'pM',1e9:'nM',1e6:'uM',1e3:'mM',1e0:'M'}
 concUnitPrefix = unitPrefixDictionary[concUnit]
-
-FACS_Detector_Names = ['BV421-A','BV510-A','BV605-A','BV605-A','BV650-A','BV711-A','BV786-A','BUV396-A','DAPI-A','BUV737-A','APC-A','Alexa Fluor 700-A','APC-Cy7-A','FITC-A','PerCP-Cy5-5-A','PE ( 561 )-A','PE-CF594-A','PE-Cy5-A','PE-Cy7-A']
-CyTOF_Detector_Names = []
-Full_Detector_Dict = {'FACS':FACS_Detector_Names,'CyTOF':CyTOF_Detector_Names}
 
 class DataProcessingStartPage(tk.Frame):
     def __init__(self, master,folderName,expNum,ex_data,bPage):
@@ -66,7 +61,7 @@ class DataProcessingStartPage(tk.Frame):
         prolifDfButton = tk.Button(mainWindow,text='Create dataframe',command=lambda: createDataFrame('prolif'))
         prolifDfButton.grid(row=3,column=2,sticky=tk.W)
         
-        killingfButton = tk.Button(mainWindow,text='Create dataframe',command=lambda: createDataFrame('killing'))
+        killingDfButton = tk.Button(mainWindow,text='Create dataframe',command=lambda: createDataFrame('killing'))
         killingDfButton.grid(row=4,column=2,sticky=tk.W)
 
         #completeSingleCellDfButton = tk.Button(mainWindow,text='Create complete dataframes')
@@ -80,20 +75,13 @@ class DataProcessingStartPage(tk.Frame):
         cb = tk.Checkbutton(cbWindow, variable=v3)
         cb.grid(row=0,column=1,sticky=tk.W)
 
-        for i,button in enumerate([cytDfButton,cellDfButton,prolifDfButton,prolifGenerationGatesButton,singleCellDfButton,killingDfButtton]):
+        for i,button in enumerate([cytDfButton,cellDfButton,prolifDfButton,prolifGenerationGatesButton,singleCellDfButton,killingDfButton]):
             if i == 0:
                 requiredFiles = ['CBAcalibrationParameters-'+folderName+'.json']
-            elif i == 1:
-                requiredFiles = []
             elif i == 2:
                 requiredFiles = ['singleCellDataFrame-proliferation-'+folderName+'.pkl']
             elif i == 3:
                 requiredFiles = ['logicleProliferationDf.pkl','rawProliferationDf.pkl']
-            elif i ==4:
-                requiredFiles = []
-                #requiredFiles = ['A1_cell.csv']
-            elif i == 5:
-                requiredFiles = ['initialSingleCellDf-channel-'+folderName+'.pkl']
             else:
                 requiredFiles = []
             for requiredFile in requiredFiles:
@@ -135,10 +123,16 @@ def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells):
         prolifdf = pdp.generateBulkProliferationStatistics(folderName,expNum)
         idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,prolifdf,ex_data) 
     elif(dataType == 'killing'):
-        killingdf = kdp.generateBulkKillingStatistics(folderName,expNum)
-        print(killingdf)
-        sys.exit(0)
-        idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,prolifdf,ex_data) 
+        killingdf = kdp.generateBulkKillingStatistics(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
+        idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,killingdf,ex_data) 
+        
+        #Re-add parsed time values back into experiment parameter file
+        #levelLabelDict = experimentParameters['levelLabelDict']
+        #levelLabelDict['Time'] = list(killingDf.columns) 
+        #experimentParameters['levelLabelDict'] = levelLabelDict
+        #with open('misc/experimentParameters-'+folderName+'-'+dataType+'.json', 'w') as fp:
+        #    json.dump(experimentParameters, fp)
+
     elif(dataType == 'singlecell'):
         dataType = 'singlecell'
         if experimentFormat == 'plate':

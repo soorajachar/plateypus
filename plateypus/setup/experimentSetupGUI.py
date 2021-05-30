@@ -48,15 +48,6 @@ class ExperimentSetupStartPage(tk.Frame):
             cbVarList.append(v)
         
         def experimentLayout():
-            #if v3.get() == 'both':
-            #    if 'experimentParameters-'+folderName+'-cyt.json' in os.listdir('misc'):
-            #        experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-cyt.json','r'))
-            #    elif 'experimentParameters-'+folderName+'-cell.json' in os.listdir('misc'):
-            #        experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-cell.json','r'))
-            #    else:
-            #        experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'.json','r'))
-            #else:
-            #    experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-'+v3.get()+'.json','r'))
             for dataType in dataTypeList:
                 if 'experimentParameters-'+folderName+'-'+dataType+'.json' in os.listdir('misc'):
                     experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-'+dataType+'.json','r'))
@@ -73,6 +64,9 @@ class ExperimentSetupStartPage(tk.Frame):
                     levelValues.append(experimentParameters['levelLabelDict'][level])
                 maxNumLevelValues = len(max(levelValues,key=len))
                 levels = list(experimentParameters['levelLabelDict'].keys())
+                if 'killing' in dataTypeList:
+                    levels = levels[:-1]
+                    levelValues = levelValues[:-1]
                 master.switch_frame(BlankSelectionPage,folderName,levels,levelValues,maxNumLevelValues,experimentParameters['numPlates'],plateDimensions,dataTypeList,ExperimentSetupStartPage,bPage)
             #Tube mode
             else:
@@ -100,8 +94,8 @@ class ExperimentSetupStartPage(tk.Frame):
             dataTypeList = [list(dataTypeDict.values())[i] for i,x in enumerate(cbVarList) if x.get()]
             if v2.get() == 'inpt':
                 master.switch_frame(ExperimentFormatPage,folderName)
-            #elif v2.get() == 'pl':
-            #    experimentLayout()
+            elif v2.get() == 'pl':
+                experimentLayout()
 
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)

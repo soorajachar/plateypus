@@ -15,6 +15,7 @@ idx = pd.IndexSlice
 plotFolderName = 'plots'
 def produceSubsettedDataFrames(fulldf,withinFigureBoolean,specificValueBooleanList,trueLabelDict):
     fulldf = fulldf.astype(float)
+    
     #Get all possible subsetted indices
     figureSubsettedLevelValues = []
     withinFigureSubsettedLevelValues = []
