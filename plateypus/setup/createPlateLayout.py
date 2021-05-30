@@ -1,4 +1,5 @@
 #!/usr/bin/env python3 
+import time
 import pickle,math,matplotlib,sys,os,string,subprocess
 from sys import platform as sys_pf
 if sys_pf == 'darwin':
@@ -529,7 +530,7 @@ class PlateLayoutPage(tk.Frame):
         toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback,drawtype='box', useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
         self.ts = toggle_selector.RS
         toggle_selector.RS.background = self.trueBackground 
-        
+
         def updatePlatePlot(newlayout,key):
             currentcolor = self.currentpalette[key]
             self.path = sns.scatterplot(data=newlayout,x='x',y='y',ax=fig_ax1,s=200,color='#ffffff',marker='o')
@@ -545,10 +546,10 @@ class PlateLayoutPage(tk.Frame):
                 fig_ax1.legend_.remove()
                 self.canvas.restore_region(self.trueBackground)
                 self.canvas.blit(fig_ax1.bbox)
-                self.background = self.trueBackground#canvas.copy_from_bbox(fig_ax1.bbox)
+                self.background = self.trueBackground
                 toggle_selector.RS.background = self.trueBackground 
                 #self.canvas.draw()
-        
+
         def changeLevelValue(advance):
             if advance:
                 self.levelValueIndex += 1
@@ -596,7 +597,7 @@ class PlateLayoutPage(tk.Frame):
             self.background = self.canvas.copy_from_bbox(fig_ax1.bbox)
             toggle_selector.RS.background = self.background 
             #self.canvas.draw()
-
+        
         def changeLevel(advance):
             self.levelValueIndex = 0
             self.allLayouts[self.levelIndex] = self.currentLayout.copy()
@@ -735,6 +736,8 @@ class PlateLayoutPage(tk.Frame):
                     j+=1
                 else:
                     currentlabel.configure(text=self.blanktext,borderwidth=0, relief="solid")
+            if numColumnPlates <= 2:
+                currentlabel.update()
         
         def selectWells(mark,immediate):
 

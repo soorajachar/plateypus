@@ -646,17 +646,21 @@ class conditionLevelValuesPage(tk.Frame):
                 #Both
                 if '+' in globalMultiplexingVar:
                     for plate in experimentParameters['barcodingDict']:
-                        subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+plate])
+                        if plate not in os.listdir('inputData/singleCellCSVFiles/'):
+                            subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+plate])
                 else:
                     if 'Barcoding' in globalMultiplexingVar:
                         for plate in experimentParameters['barcodingDict']:
-                            subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+plate])
+                            if plate not in os.listdir('inputData/singleCellCSVFiles/'):
+                                subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+plate])
                     elif '96' in globalMultiplexingVar:
                         for plate in experimentParameters['unpackingDict']:
-                            subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+plate])
+                            if plate not in os.listdir('inputData/singleCellCSVFiles/'):
+                                subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+plate])
                     else:
                         for plateNum in range(1,experimentParameters['numPlates']+1):
-                            subprocess.run(['mkdir','inputData/singleCellCSVFiles/A'+str(plateNum)])
+                            if 'A'+str(plateNum) not in os.listdir('inputData/singleCellCSVFiles/'):
+                                subprocess.run(['mkdir','inputData/singleCellCSVFiles/A'+str(plateNum)])
             master.switch_frame(ExperimentSetupStartPage,folderName,backPage)
 
         buttonWindow = tk.Frame(self)
