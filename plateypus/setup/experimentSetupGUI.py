@@ -7,7 +7,6 @@ from plateypus.setup.createTubeLayout import TubeLayoutPage
 from plateypus.setup.createPlateLayout import BlankSelectionPage
 
 experimentParameters = {}
-parametersUpdatedByGridGUI = {}
 dataTypeDict = {'Cytokine':'cyt','Bulk/Single cell':'cell','Killing':'killing'}
 
 class ExperimentSetupStartPage(tk.Frame):
@@ -230,13 +229,16 @@ class PlateExperimentParameterPage(tk.Frame):
          
         def collectInputs():
             experimentParameters['numPlates'] = int(e0.get())
-            experimentParameters['numAllLevels'] = int(e2.get())+1
+            
+            #Incucyte datasets have time encoded in them already
+            if 'killing' in dataTypeList:
+                experimentParameters['numAllLevels'] = int(e2.get())
+            else:
+                experimentParameters['numAllLevels'] = int(e2.get())+1
             if v3.get() == 384:
                 experimentParameters['overallPlateDimensions'] = [16,24]
-                parametersUpdatedByGridGUI['currentPlateDimensions'] = [16,24]
             else:
                 experimentParameters['overallPlateDimensions'] = [8,12]
-                parametersUpdatedByGridGUI['currentPlateDimensions'] = [8,12]
             
             if plateMultiplexVar.get() and barcodeMultiplexVar.get():
                 multiplexingOption = '96->384 well + Barcoding'
@@ -452,7 +454,7 @@ class allLevelNamePage(tk.Frame):
             l1 = tk.Label(mainWindow, text="Condition "+str(conditionLevelNumber))
             e1 = tk.Entry(mainWindow)
             v = tk.IntVar()
-            if conditionLevelNumber == 1:
+            if conditionLevelNumber == 1 and 'killing' not in dataTypeList:
                 #e1 = tk.Entry(mainWindow,state='readonly')
                 e1.insert(tk.END, 'Time')
                 e2 = tk.Entry(mainWindow)
@@ -490,30 +492,28 @@ class allLevelNamePage(tk.Frame):
             numConditionLevelValues = []
             tiledLevels = []
             experimentParameters['columnVariableName'] = 'Time' 
-            timebool=False
             numericlevels = []
             for allLevelNumber in range(numAllLevels):
                 #Remove column variable from condition name list
                 if entryList1[allLevelNumber].get() == 'Time':
-                    timebool=True
-                    experimentParameters['numColumnLevelValues'] = int(entryList2[allLevelNumber].get())
                     experimentParameters['numColumnLevelValues'] = int(entryList2[allLevelNumber].get())
                 else:
                     conditionNames.append(str(entryList1[allLevelNumber].get()))
                     numConditionLevelValues.append(int(entryList2[allLevelNumber].get()))
                 numericlevels.append(numericCheckBoxVars[allLevelNumber].get() == 1)
+            if 'killing' in dataTypeList:
+                experimentParameters['numColumnLevelValues'] = 0 
+                experimentParameters['numConditionLevels'] = numAllLevels
+            else:
+                experimentParameters['numConditionLevels'] = numAllLevels - 1
 
-            experimentParameters['numConditionLevels'] = numAllLevels - 1
             experimentParameters['conditionLevelNames'] = conditionNames
             experimentParameters['allLevelNames'] = [experimentParameters['columnVariableName']]+conditionNames
             experimentParameters['numConditionLevelValues'] = numConditionLevelValues
             experimentParameters['numericLevels'] = numericlevels
-            parametersUpdatedByGridGUI['numLevelsUnparsed'] = numAllLevels
             experimentParameters[''] = tiledLevels
-            with open('misc/gui-parametersUpdatedByGridGUI.pkl','wb') as f:
-                pickle.dump(parametersUpdatedByGridGUI,f)
             master.switch_frame(columnLevelValuesPage,folderName)
-        
+
         def backCommand():
             if experimentParameters['format'] == 'tube':
                 master.switch_frame(TubeExperimentParameterPage,folderName)
