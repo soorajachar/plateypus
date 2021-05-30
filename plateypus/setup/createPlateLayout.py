@@ -1,5 +1,4 @@
 #!/usr/bin/env python3 
-import time
 import pickle,math,matplotlib,sys,os,string,subprocess
 from sys import platform as sys_pf
 if sys_pf == 'darwin':
