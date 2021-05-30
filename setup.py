@@ -27,11 +27,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="plateypus",
-<<<<<<< HEAD
-    version="0.1.20",
-=======
-    version="0.1.16",
->>>>>>> incucyteProcessing
+    version="0.2.0",
     author = "Sooraj Achar",
     author_email = "acharsr@nih.gov",
     description = "Processes and plots high throughput cytometry experiments through a GUI",
