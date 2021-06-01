@@ -3,6 +3,7 @@ import pickle,os,json,math,subprocess
 import numpy as np
 import pandas as pd
 import tkinter as tk
+from tkinter import ttk
 from plateypus.setup.createTubeLayout import TubeLayoutPage 
 from plateypus.setup.createPlateLayout import BlankSelectionPage
 
@@ -378,6 +379,10 @@ class MultiplexingPage(tk.Frame):
         Unpacking384List = []
         l1 = tk.Label(Well384ConversionWindow,text='Combined Plate Names: ')
         l1.grid(row=0,column=0)
+        l2 = tk.Label(Well384ConversionWindow,text='Separated Plate Names: ')
+        l2.grid(row=1,column=0)
+        ttk.Separator().place(x=0, y=27, relwidth=1)
+        ttk.Separator().place(x=157, y=0, relheight=0.65)
         for plateNum in range(maxNum384Plates):
             e1 = tk.Entry(Well384ConversionWindow,width=7)
             e1.insert(tk.END, 'A'+str(plateNum*4+1)+'-'+str((plateNum+1)*4))
@@ -386,6 +391,7 @@ class MultiplexingPage(tk.Frame):
             UnpackingWellPosList = []
             wellIndexList = [0,1,3,2]
             wellIndex = 0
+            ttk.Separator().place(x=317+plateNum*160, y=0, relheight=0.65)
             for wellUnpackingRow in range(2):
                 for wellUnpackingCol in range(2):
                     e2 = tk.Entry(Well384ConversionWindow,width=7)
