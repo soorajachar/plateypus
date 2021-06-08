@@ -66,7 +66,10 @@ def plot(plottingDf,subsettedDf,kwargs,facetKwargs,auxillaryKwargs,plotOptions):
             if auxillaryKwargs['plotspecifickwargs']['smoothing']-1 < 2:
                 smoothedHistBins = hist
             else:
-                smoothedHistBins = savgol_filter(hist, auxillaryKwargs['plotspecifickwargs']['smoothing']-1, 2) 
+                oddFilterVal = int(auxillaryKwargs['plotspecifickwargs']['smoothing'])
+                if oddFilterVal % 2 == 0:
+                    oddFilterVal-=1
+                smoothedHistBins = savgol_filter(hist, oddFilterVal, 2) 
             
             if not auxillaryKwargs['plotspecifickwargs']['scaleToMode']:
                 if plotOptions['Y']['axisScaling'] == 'Logarithmic':
