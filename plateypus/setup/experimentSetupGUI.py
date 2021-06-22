@@ -185,13 +185,31 @@ class PlateExperimentParameterPage(tk.Frame):
         mainWindow = tk.Frame(self)
         mainWindow.pack(side=tk.TOP,padx=10,pady=10)
         
+        l7 = tk.Label(mainWindow, text="Multiplexing Options:")
+        multiplex = tk.StringVar(value='None')
+        plateMultiplexVar = tk.BooleanVar() 
+        barcodeMultiplexVar = tk.BooleanVar() 
+        plateMultiplexCb = tk.Checkbutton(mainWindow,text='96->384 well',variable=plateMultiplexVar,onvalue=True,offvalue=False)
+        plateMultiplexCbRev = tk.Checkbutton(mainWindow,text='384->96 well',variable=plateMultiplexVar,onvalue=True,offvalue=False)
+        barcodeMultiplexCb = tk.Checkbutton(mainWindow,text='Barcoding',variable=barcodeMultiplexVar,onvalue=True,offvalue=False)
+        barcodingNumberLabel = tk.Label(mainWindow,text='# plates per barcoded plate') 
+        barcodingNumberEntry = tk.Entry(mainWindow,width=4)
+
         v = tk.IntVar()
         v2 = tk.IntVar()
         v3 = tk.IntVar()
+        
+        def disable():
+            if v3.get() == 384:
+                plateMultiplexCb.config(state=tk.DISABLED)
+                plateMultiplexCbRev.config(state=tk.NORMAL)
+            else:
+                plateMultiplexCbRev.config(state=tk.DISABLED)
+                plateMultiplexCb.config(state=tk.NORMAL)
 
         l3 = tk.Label(mainWindow, text="""What format were the samples collected in?:""")
-        rb3a = tk.Radiobutton(mainWindow, text="96 well plate",padx = 20, variable=v3, value=96)
-        rb3b = tk.Radiobutton(mainWindow,text="384 well plate",padx = 20, variable=v3, value=384)
+        rb3a = tk.Radiobutton(mainWindow, text="96 well plate",padx = 20, variable=v3, value=96,command=lambda: disable())
+        rb3b = tk.Radiobutton(mainWindow,text="384 well plate",padx = 20, variable=v3, value=384,command=lambda: disable())
         l3.grid(row=0,column=0)
         rb3a.grid(row=0,column=1)
         rb3b.grid(row=0,column=2)
@@ -207,17 +225,9 @@ class PlateExperimentParameterPage(tk.Frame):
         l6.grid(row=3,column=0)
         e2.grid(row=3,column=1)
         
-        l7 = tk.Label(mainWindow, text="Multiplexing Options:")
-        multiplex = tk.StringVar(value='None')
-        plateMultiplexVar = tk.BooleanVar() 
-        barcodeMultiplexVar = tk.BooleanVar() 
-        plateMultiplexCb = tk.Checkbutton(mainWindow,text='96->384 well',variable=plateMultiplexVar,onvalue=True,offvalue=False)
-        barcodeMultiplexCb = tk.Checkbutton(mainWindow,text='Barcoding',variable=barcodeMultiplexVar,onvalue=True,offvalue=False)
-        barcodingNumberLabel = tk.Label(mainWindow,text='# plates per barcoded plate') 
-        barcodingNumberEntry = tk.Entry(mainWindow,width=4)
-
         l7.grid(row=4,column=0)
         plateMultiplexCb.grid(row=4,column=1)
+        plateMultiplexCbRev.grid(row=5,column=1)
         barcodeMultiplexCb.grid(row=4,column=2)
         barcodingNumberLabel.grid(row=4,column=3)
         barcodingNumberEntry.grid(row=4,column=4)
@@ -275,9 +285,15 @@ class BarcodingPage(tk.Frame):
         BarcodingWindow = tk.Frame(self)
         BarcodingWindow.pack()
         if multiplexingOption == '96->384 well + Barcoding':
-            maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / 4 / numberOfBarcodedPlates)
-            totalPlatesPerBarcodedPlate = 4*numberOfBarcodedPlates
-            plateSkip = 4
+            if experimentParameters['overallPlateDimensions'][0] == 8: 
+                maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / 4 / numberOfBarcodedPlates)
+                totalPlatesPerBarcodedPlate = 4*numberOfBarcodedPlates
+                plateSkip = 4
+            #384->96
+            else: 
+                maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / numberOfBarcodedPlates)
+                totalPlatesPerBarcodedPlate = numberOfBarcodedPlates
+                plateSkip = 1 
         else:
             maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / numberOfBarcodedPlates)
             totalPlatesPerBarcodedPlate = numberOfBarcodedPlates
@@ -374,6 +390,11 @@ class MultiplexingPage(tk.Frame):
         Well384ConversionWindow = tk.Frame(self)
         Well384ConversionWindow.pack()
         
+        reverse = False
+        if multiplexingOption == '96->384 well + Barcoding':
+            if experimentParameters['overallPlateDimensions'][0] == 16: 
+                reverse = True
+
         maxNum384Plates = math.ceil(experimentParameters['numPlates'] / 4)
         Unpacking384PlateNameList = []
         Unpacking384List = []
@@ -385,7 +406,10 @@ class MultiplexingPage(tk.Frame):
         ttk.Separator().place(x=157, y=0, relheight=0.65)
         for plateNum in range(maxNum384Plates):
             e1 = tk.Entry(Well384ConversionWindow,width=7)
-            e1.insert(tk.END, 'A'+str(plateNum*4+1)+'-'+str((plateNum+1)*4))
+            if not reverse:
+                e1.insert(tk.END, 'A'+str(plateNum*4+1)+'-'+str((plateNum+1)*4))
+            else:
+                e1.insert(tk.END, 'A'+str(plateNum+1))
             e1.grid(row=0,column=plateNum*2+1)
             Unpacking384PlateNameList.append(e1)
             UnpackingWellPosList = []

@@ -27,7 +27,7 @@ def returnMultiIndex(sortedData,sortedFiles,dataType,folderName):
     else:
         return sortedFiles,newMultiIndex
 
-def decodeBarcodedPlates(experimentParameters,folderName,dataType):
+def decodeBarcodedPlates(experimentParameters,folderName,dataType,reverse):
     path = 'inputData/bulkCSVFiles/'
     barcodingDict = experimentParameters['barcodingDict']
     for barcodedPlate in barcodingDict:
@@ -67,7 +67,7 @@ def decodeBarcodedPlates(experimentParameters,folderName,dataType):
             decodedCSV.columns = newColumns
             decodedCSV.to_csv(path+decodedPlate+'_'+dataType+'.csv',index=False)
 
-def unpackMultiplexedPlates(experimentParameters,folderName,dataType):
+def unpackMultiplexedPlates(experimentParameters,folderName,dataType,reverse):
     #A1->A1,A2->A2,A3- >A1,B1->A4,B2->A3
     #1.1,1.3,1.5,3.1,3.3,3.5 -> A1; 1.2,1.4,1.6,3.2,3.4,3.6->A2; 2.1,2.3,3.5,4.1,4.3,4.5->A4; 2.2,2.4,2.6,4.2,4.4,4.6->A3
     #1-24
@@ -92,31 +92,76 @@ def unpackMultiplexedPlates(experimentParameters,folderName,dataType):
             plateIDConversionDict[multiplexedWellPos] = wellIDs
     #Specimen_001_A1_A01_001.fcs
     multiplexedPlateNames = experimentParameters['unpackingDict'].keys()
-    #sortedMultiplexedData,sortedMultiplexedFiles = cleanUpFlowjoCSV(multiplexedPlateNames,folderName,dataType)
-    for multiplexedPlateName in multiplexedPlateNames:
-        multiplexedWellPoses = experimentParameters['unpackingDict'][multiplexedPlateName]
-        with open('inputData/bulkCSVFiles/'+multiplexedPlateName+'_'+dataType+'.csv', 'r') as f:
-            multiplexedCSVLines = f.readlines()
-        for multiplexedWellPos in multiplexedWellPoses:
-            if multiplexedWellPos != '':
-                wellIDsInThisPos = plateIDConversionDict[multiplexedWellPos]
-                linesToMove = []
-                newCSVLines = []
-                for lineNum,line in enumerate(multiplexedCSVLines):
-                    if lineNum in [0,len(multiplexedCSVLines)-2,len(multiplexedCSVLines)-1]:
-                        newCSVLines.append(line)
-                    else:
-                        fileName = line.split(',')[0]
-                        wellID = fileName.split('_')[2]
-                        #Well ID is in pos or first line or last two lines
-                        if wellID in wellIDsInThisPos:
-                            #underscorePoses = [pos for pos, char in enumerate(line) if char == '_']
-                            newWellID = wellIDConversionDict[wellID]
+    #Unpacking
+    if not reverse:
+        for multiplexedPlateName in multiplexedPlateNames:
+            multiplexedWellPoses = experimentParameters['unpackingDict'][multiplexedPlateName]
+            with open('inputData/bulkCSVFiles/'+multiplexedPlateName+'_'+dataType+'.csv', 'r') as f:
+                multiplexedCSVLines = f.readlines()
+            for multiplexedWellPos in multiplexedWellPoses:
+                if multiplexedWellPos != '':
+                    wellIDsInThisPos = plateIDConversionDict[multiplexedWellPos]
+                    linesToMove = []
+                    newCSVLines = []
+                    for lineNum,line in enumerate(multiplexedCSVLines):
+                        if lineNum in [0,len(multiplexedCSVLines)-2,len(multiplexedCSVLines)-1]:
+                            newCSVLines.append(line)
+                        else:
+                            #CyTEK Explorer
+                            if ' Well' in line:
+                                wellID = line.split(' ')[0]
+                            #FACSDiva
+                            else:
+                                fileName = line.split(',')[0]
+                                wellID = fileName.split('_')[2]
+                            #Well ID is in pos or first line or last two lines
+                            if wellID in wellIDsInThisPos:
+                                #underscorePoses = [pos for pos, char in enumerate(line) if char == '_']
+                                newWellID = wellIDConversionDict[wellID]
+                                newLine = line.replace(wellID,newWellID)
+                                newCSVLines.append(newLine)
+                    with open('inputData/bulkCSVFiles/'+multiplexedWellPos+'_'+dataType+'.csv', 'w') as f:
+                        for item in newCSVLines:
+                            f.write("%s" % item)
+    #Repacking
+    else:
+        #Invert well conversion dictionary
+        for mpos,multiplexedPlateName in enumerate(experimentParameters['unpackingDict']):
+            newCSVLines = []
+            for mpos2,multiplexedWellPos in enumerate(experimentParameters['unpackingDict'][multiplexedPlateName]):
+                specificWellIDConversionDict = {}
+                for well in plateIDConversionDict[multiplexedWellPos]:
+                    specificWellIDConversionDict[well] = wellIDConversionDict[well]
+                invertedWellIDConversionDict = {v: k for k, v in specificWellIDConversionDict.items()}
+                if multiplexedWellPos != '':
+                    #Read unpacked csv, rename to name-unpacked.csv, delete old name (as repacked csv names can overlap with these)
+                    with open('inputData/bulkCSVFiles/'+multiplexedWellPos+'_'+dataType+'.csv', 'r') as f:
+                        multiplexedCSVLines = f.readlines()
+                    subprocess.run(['cp','inputData/bulkCSVFiles/'+multiplexedWellPos+'_'+dataType+'.csv','inputData/bulkCSVFiles/'+multiplexedWellPos+'-unpacked_'+dataType+'.csv'])
+                    subprocess.run(['rm','inputData/bulkCSVFiles/'+multiplexedWellPos+'_'+dataType+'.csv'])
+                    
+                    for lineNum,line in enumerate(multiplexedCSVLines):
+                        #If first plate to repack, use first line
+                        #If last plate to repack, use last 2 lines
+                        if lineNum in [0,len(multiplexedCSVLines)-2,len(multiplexedCSVLines)-1]:
+                            if (lineNum == 0 and mpos2 == 0) or (lineNum in [len(multiplexedCSVLines)-2,len(multiplexedCSVLines)-1] and mpos2 == len(experimentParameters['unpackingDict'][multiplexedPlateName])-1):
+                                newCSVLines.append(line)
+                        else:
+                            #CyTEK Explorer
+                            if ' Well' in line:
+                                wellID = line.split(' ')[0]
+                            #FACSDiva
+                            else:
+                                fileName = line.split(',')[0]
+                                wellID = fileName.split('_')[2]
+                            newWellID = invertedWellIDConversionDict[wellID]        
+                            #print(wellID+'->'+newWellID)
                             newLine = line.replace(wellID,newWellID)
                             newCSVLines.append(newLine)
-                with open('inputData/bulkCSVFiles/'+multiplexedWellPos+'_'+dataType+'.csv', 'w') as f:
-                    for item in newCSVLines:
-                        f.write("%s" % item)
+                     
+            with open('inputData/bulkCSVFiles/'+multiplexedPlateName+'_'+dataType+'.csv', 'w') as f:
+                for item in newCSVLines:
+                    f.write("%s" % item)
 
 def performCommaCheck(fileName):
     with open('inputData/bulkCSVFiles/'+fileName, 'r') as istr:
@@ -202,11 +247,17 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
         fullExperimentDf = pd.concat(dfList)
     else:
         realDataType = dataType
-    
+        
+        #Reverse order; first decode 96 well barcoded plates, then repack the unbarcoded 96 well plates to a 384 well plate 
+        if experimentParameters['overallPlateDimensions'][0] == 16 and 'unpackingDict' in list(experimentParameters.keys()):
+            reverse = True
+        #Normal order; first decode 384 well barcoded plates, then unpack the unbarcoded 384 well plates to 96 well plates
+        else:
+            reverse = False
         if 'barcodingDict' in list(experimentParameters.keys()):
-            decodeBarcodedPlates(experimentParameters,folderName,dataType)
+            decodeBarcodedPlates(experimentParameters,folderName,dataType,reverse)
         if 'unpackingDict' in list(experimentParameters.keys()):
-            unpackMultiplexedPlates(experimentParameters,folderName,dataType)
+            unpackMultiplexedPlates(experimentParameters,folderName,dataType,reverse)
 
         #Legacy experiment parameter files compatibility
         if 'paired' in experimentParameters.keys():
