@@ -188,9 +188,12 @@ class PlateExperimentParameterPage(tk.Frame):
         l7 = tk.Label(mainWindow, text="Multiplexing Options:")
         multiplex = tk.StringVar(value='None')
         plateMultiplexVar = tk.BooleanVar() 
+        plateMultiplexVar2 = tk.BooleanVar() 
         barcodeMultiplexVar = tk.BooleanVar() 
         plateMultiplexCb = tk.Checkbutton(mainWindow,text='96->384 well',variable=plateMultiplexVar,onvalue=True,offvalue=False)
-        plateMultiplexCbRev = tk.Checkbutton(mainWindow,text='384->96 well',variable=plateMultiplexVar,onvalue=True,offvalue=False)
+        plateMultiplexCbRev = tk.Checkbutton(mainWindow,text='384->96 well',variable=plateMultiplexVar2,onvalue=True,offvalue=False)
+        plateMultiplexCbRev.config(state=tk.DISABLED)
+        plateMultiplexCb.config(state=tk.NORMAL)
         barcodeMultiplexCb = tk.Checkbutton(mainWindow,text='Barcoding',variable=barcodeMultiplexVar,onvalue=True,offvalue=False)
         barcodingNumberLabel = tk.Label(mainWindow,text='# plates per barcoded plate') 
         barcodingNumberEntry = tk.Entry(mainWindow,width=4)
@@ -198,6 +201,7 @@ class PlateExperimentParameterPage(tk.Frame):
         v = tk.IntVar()
         v2 = tk.IntVar()
         v3 = tk.IntVar()
+        v4 = tk.IntVar()
         
         def disable():
             if v3.get() == 384:
@@ -240,16 +244,17 @@ class PlateExperimentParameterPage(tk.Frame):
                 experimentParameters['numAllLevels'] = int(e2.get())
             else:
                 experimentParameters['numAllLevels'] = int(e2.get())+1
+            print(v3.get())
             if v3.get() == 384:
                 experimentParameters['overallPlateDimensions'] = [16,24]
             else:
                 experimentParameters['overallPlateDimensions'] = [8,12]
             
-            if plateMultiplexVar.get() and barcodeMultiplexVar.get():
+            if (plateMultiplexVar.get() or plateMultiplexVar2.get()) and barcodeMultiplexVar.get():
                 multiplexingOption = '96->384 well + Barcoding'
                 numberOfBarcodes = int(barcodingNumberEntry.get())
             else:
-                if plateMultiplexVar.get():
+                if plateMultiplexVar.get() or platMultiplexVar2.get():
                     multiplexingOption = '96->384 well'
                 elif barcodeMultiplexVar.get():
                     multiplexingOption = 'Barcoding'
