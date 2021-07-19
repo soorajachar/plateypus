@@ -73,6 +73,7 @@ def cleanUpFlowjoCSV(fileArray,folderName,dataType,experimentParameters):
             #FACS Diva
             else:
                 if '_' in temp.iloc[i,0]:
+                    #wellID = temp.iloc[i,0].split('.')[0].split('_')[-2]
                     wellID = temp.iloc[i,0].split('.')[0].split('_')[-3]
                 else:
                     wellID = temp.iloc[i,0]

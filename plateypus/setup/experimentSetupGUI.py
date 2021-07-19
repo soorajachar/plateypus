@@ -244,7 +244,6 @@ class PlateExperimentParameterPage(tk.Frame):
                 experimentParameters['numAllLevels'] = int(e2.get())
             else:
                 experimentParameters['numAllLevels'] = int(e2.get())+1
-            print(v3.get())
             if v3.get() == 384:
                 experimentParameters['overallPlateDimensions'] = [16,24]
             else:
@@ -252,7 +251,7 @@ class PlateExperimentParameterPage(tk.Frame):
             
             if (plateMultiplexVar.get() or plateMultiplexVar2.get()) and barcodeMultiplexVar.get():
                 multiplexingOption = '96->384 well + Barcoding'
-                numberOfBarcodes = int(barcodingNumberEntry.get())
+                numberOfBarcodes = barcodingNumberEntry.get()
             else:
                 if plateMultiplexVar.get() or plateMultiplexVar2.get():
                     multiplexingOption = '96->384 well'
@@ -261,6 +260,10 @@ class PlateExperimentParameterPage(tk.Frame):
                     numberOfBarcodes = int(barcodingNumberEntry.get())
                 else:
                     multiplexingOption = 'None'
+            if ',' in barcodingNumberEntry.get():
+                numberOfBarcodes = list(map(int,numberOfBarcodes.split(',')))
+            else:
+                numberOfBarcodes = [int(numberOfBarcodes)]
             global globalMultiplexingVar
             globalMultiplexingVar = multiplexingOption
             experimentParameters['multiplexingOption'] = multiplexingOption
@@ -284,27 +287,11 @@ class BarcodingPage(tk.Frame):
     def __init__(self, master,mpo,nb):
         tk.Frame.__init__(self, master)
         multiplexingOption = mpo
-        numberOfBarcodedPlates = nb
-        numPl = experimentParameters['numPlates'] 
-        numberOfBarcodes = math.ceil(np.log2(nb))
         BarcodingWindow = tk.Frame(self)
         BarcodingWindow.pack()
-        if multiplexingOption == '96->384 well + Barcoding':
-            if experimentParameters['overallPlateDimensions'][0] == 8: 
-                maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / 4 / numberOfBarcodedPlates)
-                totalPlatesPerBarcodedPlate = 4*numberOfBarcodedPlates
-                plateSkip = 4
-            #384->96
-            else: 
-                maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / numberOfBarcodedPlates)
-                totalPlatesPerBarcodedPlate = numberOfBarcodedPlates
-                plateSkip = 1 
-        else:
-            maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / numberOfBarcodedPlates)
-            totalPlatesPerBarcodedPlate = numberOfBarcodedPlates
-            plateSkip = 1
-        l1 = tk.Label(BarcodingWindow,text='Barcoded Plate Name:')
-        l2 = tk.Label(BarcodingWindow,text='Plate Name:')
+        numPl = experimentParameters['numPlates'] 
+        
+        numberOfBarcodes = math.ceil(np.log2(max(nb)))
         entryBarcodeLabelList = []
         for barcode in range(numberOfBarcodes):
             e = tk.Entry(BarcodingWindow,width=8)
@@ -312,41 +299,109 @@ class BarcodingPage(tk.Frame):
             e.insert(tk.END, 'Barcode '+str(barcode+1))
             entryBarcodeLabelList.append(e)
             #tk.Label(BarcodingWindow,text='Barcode '+str(barcode+1)).grid(row=0,column=2+barcode)
+        
+        if len(nb) == 1:
+            numberOfBarcodedPlates = nb[0]
+            if multiplexingOption == '96->384 well + Barcoding':
+                if experimentParameters['overallPlateDimensions'][0] == 8: 
+                    maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / 4 / numberOfBarcodedPlates)
+                    totalPlatesPerBarcodedPlate = 4*numberOfBarcodedPlates
+                    plateSkip = 4
+                #384->96
+                else: 
+                    maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / numberOfBarcodedPlates)
+                    totalPlatesPerBarcodedPlate = numberOfBarcodedPlates
+                    plateSkip = 1 
+            else:
+                maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / numberOfBarcodedPlates)
+                totalPlatesPerBarcodedPlate = numberOfBarcodedPlates
+                plateSkip = 1
+            allIndividualPlateEntryList = []
+            combinedPlateBarcodingVarList,combinedEntryList = [],[]
+            for combinedPlateNum in range(maxNumBarcoded):
+                combinedEntry = tk.Entry(BarcodingWindow,width=8)
+                combinedEntry.insert(tk.END, 'A'+str(combinedPlateNum*totalPlatesPerBarcodedPlate+1)+'-'+str((combinedPlateNum+1)*totalPlatesPerBarcodedPlate))
+                plateStart = combinedPlateNum*totalPlatesPerBarcodedPlate+1
+                plateEnd = (combinedPlateNum+1)*totalPlatesPerBarcodedPlate
+                allPlateIndices = list(range(plateStart,plateEnd+2,plateSkip))
+                combinedEntry.grid(row=combinedPlateNum*numberOfBarcodedPlates+1,column=0)
+                plateBarcodingVarList,plateEntryList = [],[]
+                for plateNum in range(numberOfBarcodedPlates):
+                    if plateNum == numberOfBarcodedPlates-1:
+                        padvar = 10 
+                    else:
+                        padvar = 0
+                    plateEntry = tk.Entry(BarcodingWindow,width=8)
+                    if plateSkip == 4:
+                        plateEntry.insert(tk.END, 'A'+str(allPlateIndices[plateNum])+'-'+str(allPlateIndices[plateNum+1]-1))
+                    else:
+                        plateEntry.insert(tk.END, 'A'+str(allPlateIndices[plateNum]))
+                    plateEntry.grid(row=combinedPlateNum*numberOfBarcodedPlates+plateNum+1,column=1,pady=(0,padvar))
+                    barcodingCbList,barcodingVarList = [],[]
+                    for barcodeNum in range(numberOfBarcodes):
+                        barcodeVar = tk.BooleanVar()
+                        barcodeCb = tk.Checkbutton(BarcodingWindow,text='',variable=barcodeVar,onvalue=True,offvalue=False)
+                        barcodeCb.grid(row=combinedPlateNum*numberOfBarcodedPlates+plateNum+1,column=2+barcodeNum,pady=(0,padvar))
+                        barcodingCbList.append(barcodeCb)
+                        barcodingVarList.append(barcodeVar)
+                    plateBarcodingVarList.append(barcodingVarList)
+                    plateEntryList.append(plateEntry)
+                combinedPlateBarcodingVarList.append(plateBarcodingVarList)
+                combinedEntryList.append(combinedEntry)
+                allIndividualPlateEntryList.append(plateEntryList)
+        else:
+            if multiplexingOption == '96->384 well + Barcoding':
+                if experimentParameters['overallPlateDimensions'][0] == 8: 
+                    plateSkip = 4
+                #384->96
+                else: 
+                    plateSkip = 1 
+            else:
+                plateSkip = 1
+            allIndividualPlateEntryList = []
+            combinedPlateBarcodingVarList,combinedEntryList = [],[]
+            for elem,numberOfBarcodedPlates in enumerate(nb):
+                summedPlateNums = sum(nb[:elem+1])
+                plateEnd = plateSkip*summedPlateNums
+                if elem == 0:
+                    plateStart = 1
+                    plateRow = 1
+                else:
+                    plateStart = sum(nb[:elem])*plateSkip + 1
+                    plateRow = sum(nb[:elem]) + 1
+                combinedEntry = tk.Entry(BarcodingWindow,width=8)
+                combinedEntry.insert(tk.END, 'A'+str(plateStart)+'-'+str(plateEnd))
+                combinedEntry.grid(row=plateRow,column=0)
+                allPlateIndices = list(range(plateStart,plateEnd+2,plateSkip))
+                plateBarcodingVarList,plateEntryList = [],[]
+                for plateNum in range(numberOfBarcodedPlates):
+                    if plateNum == numberOfBarcodedPlates-1 and plateNum != 0:
+                        padvar = 10 
+                    else:
+                        padvar = 0
+                    plateEntry = tk.Entry(BarcodingWindow,width=8)
+                    if plateSkip == 4:
+                        plateEntry.insert(tk.END, 'A'+str(allPlateIndices[plateNum])+'-'+str(allPlateIndices[plateNum+1]-1))
+                    else:
+                        plateEntry.insert(tk.END, 'A'+str(allPlateIndices[plateNum]))
+                    plateEntry.grid(row=plateRow+plateNum,column=1,pady=(0,padvar))
+                    barcodingCbList,barcodingVarList = [],[]
+                    for barcodeNum in range(numberOfBarcodes):
+                        barcodeVar = tk.BooleanVar()
+                        barcodeCb = tk.Checkbutton(BarcodingWindow,text='',variable=barcodeVar,onvalue=True,offvalue=False)
+                        barcodeCb.grid(row=plateRow+plateNum,column=2+barcodeNum,pady=(0,padvar))
+                        barcodingCbList.append(barcodeCb)
+                        barcodingVarList.append(barcodeVar)
+                    plateBarcodingVarList.append(barcodingVarList)
+                    plateEntryList.append(plateEntry)
+                combinedPlateBarcodingVarList.append(plateBarcodingVarList)
+                combinedEntryList.append(combinedEntry)
+                allIndividualPlateEntryList.append(plateEntryList)
+
+        l1 = tk.Label(BarcodingWindow,text='Barcoded Plate Name:')
+        l2 = tk.Label(BarcodingWindow,text='Plate Name:')
         l1.grid(row=0,column=0)
         l2.grid(row=0,column=1)
-        allIndividualPlateEntryList = []
-        combinedPlateBarcodingVarList,combinedEntryList = [],[]
-        for combinedPlateNum in range(maxNumBarcoded):
-            combinedEntry = tk.Entry(BarcodingWindow,width=8)
-            combinedEntry.insert(tk.END, 'A'+str(combinedPlateNum*totalPlatesPerBarcodedPlate+1)+'-'+str((combinedPlateNum+1)*totalPlatesPerBarcodedPlate))
-            plateStart = combinedPlateNum*totalPlatesPerBarcodedPlate+1
-            plateEnd = (combinedPlateNum+1)*totalPlatesPerBarcodedPlate
-            allPlateIndices = list(range(plateStart,plateEnd+2,plateSkip))
-            combinedEntry.grid(row=combinedPlateNum*numberOfBarcodedPlates+1,column=0)
-            plateBarcodingVarList,plateEntryList = [],[]
-            for plateNum in range(numberOfBarcodedPlates):
-                if plateNum == numberOfBarcodedPlates-1:
-                    padvar = 10 
-                else:
-                    padvar = 0
-                plateEntry = tk.Entry(BarcodingWindow,width=8)
-                if plateSkip == 4:
-                    plateEntry.insert(tk.END, 'A'+str(allPlateIndices[plateNum])+'-'+str(allPlateIndices[plateNum+1]-1))
-                else:
-                    plateEntry.insert(tk.END, 'A'+str(allPlateIndices[plateNum]))
-                plateEntry.grid(row=combinedPlateNum*numberOfBarcodedPlates+plateNum+1,column=1,pady=(0,padvar))
-                barcodingCbList,barcodingVarList = [],[]
-                for barcodeNum in range(numberOfBarcodes):
-                    barcodeVar = tk.BooleanVar()
-                    barcodeCb = tk.Checkbutton(BarcodingWindow,text='',variable=barcodeVar,onvalue=True,offvalue=False)
-                    barcodeCb.grid(row=combinedPlateNum*numberOfBarcodedPlates+plateNum+1,column=2+barcodeNum,pady=(0,padvar))
-                    barcodingCbList.append(barcodeCb)
-                    barcodingVarList.append(barcodeVar)
-                plateBarcodingVarList.append(barcodingVarList)
-                plateEntryList.append(plateEntry)
-            combinedPlateBarcodingVarList.append(plateBarcodingVarList)
-            combinedEntryList.append(combinedEntry)
-            allIndividualPlateEntryList.append(plateEntryList)
 
         def collectInputs():
             barcodingDict = {}
@@ -380,7 +435,7 @@ class BarcodingPage(tk.Frame):
                 master.switch_frame(MultiplexingPage,multiplexingOption)
             else:
                 master.switch_frame(allLevelNamePage,folderName)
-
+        
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
 
