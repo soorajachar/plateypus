@@ -309,7 +309,7 @@ class BarcodingPage(tk.Frame):
                     plateSkip = 4
                 #384->96
                 else: 
-                    maxNumBarcoded = math.ceil(experimentParameters['numPlates'] / numberOfBarcodedPlates)
+                    maxNumBarcoded = math.ceil(4*experimentParameters['numPlates'] / numberOfBarcodedPlates)
                     totalPlatesPerBarcodedPlate = numberOfBarcodedPlates
                     plateSkip = 1 
             else:
@@ -455,7 +455,10 @@ class MultiplexingPage(tk.Frame):
             if experimentParameters['overallPlateDimensions'][0] == 16: 
                 reverse = True
 
-        maxNum384Plates = math.ceil(experimentParameters['numPlates'] / 4)
+        if not reverse:
+            maxNum384Plates = math.ceil(experimentParameters['numPlates'] / 4)
+        else:
+            maxNum384Plates = math.ceil(experimentParameters['numPlates'])
         Unpacking384PlateNameList = []
         Unpacking384List = []
         l1 = tk.Label(Well384ConversionWindow,text='Combined Plate Names: ')
