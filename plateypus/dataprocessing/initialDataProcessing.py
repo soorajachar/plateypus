@@ -30,6 +30,8 @@ def returnMultiIndex(sortedData,sortedFiles,dataType,folderName):
 def decodeBarcodedPlates(experimentParameters,folderName,dataType,reverse):
     path = 'inputData/bulkCSVFiles/'
     barcodingDict = experimentParameters['barcodingDict']
+    bIndex  = 0
+    alignmentColumnOrder = []
     for barcodedPlate in barcodingDict:
         barcodedCSV = pd.read_csv(path+barcodedPlate+'_'+dataType+'.csv')
         for decodedPlate in barcodingDict[barcodedPlate]:
@@ -65,8 +67,13 @@ def decodeBarcodedPlates(experimentParameters,folderName,dataType,reverse):
                     newColumn = ' | '.join(['/'.join(populationsToKeep),populationStatisticSplit[1]])
                     newColumns.append(newColumn)
             decodedCSV.columns = newColumns
+            if bIndex == 0:
+                alignmentColumnOrder = decodedCSV.columns
+            else:
+                decodedCSV = decodedCSV[alignmentColumnOrder]
             decodedCSV.to_csv(path+decodedPlate+'_'+dataType+'.csv',index=False)
-
+            bIndex+=1
+        
 def unpackMultiplexedPlates(experimentParameters,folderName,dataType,reverse):
     #A1->A1,A2->A2,A3- >A1,B1->A4,B2->A3
     #1.1,1.3,1.5,3.1,3.3,3.5 -> A1; 1.2,1.4,1.6,3.2,3.4,3.6->A2; 2.1,2.3,3.5,4.1,4.3,4.5->A4; 2.2,2.4,2.6,4.2,4.4,4.6->A3

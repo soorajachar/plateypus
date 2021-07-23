@@ -257,7 +257,7 @@ class PlateExperimentParameterPage(tk.Frame):
                     multiplexingOption = '96->384 well'
                 elif barcodeMultiplexVar.get():
                     multiplexingOption = 'Barcoding'
-                    numberOfBarcodes = int(barcodingNumberEntry.get())
+                    numberOfBarcodes = barcodingNumberEntry.get()
                 else:
                     multiplexingOption = 'None'
             if ',' in barcodingNumberEntry.get():
