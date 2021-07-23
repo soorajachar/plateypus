@@ -71,7 +71,11 @@ def decodeBarcodedPlates(experimentParameters,folderName,dataType,reverse):
                 alignmentColumnOrder = decodedCSV.columns.tolist()
             else:
                 if alignmentColumnOrder != decodedCSV.columns.tolist():
-                    decodedCSV = decodedCSV[alignmentColumnOrder]
+                    #Realign columns
+                    newDecodedCSV = decodedCSV.iloc[:,:-1][alignmentColumnOrder[:-1]]
+                    decodedCSV.iloc[:,:-1] = newDecodedCSV.values
+                    decodedCSV.columns = alignmentColumnOrder
+            
             decodedCSV.to_csv(path+decodedPlate+'_'+dataType+'.csv',index=False)
             bIndex+=1
         
