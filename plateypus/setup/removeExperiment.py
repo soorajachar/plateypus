@@ -22,7 +22,7 @@ class RemoveExperimentWindow(tk.Frame):
             experimentName = selectionMenu.get()
             subprocess.run(['rm','-r','experiments/'+experimentName])
 
-        b = tk.Button(mainWindow,text='Remove experiment',command=lambda:createExperiment())
+        b = tk.Button(mainWindow,text='Remove experiment',command=lambda:removeExperiment())
         
         l1.grid(row=0,column=0,sticky=tk.W)
         b.grid(row=1,column=0,columnspan=2)

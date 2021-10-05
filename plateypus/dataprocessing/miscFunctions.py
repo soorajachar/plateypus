@@ -235,6 +235,17 @@ def returnGates(logicleData,rawData,generationZeroBoundary,numGens):
         generationGatesLinear.append(newtemplin[find_nearest(newtempraw,gateval)[1]])
     return generationGatesLinear
 
+def returnGatesLinear(logicleData,generationZeroBoundary,numGens):
+    parentGenerationPresent = True
+    maxGenerationNumber = numGens
+    newtemplin = logicleData.values.ravel(order='F')
+    generationGatesLinear = [generationZeroBoundary]
+    scaling = 62
+    #Get CTV GFI means for each generation by dividing initial GFI (raw) by 2 for each division; with only linear gates, best we can do is subtracting by a constant
+    for i in range(maxGenerationNumber-1):
+        generationGatesLinear.append(generationZeroBoundary-scaling*i)
+    return generationGatesLinear
+
 def extractValues(currentLevelLayout,valueToRemove,equalityBoolean):
     if equalityBoolean:
         idx = np.argwhere(np.all(currentLevelLayout[..., :] == valueToRemove, axis=0))

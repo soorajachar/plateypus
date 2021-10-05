@@ -11,10 +11,13 @@ import subprocess
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 import matplotlib.lines as linesmpl
-from plateypus.dataprocessing.miscFunctions import find_nearest,returnTicks,returnGates
+from plateypus.dataprocessing.miscFunctions import find_nearest,returnTicks,returnGates,returnGatesLinear
+from scipy.signal import find_peaks
+from scipy.stats import gaussian_kde
+from sklearn.preprocessing import MinMaxScaler
 
-class GatingPage(tk.Frame):
-    def __init__(self,master,fName,expn,exdata,shp):
+class ProliferationSelectionPage(tk.Frame):
+    def __init__(self,master,fName,expn,exdata,shp,bp):
         tk.Frame.__init__(self, master)
         
         global secondaryhomepage
@@ -25,6 +28,54 @@ class GatingPage(tk.Frame):
         expNum = expn
         global ex_data
         ex_data = exdata
+        global bPage
+        bPage = bp
+        
+        singleCellDf = pd.read_hdf('outputData/pickleFiles/initialSingleCellDf-channel-'+folderName+'.h5',key='df')
+        markers = list(singleCellDf.columns)
+        celltypes = singleCellDf.index.unique('CellType').tolist()
+        
+        mainWindow = tk.Frame(self)
+        mainWindow.pack()
+
+        tk.Label(mainWindow,text='Proliferating:').grid(row=0,column=0,columnspan=2,sticky=tk.W)
+        tk.Label(mainWindow,text='Celltypes:').grid(row=1,column=0,sticky=tk.W)
+        rbList,rbVarList = [],[]
+        for i,celltype in enumerate(celltypes):
+            rbVar = tk.BooleanVar(value=False)
+            rb = tk.Checkbutton(mainWindow,text=celltype,variable=rbVar)
+            rb.grid(row=i+2,column=0,sticky=tk.W)
+            rbList.append(rb)
+            rbVarList.append(rbVar)
+        
+        tk.Label(mainWindow,text='Markers:').grid(row=1,column=1,sticky=tk.W)
+        rbList2,rbVarList2 = [],[]
+        for i,marker in enumerate(markers):
+            rbVar = tk.BooleanVar(value=False)
+            rb = tk.Checkbutton(mainWindow,text=marker,variable=rbVar)
+            rb.grid(row=i+2,column=1,sticky=tk.W)
+            rbList2.append(rb)
+            rbVarList2.append(rbVar)
+
+        def collectInputs():
+            prolifCellTypes = [celltypes[i] for i,x in enumerate(rbVarList) if x.get()]
+            prolifMarkers = [markers[i] for i,x in enumerate(rbVarList2) if x.get()]
+            #Only select first prolif marker and first prolif celltype for now. TODO: allow multiple proliferation markers/celltypes
+            global logicleDataStacked 
+            logicleDataStacked = singleCellDf[prolifMarkers[0]].xs((prolifCellTypes[0]),level=('CellType'))
+            master.switch_frame(GatingPage)
+         
+
+        buttonWindow = tk.Frame(self)
+        buttonWindow.pack(side=tk.TOP,pady=10)
+
+        tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
+        tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(secondaryhomepage,folderName,expNum,ex_data,bPage)).grid(row=5,column=1)
+        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+
+class GatingPage(tk.Frame):
+    def __init__(self,master):
+        tk.Frame.__init__(self, master)
         
         experimentNameWindow = tk.Frame(self)
         experimentNameWindow.pack(side=tk.TOP,padx=10,pady=10)
@@ -46,10 +97,7 @@ class GatingPage(tk.Frame):
         e1.insert(tk.END,'6')
         e1.grid(row=5,column=0)
 
-        global logicleDataStacked 
-        global rawDataStacked
-        logicleDataStacked = pickle.load(open('semiProcessedData/logicleProliferationDf.pkl','rb'))
-        rawDataStacked = pickle.load(open('semiProcessedData/rawProliferationDf.pkl','rb'))
+        #logicleDataStacked = pickle.load(open('outputData/pickleFiles/logicleProliferationDf.pkl','rb'))
         groupedGateList = []
 
         rowAsAllLevelNames = logicleDataStacked.index.names[:-1]
@@ -62,7 +110,7 @@ class GatingPage(tk.Frame):
         for tpl in logicleDataStacked.groupby(level=rowAsTimePointLevelNames,sort=False):
             timepointTuple.append(tpl[0])
         
-        os.chdir('../../experiments/'+folderName) 
+        #os.chdir('../../experiments/'+folderName) 
         def collectInputs():
             global groupVariable
             global titleVariable
@@ -94,14 +142,14 @@ class GatingPage(tk.Frame):
                     innerVariableValues = timepointTuple
                     titleVariable = 'Condition'
                 global logicleDataUnstacked
-                logicleDataUnstacked = logicleDataStacked.groupby(level=levelNames,sort=False).first().to_frame('GFI')
+                logicleDataUnstacked = logicleDataStacked.groupby(level=levelNames,sort=False).first().to_frame('MFI')
                 iterationRange = logicleDataUnstacked.shape[0] 
-            with open('inputFiles/iterationRange.pkl','wb') as f:
+            with open('misc/iterationRange.pkl','wb') as f:
                 pickle.dump(iterationRange,f)
-            with open('inputFiles/rowValIterationRange.pkl','wb') as f:
+            with open('misc/rowValIterationRange.pkl','wb') as f:
                 pickle.dump(0,f)
             groupedGateList = []
-            with open('inputFiles/groupedGateList.pkl','wb') as f:
+            with open('misc/groupedGateList.pkl','wb') as f:
                 pickle.dump(groupedGateList,f)
             master.switch_frame(Unsplit_Proliferation_Gating_GUI)
 
@@ -109,7 +157,7 @@ class GatingPage(tk.Frame):
         buttonWindow.pack(side=tk.TOP,pady=10)
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
-        tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(shp,folderName,expNum,ex_data)).grid(row=5,column=1)
+        tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(ProliferationSelectionPage,folderName,expNum,ex_data,secondaryhomepage,bPage)).grid(row=5,column=1)
         tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
 
 class Unsplit_Proliferation_Gating_GUI(tk.Frame):
@@ -123,15 +171,13 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
         
         plotFrame = tk.Frame(self)
         plotFrame.pack()
-        row = pickle.load(open('inputFiles/rowValIterationRange.pkl','rb'))
-        groupedGateList = pickle.load(open('inputFiles/groupedGateList.pkl','rb'))
+        row = pickle.load(open('misc/rowValIterationRange.pkl','rb'))
+        groupedGateList = pickle.load(open('misc/groupedGateList.pkl','rb'))
         if groupVariable == 'Condition-Time':
-            currentDf = logicleDataStacked.to_frame('GFI')
-            rawDf = rawDataStacked.to_frame('GFI')
+            currentDf = logicleDataStacked.to_frame('MFI')
         else:
             currentLevelValues = logicleDataUnstacked.iloc[row,:].name
-            currentDf = logicleDataStacked.xs(currentLevelValues,level=levelNames).to_frame('GFI')
-            rawDf = rawDataStacked.xs(currentLevelValues,level=levelNames).to_frame('GFI')
+            currentDf = logicleDataStacked.xs(currentLevelValues,level=levelNames).to_frame('MFI')
         plottingDf = currentDf.reset_index()
         if groupVariable == 'Condition-Time' or groupVariable == 'Condition':
             nonEventLevelNames = currentDf.index.names[:-1]
@@ -141,25 +187,45 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
                 conditionName = '-'.join(conditionGroupbyTupleNew)
                 for event in range(conditionGroupbyTuple[1].shape[0]):
                     groupingColumn.append(conditionName)
-            plottingDf[groupVariable] = groupingColumn        
+            plottingDf[groupVariable] = groupingColumn
+        
         #Plot facetgrid of histograms of ctv values of all times for current condition
-        g = sns.FacetGrid(plottingDf,legend_out=True,hue=groupVariable,height=6,palette=sns.color_palette("Purples", len(pd.unique(plottingDf[groupVariable]))))
-        #g.map(sns.distplot,'GFI',kde=False,bins=256)
-        g.map(sns.kdeplot,'GFI',bw=15)
+        kind='kde'
+        if groupVariable == 'Condition-Time':
+            g = sns.displot(data=plottingDf,x='MFI',color='purple',height=6,kind=kind)
+        elif groupVariable == 'Time':
+            g = sns.displot(data=plottingDf,x='MFI',hue='Time',height=6,palette=sns.color_palette("Purples", len(pd.unique(plottingDf[groupVariable]))),kind=kind)
+        else:
+            g = sns.displot(data=plottingDf,x='MFI',hue='Condition',height=6,palette=sns.color_palette("Purples", len(pd.unique(plottingDf['Condition']))),kind=kind)
+        #g = sns.FacetGrid(plottingDf,legend_out=True,hue=groupVariable,height=6,palette=sns.color_palette("Purples", len(pd.unique(plottingDf[groupVariable]))))
+        #g.map(sns.distplot,'MFI',kde=False,bins=256)
+        #g.map(sns.kdeplot,'MFI',bw=15)
         plt.subplots_adjust(top=0.95)
         xtickValues,xtickLabels = returnTicks([-1000,100,1000,10000,100000])
         axis = g.fig.get_axes()[0]
         axis.set_xticks(xtickValues)
         axis.set_xticklabels(xtickLabels)
         
-        startingGateLogicle = 725
-        startingGateRaw = rawDf.values[find_nearest(currentDf,startingGateLogicle)[1]][0]
-        logicleGates = returnGates(currentDf,rawDf,startingGateRaw,numGens)
+        #startingGateLogicle = 725
+        space = np.linspace(0,1024,num=100)
+        kde = gaussian_kde(currentDf['MFI'].values)
+        kdeVals = kde.evaluate(space)
+        maxInd = np.argmax(kdeVals)
+        minMaxScaledKDE = MinMaxScaler().fit_transform(kdeVals.reshape(-1,1))
+        #tempDf = pd.DataFrame({sizeDimension:space,'Density':minMaxScaledKDE[:,0]})
+        startingGateLogicle = space[np.argmax(minMaxScaledKDE[:,0] > 0.01)]
+        endingGateLogicle = max(space)
+
+        logicleGates = [startingGateLogicle]+[space[x] for x in list(find_peaks(kdeVals*-1)[0]) if space[x] > startingGateLogicle]+[endingGateLogicle]
+        logicleGates = logicleGates[::-1]
+        #logicleGates = returnGatesLinear(currentDf,startingGateLogicle,numGens)
         maxY = list(plt.gca().get_yticks())[-1]
-        X = startingGateLogicle
+        X = endingGateLogicle
         Ymin = -1
         Ymax = maxY
         gates = logicleGates[1:]
+        
+        #sys.exit(0)
         numGates = len(logicleGates)-1
         self.canvas = FigureCanvasTkAgg(g.fig,master=plotFrame)
         self.ax = plt.gca() 
@@ -201,13 +267,13 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
         def collectInputs():
             for names in range(len(pd.unique(plottingDf[groupVariable]))):
                 groupedGateList.append(self.getAllX())
-            with open('inputFiles/groupedGateList.pkl','wb') as f:
+            with open('misc/groupedGateList.pkl','wb') as f:
                 pickle.dump(groupedGateList,f)
-            row = pickle.load(open('inputFiles/rowValIterationRange.pkl','rb'))
+            row = pickle.load(open('misc/rowValIterationRange.pkl','rb'))
             row+=1
-            with open('inputFiles/rowValIterationRange.pkl','wb') as f:
+            with open('misc/rowValIterationRange.pkl','wb') as f:
                 pickle.dump(row,f)
-            if row != pickle.load(open('inputFiles/iterationRange.pkl','rb')):
+            if row != pickle.load(open('misc/iterationRange.pkl','rb')):
                 master.switch_frame(Unsplit_Proliferation_Gating_GUI)
             else:
                 i = 0
@@ -232,9 +298,9 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
                         singleCellProliferationDf.loc[indexingTuple,:] = generationValues
 
                 print(singleCellProliferationDf)
-                with open('semiProcessedData/singleCellDataFrame-proliferation-'+folderName+'.pkl', 'wb') as f:
+                with open('outputData/pickleFiles/singleCellDataFrame-proliferation-'+folderName+'.pkl', 'wb') as f:
                     pickle.dump(singleCellProliferationDf,f)
-                master.switch_frame(secondaryhomepage,folderName,expNum,ex_data)
+                master.switch_frame(secondaryhomepage,folderName,expNum,ex_data,bPage)
 
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
@@ -244,13 +310,13 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
 
     def clickOnParentLine(self, event):
         if event.artist == self.line:
-            print("line selected ", event.artist)
+            #print("line selected ", event.artist)
             self.follower = self.canvas.mpl_connect("motion_notify_event", self.followParentMouse)
             self.releaser = self.canvas.mpl_connect("button_press_event", self.releaseParentOnClick)
     
     def clickOnChildLines(self, event):
         if event.artist in self.childlines:
-            print("line selected ", event.artist)
+            #print("line selected ", event.artist)
             self.currentArtist = event.artist
             self.follower = self.canvas.mpl_connect("motion_notify_event", self.followChildMouse)
             self.releaser = self.canvas.mpl_connect("button_press_event", self.releaseChildOnClick)
@@ -302,7 +368,7 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
         return [self.getParentX()]+self.getChildX()
 
 def generateBulkProliferationStatistics(folderName,experimentNumber):
-    singleCellProliferationDfStacked = pickle.load(open('semiProcessedData/singleCellDataFrame-proliferation-'+folderName+'.pkl','rb'))
+    singleCellProliferationDfStacked = pickle.load(open('outputData/pickleFiles/singleCellDataFrame-proliferation-'+folderName+'.pkl','rb'))
     idx = pd.IndexSlice
     numGenerations = len(singleCellProliferationDfStacked.loc[:,'Generation'].unique())
     singleCellProliferationDfUnstacked = singleCellProliferationDfStacked.unstack('Event')
@@ -310,11 +376,14 @@ def generateBulkProliferationStatistics(folderName,experimentNumber):
     #conditionLevelNames = singleCellProliferationDfStacked.index.names[:-1]
     #indexDf = singleCellProliferationDfStacked.groupby(level=conditionLevelNames,sort=False).first()
     #print(indexDf)
-    indexDfFull = pickle.load(open('semiProcessedData/cellStatisticPickleFile-'+folderName+'.pkl','rb'))
-    indexDf = indexDfFull.loc[list(pd.unique(indexDfFull.index.get_level_values(0)))[0]].loc[list(pd.unique(indexDfFull.index.get_level_values(1)))[0]].loc[list(pd.unique(indexDfFull.index.get_level_values(2)))[0]]
+    #indexDfFull = pickle.load(open('outputData/pickleFiles/cellStatisticPickleFile-'+folderName+'.pkl','rb'))
+    firstTimepoint = singleCellProliferationDfStacked.index.unique('Time').tolist()[0]
+    reindex = singleCellProliferationDfStacked.xs((1,firstTimepoint),level=('Event','Time')).index
+    indexDf = singleCellProliferationDfStacked.xs((1),level=('Event')).unstack('Time').reindex(reindex).loc[:,'Generation']
+    #indexDf = indexDfFull.loc[list(pd.unique(indexDfFull.index.get_level_values(0)))[0]].loc[list(pd.unique(indexDfFull.index.get_level_values(1)))[0]].loc[list(pd.unique(indexDfFull.index.get_level_values(2)))[0]]
     levelValues = []
     iteration = 0
-    temp = indexDfFull.reset_index()
+    #temp = indexDfFull.reset_index()
     temp = singleCellProliferationDfUnstacked.reset_index()
     emptyMatrixLogicle = np.zeros(singleCellProliferationDfUnstacked.shape)
     for row in range(indexDf.shape[0]):
@@ -374,8 +443,8 @@ def generateBulkProliferationStatistics(folderName,experimentNumber):
     for i in range(len(allProliferationMatricesList)):
         statisticDf = pd.DataFrame(allProliferationMatricesList[i],index=singleCellProliferationDfUnstacked.index)#,columns = [allProliferationStatisticNames[i]])
         statisticDfUnstacked = statisticDf.unstack('Time')
-        indexDfFull = pickle.load(open('semiProcessedData/cellStatisticPickleFile-'+folderName+'.pkl','rb'))
-        indexDf = indexDfFull.loc[list(pd.unique(indexDfFull.index.get_level_values(0)))[0]].loc[list(pd.unique(indexDfFull.index.get_level_values(1)))[0]].loc[list(pd.unique(indexDfFull.index.get_level_values(2)))[0]]
+        #indexDfFull = pickle.load(open('outputData/pickleFiles/cellStatisticPickleFile-'+folderName+'.pkl','rb'))
+        #indexDf = indexDfFull.loc[list(pd.unique(indexDfFull.index.get_level_values(0)))[0]].loc[list(pd.unique(indexDfFull.index.get_level_values(1)))[0]].loc[list(pd.unique(indexDfFull.index.get_level_values(2)))[0]]
         levelValues = []
         iteration = 0
         emptyMatrixLogicle = np.zeros(statisticDfUnstacked.shape)

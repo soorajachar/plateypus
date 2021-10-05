@@ -255,11 +255,13 @@ class PlateExperimentParameterPage(tk.Frame):
             else:
                 if plateMultiplexVar.get() or plateMultiplexVar2.get():
                     multiplexingOption = '96->384 well'
+                    numberOfBarcodes = 1
                 elif barcodeMultiplexVar.get():
                     multiplexingOption = 'Barcoding'
                     numberOfBarcodes = barcodingNumberEntry.get()
                 else:
                     multiplexingOption = 'None'
+                    numberOfBarcodes = 1
             if ',' in barcodingNumberEntry.get():
                 numberOfBarcodes = list(map(int,numberOfBarcodes.split(',')))
             else:

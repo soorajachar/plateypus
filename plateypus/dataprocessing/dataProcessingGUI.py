@@ -56,7 +56,7 @@ class DataProcessingStartPage(tk.Frame):
         #cellAbPanelButton = tk.Button(mainWindow,text='Edit antibody panel',command=lambda: master.switch_frame(cdp.MarkerNumberPage,folderName,expNum,ex_data,DataProcessingStartPage,bPage))
         #cellAbPanelButton.grid(row=2,column=2,sticky=tk.W)
         
-        prolifGenerationGatesButton = tk.Button(mainWindow,text='Edit generation gates',command=lambda: master.switch_frame(pdp.GatingPage,folderName,expNum,ex_data,DataProcessingStartPage,bPage))
+        prolifGenerationGatesButton = tk.Button(mainWindow,text='Edit generation gates',command=lambda: master.switch_frame(pdp.ProliferationSelectionPage,folderName,expNum,ex_data,DataProcessingStartPage,backPage))
         prolifGenerationGatesButton.grid(row=3,column=1,sticky=tk.W)
         prolifDfButton = tk.Button(mainWindow,text='Create dataframe',command=lambda: createDataFrame('prolif'))
         prolifDfButton.grid(row=3,column=2,sticky=tk.W)
@@ -80,8 +80,10 @@ class DataProcessingStartPage(tk.Frame):
                 requiredFiles = ['CBAcalibrationParameters-'+folderName+'.json']
             elif i == 2:
                 requiredFiles = ['singleCellDataFrame-proliferation-'+folderName+'.pkl']
+            #Go to separate page where you select how many markers are proliferation, then each marker that serves as proliferation
             elif i == 3:
-                requiredFiles = ['logicleProliferationDf.pkl','rawProliferationDf.pkl']
+                requiredFiles = ['initialSingleCellDf-channel-'+folderName+'.h5']
+                #requiredFiles = ['logicleProliferationDf.pkl','rawProliferationDf.pkl']
             else:
                 requiredFiles = []
             for requiredFile in requiredFiles:
