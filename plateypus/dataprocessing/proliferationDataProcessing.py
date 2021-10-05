@@ -14,7 +14,6 @@ import matplotlib.lines as linesmpl
 from plateypus.dataprocessing.miscFunctions import find_nearest,returnTicks,returnGates,returnGatesLinear
 from scipy.signal import find_peaks
 from scipy.stats import gaussian_kde
-from sklearn.preprocessing import MinMaxScaler
 
 class ProliferationSelectionPage(tk.Frame):
     def __init__(self,master,fName,expn,exdata,shp,bp):
@@ -211,7 +210,8 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
         kde = gaussian_kde(currentDf['MFI'].values)
         kdeVals = kde.evaluate(space)
         maxInd = np.argmax(kdeVals)
-        minMaxScaledKDE = MinMaxScaler().fit_transform(kdeVals.reshape(-1,1))
+        minMaxScaledKDE = kdeVals.reshape(-1,1)
+        minMaxScaledKDE = (minMaxScaledKDE - minMaxScaledKDE.min()) / (minMaxScaledKDE.max() - minMaxScaledKDE.min())
         #tempDf = pd.DataFrame({sizeDimension:space,'Density':minMaxScaledKDE[:,0]})
         startingGateLogicle = space[np.argmax(minMaxScaledKDE[:,0] > 0.01)]
         endingGateLogicle = max(space)

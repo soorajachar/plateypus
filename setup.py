@@ -5,7 +5,6 @@ install_requires = [
 'pandas',
 'seaborn',
 'scipy',
-'sklearn',
 'openpyxl',
 'tables',
 'pillow',
