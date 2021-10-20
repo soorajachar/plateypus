@@ -3,6 +3,7 @@ import os,subprocess,pickle,math
 import tkinter as tk
 import tkinter.ttk
 import tkinter.font as tkfont
+from tkinter import filedialog as fd
 
 def setMaxWidth(stringList, element):
     f = tkfont.nametofont(element.cget("font"))
@@ -18,19 +19,28 @@ class NewProjectWindow(tk.Frame):
         
         l1 = tk.Label(mainWindow, text="Project Name: ")
         e1 = tk.Entry(mainWindow)
+        l1.grid(row=0,column=0,sticky=tk.W)
+        e1.grid(row=0,column=1,sticky=tk.W)
 
-        l2 = tk.Label(mainWindow, text="Path to Project folder (must start with a ~ or /)")
-        e2 = tk.Entry(mainWindow)
+        def load_save():
+            self.save = fd.askdirectory()
+            if self.save[-1] != '/':
+                self.save+='/'
+            outputPathLabel['text'] = self.save
+            outputPathLabel['font'] = 'Helvetica 14 bold'
         
-        l3 = tk.Label(mainWindow, text="For reference, path to current folder is: \n"+os.getcwd()+'/\n')
-        
+        outputPathFrame = tk.Frame(mainWindow)
+        outputPathFrame.grid(row=1,column=0,columnspan=2)
+        outputPathSelectionButton = tk.Button(outputPathFrame,text='Path to Project folder:',command=lambda:load_save())
+        outputPathSelectionButton.grid(row=0,column=0,sticky=tk.W)
+        outputPathLabel = tk.Label(outputPathFrame,text='')
+        outputPathLabel.grid(row=0,column=1,sticky=tk.W)
+
         def createProject():
             projectName = e1.get()
-            rawPathName = e2.get()
+            rawPathName = self.save 
             if rawPathName[-1] != '/':
                 rawPathName+='/'
-            if rawPathName.split('/')[-2] == projectName:
-                rawPathName = rawPathName[:rawPathName[:-1].rfind('/')]+'/'
             if projectName not in os.listdir(rawPathName):
                 subprocess.run(['mkdir',rawPathName+projectName])
             if 'pathDict.pkl' in os.listdir(master.homedirectory+'misc'):
@@ -45,12 +55,6 @@ class NewProjectWindow(tk.Frame):
             tk.messagebox.showinfo("Project Created", "Project\n"+projectName+"\nhas been created.")
 
         b = tk.Button(mainWindow,text='Create new project',command=lambda:createProject())
-        
-        l1.grid(row=0,column=0,sticky=tk.W)
-        e1.grid(row=0,column=1,sticky=tk.W)
-        l2.grid(row=1,column=0,sticky=tk.W)
-        e2.grid(row=1,column=1,sticky=tk.W)
-        l3.grid(row=3,column=0,columnspan=2)
         b.grid(row=2,column=0,columnspan=2)
 
         buttonWindow = tk.Frame(self)

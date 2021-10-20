@@ -176,6 +176,7 @@ def parseCellCSVHeaders(columns,panelData=[]):
         uncommonStatisticsList.append('/'.join(uncommonStatistics))
     for uncommonStatistic,i in zip(uncommonStatisticsList,range(len(uncommonStatisticsList))):
         newMultiIndexList[i] = [uncommonStatistic]+newMultiIndexList[i][1:]
+    print(newMultiIndexList)
     return newMultiIndexList
 
 def createCellDataFrame(folderName,finalDataFrame,concUnitPrefix):
