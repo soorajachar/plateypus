@@ -3,10 +3,18 @@ import seaborn as sns
     
 def plot(plottingDf,subsettedDf,kwargs,facetKwargs,auxillaryKwargs,plotOptions):
     #Make sure there are markers at each column variable
-    if 'style' not in kwargs.keys():
-        fg = sns.relplot(data=plottingDf,marker='o',kind=auxillaryKwargs['subPlotType'],facet_kws=facetKwargs,ci=False,**kwargs,**plotOptions['X']['figureDimensions'],**auxillaryKwargs['cmap'])
+    errKwargs = {}
+    if 'ci' in list(auxillaryKwargs['plotspecifickwargs'].keys()):
+        psKwargs = auxillaryKwargs['plotspecifickwargs']
+        errKwargs['ci'] = psKwargs['ci']
+        errKwargs['err_style'] = psKwargs['err_style']
     else:
-        fg = sns.relplot(data=plottingDf,markers=True,kind=auxillaryKwargs['subPlotType'],facet_kws=facetKwargs,ci=False,**kwargs,**plotOptions['X']['figureDimensions'],**auxillaryKwargs['cmap'])
+        errKwargs['ci'] = False
+
+    if 'style' not in kwargs.keys():
+        fg = sns.relplot(data=plottingDf,marker='o',kind=auxillaryKwargs['subPlotType'],facet_kws=facetKwargs,**kwargs,**plotOptions['X']['figureDimensions'],**auxillaryKwargs['cmap'],**errKwargs)
+    else:
+        fg = sns.relplot(data=plottingDf,markers=True,kind=auxillaryKwargs['subPlotType'],facet_kws=facetKwargs,**kwargs,**plotOptions['X']['figureDimensions'],**auxillaryKwargs['cmap'],**errKwargs)
         
     #X and Y Axis Scaling for 2D plots
     for axis in plotOptions:
