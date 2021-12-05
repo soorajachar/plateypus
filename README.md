@@ -1,6 +1,6 @@
 ![PLATEypusLogo](https://user-images.githubusercontent.com/49458891/116960335-185c1500-ac6e-11eb-92e0-369334eb7882.png)
 
-A GUI to process and plot high throughput bulk cytokine, surface marker, and single cell data exported from flowjo  
+A GUI to process and plot high throughput bulk cytokine, surface marker, and single cell data exported from Flowjo  
   
 Main powerpoint tutorial for GUI is hosted on google drive:   
 https://drive.google.com/file/d/1jt8ZlOiArbiVK-RyF1_rrS8swEYsqWae/view?usp=sharing
