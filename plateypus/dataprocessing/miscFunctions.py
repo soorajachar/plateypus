@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tkinter as tk
+import itertools
 from matplotlib import transforms
 import tkinter.font as tkfont
 
@@ -62,9 +63,12 @@ def cleanUpFlowjoCSV(fileArray,folderName,dataType,experimentParameters):
             index+=1
     orderWellID['Mean'] = len(orderWellID.keys())+1
     orderWellID['SD'] = len(orderWellID.keys())+2
+    allWellPoses = [''.join(x) for x in list(itertools.product(string.ascii_uppercase[:16],list(map(str,list(range(1,25))))))]
     for name in fileArray:
         temp = pd.read_csv('inputData/bulkCSVFiles/'+str(name)+'_'+dataTypeForCSV+'.csv')
         temp2 = [] 
+        notFoundWellIDPos = True
+        wellIDPos = -3
         for i in range(0,temp.shape[0]):
             fullfilename = 'inputData/singleCellCSVFiles/'+name+'/'+temp.iloc[i,0][:temp.iloc[i,0].find('.')]
             #CyTEK Explorer
@@ -74,7 +78,14 @@ def cleanUpFlowjoCSV(fileArray,folderName,dataType,experimentParameters):
             else:
                 if '_' in temp.iloc[i,0]:
                     #wellID = temp.iloc[i,0].split('.')[0].split('_')[-2]
-                    wellID = temp.iloc[i,0].split('.')[0].split('_')[-3]
+                    if notFoundWellIDPos:
+                        splitWellIDs = temp.iloc[i,0].split('.')[0].split('_')
+                        for i2,splitWellID in enumerate(splitWellIDs):
+                            if splitWellID in allWellPoses:
+                                wellIDPos = i2
+                                notFoundWellIDPos = False
+                                break
+                    wellID = temp.iloc[i,0].split('.')[0].split('_')[wellIDPos]
                 else:
                     wellID = temp.iloc[i,0]
             temp.iloc[i,0] = orderWellID[wellID]

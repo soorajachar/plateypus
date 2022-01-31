@@ -51,6 +51,7 @@ def createIncucyteDataframe(plateNames,plateLayoutDict,levelLabelDict,unwrapping
         inputDf.index = pd.read_csv(path+plateNames[0]+'_killing.csv',header=1).iloc[:,1].dropna().values
     else:
         inputDf.index = pd.read_excel(path+plateNames[0]+'_killing.xlsx',header=1).iloc[:,1].dropna().values
+    
     inputDf.index.name = 'Time'
     
     unwrappingOrderDict = {'col':'F','row':'C'}
@@ -92,10 +93,17 @@ def createIncucyteDataframe(plateNames,plateLayoutDict,levelLabelDict,unwrapping
     #Create final dataframe, drop blanks, and swap columns/rows
     if 'Blank' in list(inputPlateLayout.keys()):
         if 'Yes' in inputPlateLayout['Blank'].flatten():
-            incucyteDf = pd.DataFrame(inputDf.values,index=inputDf.index,columns=trueMultiIndex).drop('Yes',level='Blank',axis=1).droplevel('Blank',axis=1).replace('na',np.nan).astype(float).T
+            incucyteDf = pd.DataFrame(inputDf.values,index=inputDf.index,columns=trueMultiIndex).drop('Yes',level='Blank',axis=1).droplevel('Blank',axis=1).replace('na',np.nan)#.astype(float).T
         else:
-            incucyteDf = pd.DataFrame(inputDf.values,index=inputDf.index,columns=trueMultiIndex).droplevel('Blank',axis=1).replace('na',np.nan).astype(float).T
+            incucyteDf = pd.DataFrame(inputDf.values,index=inputDf.index,columns=trueMultiIndex).droplevel('Blank',axis=1).replace('na',np.nan)#.astype(float).T
     else:
-        incucyteDf = pd.DataFrame(inputDf.values,index=inputDf.index,columns=trueMultiIndex).replace('na',np.nan).astype(float).T
+        incucyteDf = pd.DataFrame(inputDf.values,index=inputDf.index,columns=trueMultiIndex).replace('na',np.nan)#.astype(float).T
     
+    #Correct missing values to zero
+    for i in range(incucyteDf.shape[0]):
+        for j in range(incucyteDf.shape[1]):
+            if type(incucyteDf.iloc[i,j]) == str:
+                incucyteDf.iloc[i,j] = 0
+    incucyteDf = incucyteDf.astype(float).T
+
     return incucyteDf,plateLayoutDf
