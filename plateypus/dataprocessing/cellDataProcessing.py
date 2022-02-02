@@ -1,7 +1,122 @@
 #!/usr/bin/env python3 
 import pandas as pd
 
-def parseCellCSVHeaders(columns,panelData=[]):
+def parseCellCSVHeaders(columns,panelData=[]):    
+    #Determine marker and statistic first; simply add the population name as is for now
+    newMultiIndexList = []
+    for column in columns:
+        if 'Unnamed' not in column:
+            populationNameVsStatisticSplit = column.split(' | ')
+            fullPopulationName = populationNameVsStatisticSplit[0]
+            #Statistics can be performed on the whole cell population, in which case the cellType is allEvents
+            #MFI and CV need to be specified in terms of a laser channel; count and percent positive do not
+            if '/' in fullPopulationName:
+                populationDivisionIndices = [i for i,c in enumerate(fullPopulationName) if c=='/']
+                cellType = fullPopulationName
+                #MFI or CV
+                #print(populationNameVsStatisticSplit[1])
+                if 'Mean' in populationNameVsStatisticSplit[1] or 'Median' in populationNameVsStatisticSplit[1] or 'CV' in populationNameVsStatisticSplit[1]:
+                    cellType = fullPopulationName
+                    if 'Comp-' in populationNameVsStatisticSplit[1]:
+                        statisticVsChannelSplit = populationNameVsStatisticSplit[1].split(' (Comp-')
+                    else:
+                        statisticVsChannelSplit = populationNameVsStatisticSplit[1].split(' (')
+                    statistic = statisticVsChannelSplit[0]
+                    if 'Mean' in statistic:
+                        statistic = 'MFI'
+                    elif 'Median' in statistic:
+                        statistic = 'MedianFI'
+                    else:
+                        statistic = 'CV'
+                    channel = statisticVsChannelSplit[1][:-1]
+                    if '-A' in channel:
+                        if '::' not in statisticVsChannelSplit[1]:
+                            panelIndex = list(panelData['FCSDetectorName']).index(channel)
+                            marker = panelData['Marker'][panelIndex]
+                        else:
+                            marker = statisticVsChannelSplit[1].split(' :: ')[-1][:-1] 
+                    else:
+                        if '::' not in statisticVsChannelSplit[1]:
+                            marker = channel 
+                        else:
+                            marker = statisticVsChannelSplit[1].split(' :: ')[-1][:-1]                     
+                #% of parent and count
+                else:
+                    marker = 'NotApplicable'
+                    if 'Freq' in populationNameVsStatisticSplit[1]:
+                        statistic = '%'
+                    else:
+                        statistic = 'Count'
+            else:
+                #Statistics can be performed on the whole cell population, in which case the cellType is allEvents
+                #DAPI+ | Freq. of Parent (%)
+                #Positive cell percentage statistics do not have channel names, so treat differently
+                #MFI or CV
+                if len(populationNameVsStatisticSplit) == 1:
+                    cellType = 'allEvents'
+                    populationNameVsStatisticSplit = [' ',populationNameVsStatisticSplit[0]]
+                else:
+                    cellType = populationNameVsStatisticSplit[0]
+                if 'Mean' in populationNameVsStatisticSplit[1] or 'Median' in populationNameVsStatisticSplit[1] or 'CV' in populationNameVsStatisticSplit[1]:
+                    if 'Comp-' in populationNameVsStatisticSplit[1]:
+                        statisticVsChannelSplit = populationNameVsStatisticSplit[1].split(' (Comp-')
+                    else:
+                        statisticVsChannelSplit = populationNameVsStatisticSplit[1].split(' (')
+                    statistic = statisticVsChannelSplit[0]
+                    if 'Mean' in statistic:
+                        statistic = 'MFI'
+                    elif 'Median' in statistic:
+                        statistic = 'MedianFI'
+                    else:
+                        statistic = 'CV'
+                    channel = statisticVsChannelSplit[1][:-1]
+                    marker = channel
+                    #panelIndex = list(panelData['FCSDetectorName']).index(channel)
+                    #marker = panelData['Marker'][panelIndex]
+                #% of parent and count
+                else:
+                    marker = 'NotApplicable'
+                    if 'Freq' in populationNameVsStatisticSplit[1]:
+                        statistic = '% Positive'
+                    else:
+                        statistic = 'Count'
+            newMultiIndexList.append([cellType,marker,statistic])
+    
+    #Now determine population name
+    commonBranches = []
+    allFullPopNames = []
+    for multiIndexList in newMultiIndexList:
+        fullPopulationName = multiIndexList[0]
+        commonBranches.append(fullPopulationName.split('/'))
+        allFullPopNames.append(fullPopulationName)
+    
+    #Only one unique sequence of gates; simply take last gate name
+    if len(set(allFullPopNames)) == 1:
+        populationNames = [allFullPopNames[0].split('/')[-1]]*len(newMultiIndexList)
+    #Otherwise use last common gate name as root of all other gating trees
+    else:
+        minGatingTreeLen = len(min(commonBranches, key=len))
+        commonGates,commonGateIndices = [],[]
+        for gateIndex in range(minGatingTreeLen):
+            currentLevel = []
+            for cb in commonBranches:
+                currentLevel.append(cb[gateIndex])
+            if len(set(currentLevel)) == 1:
+                commonGates.append(cb[gateIndex])
+                commonGateIndices.append(gateIndex)
+        #If there is at least one common population name
+        if len(commonGateIndices) >= 1:
+            lastCommonGateIndex = commonGateIndices[-1]
+            populationNames = ['/'.join(x.split('/')[lastCommonGateIndex:]) for x in allFullPopNames]
+        else:
+            populationNames = allFullPopNames.copy()
+    
+    #Add cropped population names to multiIndex
+    for i,populationName in enumerate(populationNames):
+        newMultiIndexList[i] = [populationName]+newMultiIndexList[i][1:]
+    return newMultiIndexList
+
+def parseCellCSVHeadersOld(columns,panelData=[]):
 
 #,SingleCells/CD45Neg/TumorCells | Count,SingleCells/CD45Neg/TumorCells | Geometric Mean (Comp-APC-A),SingleCells/CD45Neg/TumorCells | Geometric Mean (Comp-BV650-A),SingleCells/CD45Neg/TumorCells | Geometric Mean (Comp-PE ( 561 )-A),SingleCells/CD45Pos/TCells | Count,SingleCells/CD45Pos/TCells | Geometric Mean (Comp-APC-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-APC-Cy7-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-BUV737-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-BV421-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-BV510-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-BV650-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-BV711-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-BV786-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-FITC-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-PE-CF594-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-PE-Cy7-A),SingleCells/CD45Pos/TCells | Geometric Mean (Comp-PerCP-Cy5-5-A),SingleCells/CD45Pos/TCells/CD25+ | Freq. of Parent (%),SingleCells/CD45Pos/TCells/CD25+ | Count,SingleCells/CD45Pos/TCells/CD27+ | Freq. of Parent (%),SingleCells/CD45Pos/TCells/CD27+ | Count,SingleCells/CD45Pos/TCells/CD39+ | Freq. of Parent (%),SingleCells/CD45Pos/TCells/CD39+ | Count,SingleCells/CD45Pos/TCells/CD44+ | Freq. of Parent (%),SingleCells/CD45Pos/TCells/CD44+ | Count,SingleCells/CD45Pos/TCells/CD54+ | Freq. of Parent (%),SingleCells/CD45Pos/TCells/CD54+ | Count,SingleCells/CD45Pos/TCells/CD69+ | Freq. of Parent (%),SingleCells/CD45Pos/TCells/CD69+ | Count,SingleCells/CD45Pos/TCells/PD1+ | Freq. of Parent (%),SingleCells/CD45Pos/TCells/PD1+ | Count,
     #,Cells/Single Cells/APCs | Geometric Mean (Comp-BV605-A),Cells/Single Cells/APCs | Geometric Mean (Comp-FITC-A),Cells/Single Cells/APCs | Geometric Mean (Comp-PE ( 561 )-A),Cells/Single Cells/APCs | Count,Cells/Single Cells/APCs/CD86+ | Freq. of Parent (%),Cells/Single Cells/APCs/H2Kb+ | Freq. of Parent (%),Cells/Single Cells/APCs/PDL1+ | Freq. of Parent (%),Cells/Single Cells/TCells | Count,Cells/Single Cells/TCells | Geometric Mean (Comp-BUV737-A),Cells/Single Cells/TCells | Geometric Mean (Comp-BV605-A),Cells/Single Cells/TCells | Geometric Mean (Comp-PE-CF594-A),Cells/Single Cells/TCells | Geometric Mean (Comp-PE-Cy7-A),Cells/Single Cells/TCells | Geometric Mean (Comp-PerCP-Cy5-5-A),Cells/Single Cells/TCells/CD27+ | Freq. of Parent (%),Cells/Single Cells/TCells/CD54+ | Freq. of Parent (%),Cells/Single Cells/TCells/CD69+ | Freq. of Parent (%),Cells/Single Cells/TCells/PDL1+ | Freq. of Parent (%),
