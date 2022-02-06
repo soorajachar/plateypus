@@ -104,6 +104,8 @@ def parseCellCSVHeaders(columns,panelData=[]):
             if len(set(currentLevel)) == 1:
                 commonGates.append(cb[gateIndex])
                 commonGateIndices.append(gateIndex)
+            else:
+                break
         #If there is at least one common population name
         if len(commonGateIndices) >= 1:
             lastCommonGateIndex = commonGateIndices[-1]
