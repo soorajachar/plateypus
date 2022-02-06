@@ -481,10 +481,15 @@ class MultiplexingPage(tk.Frame):
             wellIndexList = [0,1,3,2]
             wellIndex = 0
             ttk.Separator().place(x=317+plateNum*160, y=0, relheight=0.65)
+            pN = 0
             for wellUnpackingRow in range(2):
                 for wellUnpackingCol in range(2):
                     e2 = tk.Entry(Well384ConversionWindow,width=7)
-                    e2.insert(tk.END, 'A'+str((plateNum*4)+wellIndexList[wellIndex]+1))
+                    if pN < experimentParameters['numPlates']:
+                        e2.insert(tk.END, 'A'+str((plateNum*4)+wellIndexList[wellIndex]+1))
+                        pN+=1
+                    else:
+                        e2.insert(tk.END, '')
                     if wellUnpackingCol == 1:
                         padvar = 5
                     else:
