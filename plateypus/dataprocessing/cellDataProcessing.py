@@ -1,6 +1,7 @@
 #!/usr/bin/env python3 
 import pandas as pd
-
+from collections import Counter
+import string
 def parseCellCSVHeaders(columns,panelData=[]):    
     #Determine marker and statistic first; simply add the population name as is for now
     newMultiIndexList = []
@@ -112,10 +113,31 @@ def parseCellCSVHeaders(columns,panelData=[]):
             populationNames = ['/'.join(x.split('/')[lastCommonGateIndex:]) for x in allFullPopNames]
         else:
             populationNames = allFullPopNames.copy()
-    
+
     #Add cropped population names to multiIndex
     for i,populationName in enumerate(populationNames):
         newMultiIndexList[i] = [populationName]+newMultiIndexList[i][1:]
+
+    trueMIList = [';'.join(x) for x in newMultiIndexList]
+    trueUniqueMIList = list(set(trueMIList))
+    cnt = Counter(trueMIList)
+    nonUniqueItems = [k for k, v in cnt.items() if v > 1]
+    
+    if len(nonUniqueItems) > 0:
+        uppercase = string.ascii_uppercase
+        printingNonUnique = [x.split(';') for x in nonUniqueItems]
+        print('These column headers are duplicated: please remove them from the table editor, re-export, and try reprocessing:')
+        for p in printingNonUnique:
+            indexVal = trueMIList.index(';'.join(p))+2
+            n = indexVal
+            result = ''
+            while n > 0:
+                index = (n-1)%26
+                result = uppercase[int(index)]+result
+                n = int((n-1)/26)
+            print('Column '+str(indexVal)+' ('+result+'): '+str(p))
+        sys.exit(0)
+
     return newMultiIndexList
 
 def parseCellCSVHeadersOld(columns,panelData=[]):
