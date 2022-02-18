@@ -31,24 +31,8 @@ bdHumanFlexKit = {'Angiogenin': 14000,'CD121a': 37400,'CD121b': 38800,'CD178': 1
  'GM-CSF': 14500,'Granzyme A': 28000,'Granzyme B': 27500,'IFNg': 16900,'IL-10': 18600,'IL-11': 19100,'IL-12': 57000,'IL-17A': 30700,'IL-17F': 14903,'IL-1A': 18047,'IL-1B': 17300,'IL-2': 15386,\
  'IL-21': 15500,'IL-3': 15000,'IL-4': 15000,'IL-5': 26522,'IL-6': 21000,'IL-7': 17400,'IL-8': 8904,'IL-9': 14000,'IP-10': 8600,'LT-Alp': 18600,'MIG': 11700,'MIP-1A': 7500,'RANTES': 7809,'TGF-B': 12700,'TNF': 17500,'TNFRI': 22700,'TNFRII': 26600,'VEGF': 19000}
 
-#Combine all cytokine bead kit molar masses:
-listOfKitDicts = [legendPlexMouseThKitDict,bdMouseThKitDict,bdHumanInfKitDict,bdMouseInfKitDict,bdHumanChemokineKitDict,legendPlexMouseMacrophageKitDict,bdHumanFlexKit]
-completeCytokineMWDict = {}
-for dictName in listOfKitDicts:
-    completeCytokineMWDict.update(dictName)
-"""
-#Standard BD Biosciences Th1/2/17 Kit Cytokines
-listOfCytokines1=['IFNg','IL-2','IL-4','IL-6','IL-10','IL-17A','TNFa']
-MWofCytokines1=[17200,17200,14000,21900,18900,15500,17500] #g/mol, correct one
-
-#Standard BD Biosciences Inflamamatory Kit Cytokines
-listOfCytokines2=['IL-12p70','IL-1B','IL-8']
-MWofCytokines2=[70000,17300,8904] #g/mol, correct one
-
-#Standard Mouse Th Legendplex CBA Kit Cytokines
-#Up to IL-4 is A (lower FSC and SSC), after that is B
-legendPlexListOfCytokines1=['IFNg','IL-5','TNFa','IL-2','IL-6','IL-4','IL-10','IL-9','IL-17A','IL-17F','IL-21','IL-22','IL-13']
-"""
+listOfHumanKitDicts = [bdHumanInfKitDict,bdHumanChemokineKitDict,bdHumanFlexKit]
+listofMouseKitDicts = [legendPlexMouseThKitDict,bdMouseThKitDict,bdMouseInfKitDict,legendPlexMouseMacrophageKitDict]
 
 class CalibrationParameterPage(tk.Frame):
     def __init__(self, master,folderName,expNum,ex_data,shp,bPage):
@@ -106,7 +90,7 @@ def performCommaCheck(fileName):
                     print(line, file=ostr)
 
 #Create Calibration Curves, obtain LODs (limits of detection) of experiment
-def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCalibrationSamples,initialStandardVolume):
+def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCalibrationSamples,initialStandardVolume, species):
     #Get cytokine calibration curve data
     tempExperimentParameters = {'overallPlateDimensions':[8,12]}
     calibrationFileNames = glob.glob('inputData/bulkCSVFiles/Calibration*')
@@ -134,6 +118,15 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
     numberOfPlotPoints = 101
     xaxistitle = 'Concentration of Cytokine Standards Standards ('+concUnitPrefix+')' 
     yaxistitle = 'GeoMFI'
+
+    # Combine cytokine MWs into a dict
+    completeCytokineMWDict = {}
+    if species == 'Human':
+        for dictName in listOfHumanKitDicts:
+            completeCytokineMWDict.update(dictName)
+    else:
+        for dictName in listofMouseKitDicts:
+            completeCytokineMWDict.update(dictName)
         
     allCytokinesHaveMWInDict = True 
     for calibration in sortedData:
