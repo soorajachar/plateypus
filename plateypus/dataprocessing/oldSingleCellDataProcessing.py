@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 #!/usr/bin/env python3 
 import pickle,os,sys,string,subprocess
 import numpy as np
@@ -39,13 +38,13 @@ def grabCellTypeList(experimentParameters):
                 else:
                     folder = fileName
                     break
-
+        
         for fileName in os.listdir(path+folder+'/'):
             if '.DS' not in fileName:
                 splitFile = fileName.split('_')
                 parsingVal = ''
-                for split in splitFile:
-                    if split in orderingList:
+                for splitIndex,split in enumerate(splitFile):
+                    if split in orderingList and fileName[fileName.index(split)-2:fileName.index(split)] != 'n_':
                         parsingVal = split
                 parsingPose = fileName.rindex(parsingVal)+4
                 cellType = fileName[parsingPose:].split('.')[0].replace('/','\/')
