@@ -4,6 +4,7 @@ from sys import platform as sys_pf
 if sys_pf == 'darwin':
     import matplotlib
     matplotlib.use("TkAgg")
+import colorcet as cc
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -11,8 +12,7 @@ import tkinter as tk
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 from itertools import groupby
-from plateypus.dataprocessing.miscFunctions import Hill,InverseHill,r_squared,cleanUpFlowjoCSV
-idx = pd.IndexSlice
+from plateypus.dataprocessing.miscFunctions import Hill,InverseHill,r_squared,cleanUpFlowjoCSV, setMaxWidth
 
 #Th1/2/17 Mouse  BD Biosciences CBA Kit Cytokines
 bdMouseThKitDict = {'IFNg':17200,'IL-2':17200,'IL-4':14000,'IL-6':21900,'IL-10':18900,'IL-17A':15500,'TNFa':17500}
@@ -54,11 +54,19 @@ class CalibrationParameterPage(tk.Frame):
         l2 = tk.Label(mainWindow,text='Volume of initial CBA calibration solution: ').grid(row=0,column=1)
         t2 = tk.Entry(mainWindow)
         t2.grid(row=1,column=1,sticky=tk.W)
+
+        l3 = tk.Label(mainWindow, text='Species of CBA samples: ').grid(row=0, column=3)
+        species = ['Mouse', 'Human']
+        speciesVar = tk.StringVar()
+        t3 = tk.OptionMenu(mainWindow,speciesVar,*species)
+        setMaxWidth(species, t3)
+        t3.grid(row=1, column=3)
          
         def collectInputs():
             numCalibrationSamples = int(t1.get())
             initialStandardVolume = float(t2.get())
-            calibrationParameterDict = {'Number': numCalibrationSamples,'Volume': initialStandardVolume}
+            speciesSamples = speciesVar.get()
+            calibrationParameterDict = {'Number': numCalibrationSamples,'Volume': initialStandardVolume, 'Species':speciesSamples}
             with open('misc/CBAcalibrationParameters-'+folderName+'.json','w') as f:
                 json.dump(calibrationParameterDict,f)
             master.switch_frame(secondaryhomepage,folderName,expNum,ex_data,bPage)
@@ -140,10 +148,10 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
         cytokines = parseCytokineCSVHeaders(calibration.columns)
         fittingParameters = np.zeros((data.shape[1],4))
         concLOD = np.zeros((data.shape[1],4))
-        serialDilutionFactor = 2 #1:serialDilutionFactor dilution between each standard well
+        serialDilutionFactor = 2 # serialDilutionFactor dilution between each standard well
 
         
-        if 'IL-1B' in cytokines: # TODO: Find better way to identify human flex kit
+        if len(cytokines) > 12:
             print('New dataProcessing')
             #Initial concentration of cytokine standards given by individual Flex kit manuals in pg/mL when diluted in 4mL
             all_conc = {'Angiogenin': 2500,'CD121a': 10000,'CD121b': 10000,'CD178': 2500,'CD40L': 2500,'CD54': 10000,'CD62L': 10000,'Eotaxin': 2500,'FGF': 2500,'Fractalkine': 10000,'G-CSF': 2500,'GM-CSF': 2500,\
@@ -169,6 +177,7 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
         cbaStandardsMFIMatrix = np.zeros([len(cytokines),cbaStandardsConcentrations.shape[1]]) 
         cbaStandardsMFIPlotPointsMatrix = np.zeros([len(cytokines),cbaStandardsConcentrationsPlotPoints.shape[1]])
         color_list = sns.color_palette(sns.color_palette(),len(cytokines))
+        rsquared_kit = []
         for i,cytokineList in enumerate(cytokines):
             #amplitude bounded from range/2 to range*2, EC50 bounded from minimum to maximum standard concentration tested, Hill coefficient bounded from 0 to 2, Background bounded from 0 to minimum GFI*2
             lowerCurveFitBounds = [(np.max(data[:,i])-np.min(data[:,i]))/2,np.min(cbaStandardsConcentrations),0,0]
@@ -176,7 +185,7 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
             #use scipy curve fit to determine best hill equation fit for data, searching within the bounds given above
             popt,pcov = curve_fit(Hill, cbaStandardsConcentrations[i,:],np.log10(data[:,i]),sigma=np.log10(data[:,i]),bounds=(lowerCurveFitBounds,upperCurveFitBounds))
             rsquared = round(r_squared(cbaStandardsConcentrations[i,:],np.log10(data[:,i]),Hill,popt),3)
-            rsquaredList.append(rsquared)
+            rsquared_kit.append(rsquared)
             for j in range(len(popt)):  
                 #Convert just ec50 value to desired units (nM,uM etc) if cytokine has a molar mass in dict
                 if j == 1 and allCytokinesHaveMWInDict:
@@ -245,16 +254,20 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
         mic2 = pd.MultiIndex.from_tuples([['MFI','Lower'],['MFI','Upper'],['Concentration','Lower'],['Concentration','Upper']])
         concLODDf = pd.DataFrame(concLOD,index=mic1,columns=mic2)
 
+        rsquaredDf = pd.DataFrame(rsquared_kit, index=mic1, columns=['R squared'])
+
         concLODList.append(concLODDf)
         fittingParametersList.append(fittingParametersDf)
         cbaStandardsMFIList.append(currentCBAStandardsMFIDf)
         cbaPlotPointsMFIList.append(currentCBAPlotPointsMFIDf)
         cbaStandardsConcentrationList.append(currentCBAStandardsConcentrationDf)
         cbaPlotPointsConcentrationList.append(currentCBAPlotPointsConcentrationDf)
+        rsquaredList.append(rsquaredDf)
 
     #fullFittingParametersDf = pd.concat(fittingParametersList,keys=kitNames,names=['Kit Name'])
-    fullConcLODDf = pd.concat(concLODList,keys=kitNames,names=['Kit Name'])
+    fullConcLODDf = pd.concat(concLODList)
     fullFittingParametersDf = pd.concat(fittingParametersList)
+    fullRsquaredDf = pd.concat(rsquaredList)
     #fullConcLODDf = pd.concat(concLODList)
     
     fullCBAStandardsMFIDf = pd.concat(cbaStandardsMFIList,keys=kitNames,names=['Kit Name'],axis=1)
@@ -270,8 +283,8 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
     plottingStandardsDf = fullCBAStandardsDf.reset_index()
     
     numCyt = len(pd.unique(plottingPointsDf['Cytokine']))
-    if numCyt <= 10:
-        fullpalette = sns.color_palette(sns.color_palette(),numCyt)
+    if numCyt <= 12:
+        fullpalette = sns.color_palette(sns.color_palette(cc.glasbey),numCyt)
         g = sns.relplot(data=plottingPointsDf,x=xaxistitle,y=yaxistitle,hue='Cytokine',col='Kit Name',kind='line',col_order=pd.unique(plottingPointsDf['Kit Name']),hue_order=pd.unique(plottingPointsDf['Cytokine']),height=7,palette=fullpalette)
         #Plot vertical lines at lower and upper concentration limits of detection
         colorDict = {}
@@ -282,17 +295,17 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
             for cytokine in pd.unique(plottingStandardsDf.query("`Kit Name` == @kitName")['Cytokine']):
                 currentColor = colorDict[cytokine]
                 currentpalette.append(currentColor)
-                cytokineLODValues = fullConcLODDf.loc[(kitName, cytokine),:]['Concentration']
+                cytokineLODValues = fullConcLODDf.loc[cytokine,:]['Concentration']
                 axis.axvline(x=cytokineLODValues['Lower'],color=currentColor,linestyle=':')
                 axis.axvline(x=cytokineLODValues['Upper'],color=currentColor,linestyle=':')
             g2 = sns.scatterplot(data=plottingStandardsDf[plottingStandardsDf['Kit Name'] == kitName],x=xaxistitle,y=yaxistitle,hue='Cytokine',ax=axis,legend=False,palette=currentpalette)
             axis.set_xscale('log')
             axis.set_yscale('log')
-        plt.savefig('plots/calibrationCurves-'+folderName+'-'+concUnitPrefix+'.png',bbox_inches='tight')
+        plt.savefig('plots/calibrationCurves-'+folderName+'-'+concUnitPrefix+'.png',bbox_inches='tight', dpi=200)
     else:
         fullpalette = sns.color_palette(sns.color_palette(),len(pd.unique(plottingPointsDf['Kit Name'])))
         colorDict = {}
-        g = sns.relplot(data=plottingPointsDf,x=xaxistitle,y=yaxistitle,hue='Kit Name',col='Cytokine',kind='line',hue_order=pd.unique(plottingPointsDf['Kit Name']),col_order=pd.unique(plottingPointsDf['Cytokine']),col_wrap=math.floor(np.sqrt(numCyt)),height=10,palette=fullpalette,facet_kws={'sharey':False, 'sharex':False})
+        g = sns.relplot(data=plottingPointsDf,x=xaxistitle,y=yaxistitle,hue='Kit Name',col='Cytokine',kind='line',hue_order=pd.unique(plottingPointsDf['Kit Name']),col_order=pd.unique(plottingPointsDf['Cytokine']),col_wrap=math.floor(np.sqrt(numCyt)),height=12,palette=fullpalette,facet_kws={'sharey':False, 'sharex':False})
         for j,kit in enumerate(pd.unique(plottingPointsDf['Kit Name'])):
                 colorDict[kit] = fullpalette[j]
         for axis,cytName in zip(g.axes.flat,pd.unique(plottingPointsDf['Cytokine'])):
@@ -300,19 +313,21 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
             for kit in pd.unique(plottingStandardsDf.query("Cytokine == @cytName")['Kit Name']):
                 currentColor = colorDict[kit]
                 currentpalette.append(currentColor)
-                cytokineLODValues = fullConcLODDf.loc[(kit,cytName),:]['Concentration']
+                cytokineLODValues = fullConcLODDf.loc[cytName,:]['Concentration']
                 axis.axvline(x=cytokineLODValues['Lower'],color=currentColor,linestyle=':')
                 axis.axvline(x=cytokineLODValues['Upper'],color=currentColor,linestyle=':')
             g2 = sns.scatterplot(data=plottingStandardsDf[plottingStandardsDf['Cytokine'] == cytName],x=xaxistitle,y=yaxistitle,hue='Kit Name',ax=axis,legend=False)
             axis.set_xscale('log')
             axis.set_yscale('log')
         plt.tight_layout()
-        plt.savefig('plots/calibrationCurves-'+folderName+'-'+concUnitPrefix+'.png',bbox_inches='tight')
+        g.fig.savefig('plots/calibrationCurves-'+folderName+'-'+concUnitPrefix+'.png',bbox_inches='tight', dpi=200)
     #Save fitting parameters and LOD for curve fit for each cytokine
     with open('misc/fittingParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "wb") as f:
         pickle.dump(fullFittingParametersDf, f)
     with open('misc/LODParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "wb") as f:
         pickle.dump(fullConcLODDf, f)
+    with open('misc/rsquaredValues-'+folderName+'-'+concUnitPrefix+'.pkl', "wb") as f:
+        pickle.dump(fullRsquaredDf, f)
 
 def createCytokineDataFrame(folderName,finalDataFrame,concUnitPrefix):
          
@@ -325,12 +340,13 @@ def createCytokineDataFrame(folderName,finalDataFrame,concUnitPrefix):
         #Begin converting GFI dataframe into corresponding concentration dataframe
         concentrationList = []
         #Step through dataframe one cytokine at a time
+        idx = pd.IndexSlice
         for cytokine in pd.unique(finalDataFrame.index.get_level_values(0)):
             #Retrieve LODs for current cytokine (from constructed calibration curve)
-            lowerGFILOD = LODParameters.loc[cytokine,idx['MFI','Lower']].values[0]
-            upperGFILOD = LODParameters.loc[cytokine,idx['MFI','Upper']].values[0] 
-            lowerConcLOD = LODParameters.loc[cytokine,idx['Concentration','Lower']].values[0]
-            upperConcLOD = LODParameters.loc[cytokine,idx['Concentration','Upper']].values[0] 
+            lowerGFILOD = LODParameters.loc[cytokine,idx['MFI','Lower']]
+            upperGFILOD = LODParameters.loc[cytokine,idx['MFI','Upper']]
+            lowerConcLOD = LODParameters.loc[cytokine,idx['Concentration','Lower']]
+            upperConcLOD = LODParameters.loc[cytokine,idx['Concentration','Upper']]
             smallConcentrationMatrix = np.zeros(finalDataFrame.loc[cytokine].shape)
             #Loop through every value in current cytokine's portion of the dataframe
             for i in range(0,finalDataFrame.loc[cytokine].values.shape[0]):
@@ -339,7 +355,7 @@ def createCytokineDataFrame(folderName,finalDataFrame,concUnitPrefix):
                     if currentGFIval > upperGFILOD: #If intensity is greater than upper GFI LOD
                         currentConcVal = upperConcLOD #Concentration is equal to upper concentration LOD
                     elif currentGFIval <= upperGFILOD and currentGFIval >= lowerGFILOD: #if intensity is between upper and lower GFI LODs
-                        currentConcVal = InverseHill(np.log10(currentGFIval),*fittingParameters.loc[cytokine,:].values) #Use previous hill fit parameters for the cytokine to obtain concentration
+                        currentConcVal = InverseHill(np.log10(currentGFIval),fittingParameters.loc[cytokine,:].values) #Use previous hill fit parameters for the cytokine to obtain concentration
                     else: #If intensity is less than background GFI LOD
                         currentConcVal = lowerConcLOD #Concentration is equal to lower concentration LOD
                     smallConcentrationMatrix[i,j] = currentConcVal
