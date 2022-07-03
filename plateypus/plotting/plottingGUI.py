@@ -3,6 +3,11 @@ import pickle,os,json
 import pandas as pd
 import tkinter as tk
 import tkinter.ttk
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 import plateypus.dataprocessing.initialDataProcessing as idp
 import plateypus.dataprocessing.miscFunctions as mf
 import plateypus.plotting.facetPlotLibrary as fpl 
@@ -55,7 +60,7 @@ class checkUncheckAllButton(tk.Button):
 
 class PlotExperimentWindow(tk.Frame):
     def __init__(self, master,fName,sPage):
-        with open('misc/normalPlottingBool.pkl','wb') as f:
+        with open('misc'+dirSep+'normalPlottingBool.pkl','wb') as f:
             pickle.dump(True,f)
 
         global folderName,switchPage
@@ -99,12 +104,12 @@ class PlotExperimentWindow(tk.Frame):
             dataType = str(v2.get())
             global experimentDf
             if dataType != 'singlecell':
-                experimentDf = pd.read_pickle('outputData/pickleFiles/'+idp.dataTypeDataFrameFileNames[dataType]+'-'+folderName+modifiedString+'.pkl')
+                experimentDf = pd.read_pickle('outputData'+dirSep+'pickleFiles'+dirSep+idp.dataTypeDataFrameFileNames[dataType]+'-'+folderName+modifiedString+'.pkl')
             else:
-                if 'initialSingleCellDf-channel-'+folderName+modifiedString+'.pkl' in os.listdir('outputData/pickleFiles/'):
-                    experimentDf = pickle.load(open('outputData/pickleFiles/'+'initialSingleCellDf-channel-'+folderName+modifiedString+'.pkl','rb'))
+                if 'initialSingleCellDf-channel-'+folderName+modifiedString+'.pkl' in os.listdir('outputData'+dirSep+'pickleFiles'+dirSep):
+                    experimentDf = pickle.load(open('outputData'+dirSep+'pickleFiles'+dirSep+'initialSingleCellDf-channel-'+folderName+modifiedString+'.pkl','rb'))
                 else:
-                    experimentDf = pd.read_hdf('outputData/pickleFiles/'+'initialSingleCellDf-channel-'+folderName+modifiedString+'.h5', 'df')
+                    experimentDf = pd.read_hdf('outputData'+dirSep+'pickleFiles'+dirSep+'initialSingleCellDf-channel-'+folderName+modifiedString+'.h5', 'df')
                 if 'CellType' != experimentDf.index.names[0]:
                     experimentDf = pd.concat([experimentDf], keys=['TCells'], names=['CellType'])
             global trueLabelDict
@@ -116,7 +121,7 @@ class PlotExperimentWindow(tk.Frame):
                 if 'experimentParameters' in fn:
                     if expParamDict[dataType] in fn:
                         experimentParametersBool = True
-                        experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-'+expParamDict[dataType]+'.json','r'))
+                        experimentParameters = json.load(open('misc'+dirSep+'experimentParameters-'+folderName+'-'+expParamDict[dataType]+'.json','r'))
             if experimentParametersBool:
                 trueLabelDict = createLabelDictWithExperimentParameters(experimentDf,experimentParameters)
             else:
@@ -135,13 +140,13 @@ class PlotTypePage(tk.Frame):
     def __init__(self, master):
 
         if 'normalPlottingBool.pkl' in os.listdir('misc'):
-            normalPlottingBool = pickle.load(open('misc/normalPlottingBool.pkl','rb'))
+            normalPlottingBool = pickle.load(open('misc'+dirSep+'normalPlottingBool.pkl','rb'))
         else:
             normalPlottingBool = True
 
         if not normalPlottingBool:
             global useModifiedDf,dataType,experimentDf,trueLabelDict,folderName,switchPage
-            plottingParams = pickle.load(open('misc/plottingParams.pkl','rb'))
+            plottingParams = pickle.load(open('misc'+dirSep+'plottingParams.pkl','rb'))
             useModifiedDf = False
             dataType = 'cell'
             experimentDf = plottingParams['df']
@@ -435,7 +440,7 @@ def getDefaultAxisTitles():
 class plotElementsGUIPage(tk.Frame):
     def __init__(self, master):
         if 'experimentParameters-'+folderName+'-'+expParamDict[dataType]+'.json' in os.listdir('misc'):
-            experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-'+expParamDict[dataType]+'.json','r'))
+            experimentParameters = json.load(open('misc'+dirSep+'experimentParameters-'+folderName+'-'+expParamDict[dataType]+'.json','r'))
         else:
             tempDict = {}
             stackedDf = experimentDf.stack()

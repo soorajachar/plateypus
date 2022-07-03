@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-import pickle,os,json,math,subprocess
+import pickle,os,json,math,shutil
 import numpy as np
 import pandas as pd
 import tkinter as tk
 from tkinter import ttk
 from plateypus.setup.createTubeLayout import TubeLayoutPage 
 from plateypus.setup.createPlateLayout import BlankSelectionPage
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 
 experimentParameters = {}
 dataTypeDict = {'Cytokine':'cyt','Bulk/Single cell':'cell','Killing':'killing'}
@@ -51,7 +56,7 @@ class ExperimentSetupStartPage(tk.Frame):
         def experimentLayout():
             for dataType in dataTypeList:
                 if 'experimentParameters-'+folderName+'-'+dataType+'.json' in os.listdir('misc'):
-                    experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-'+dataType+'.json','r'))
+                    experimentParameters = json.load(open('misc'+dirSep+'experimentParameters-'+folderName+'-'+dataType+'.json','r'))
                     break
             if 'format' not in experimentParameters.keys():
                 experimentParameters['format'] = 'plate'
@@ -73,17 +78,17 @@ class ExperimentSetupStartPage(tk.Frame):
             else:
                 fcsFiles = []
                 
-                if 'A1_cell.csv' not in os.listdir('inputData/bulkCSVFiles/'):
-                    if len(os.listdir('inputData/fcsFiles')) > 1:
-                        for fcsName in os.listdir('inputData/fcsFiles'):
+                if 'A1_cell.csv' not in os.listdir('inputData'+dirSep+'bulkCSVFiles'+dirSep):
+                    if len(os.listdir('inputData'+dirSep+'fcsFiles')) > 1:
+                        for fcsName in os.listdir('inputData'+dirSep+'fcsFiles'):
                             if '.fcs' in fcsName:
                                 fcsFiles.append(fcsName)
                         if len(fcsFiles) == 0:
                             fcsFiles = ['                 ']
                     elif 'sampleNameFile.xlsx' in os.listdir('misc'):
-                        fcsFiles = list(pd.read_excel('misc/sampleNameFile.xlsx',header=0).iloc[:,0].values.ravel())
+                        fcsFiles = list(pd.read_excel('misc'+dirSep+'sampleNameFile.xlsx',header=0).iloc[:,0].values.ravel())
                 else:
-                    bulkStatFile = pd.read_csv('inputData/bulkCSVFiles/A1_cell.csv')
+                    bulkStatFile = pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_cell.csv')
                     for row in range(bulkStatFile.shape[0]):
                         if bulkStatFile.iloc[row,0] not in ['Mean','SD']:
                             fcsFiles.append(bulkStatFile.iloc[row,0])
@@ -156,7 +161,7 @@ class TubeExperimentParameterPage(tk.Frame):
         e1.grid(row=2,column=1)
         
         if 'sampleNameFile.xlsx' in os.listdir('misc'):
-            df = pd.read_excel('misc/sampleNameFile.xlsx')
+            df = pd.read_excel('misc'+dirSep+'sampleNameFile.xlsx')
             columns = []
             for column in df:
                 if column not in ['','FileName','Time']:
@@ -535,7 +540,7 @@ class allLevelNamePage(tk.Frame):
         lt3 = tk.Label(mainWindow, text="Numeric?").grid(row=0,column=3)
         
         if 'sampleNameFile.xlsx' in os.listdir('misc'):
-            df = pd.read_excel('misc/sampleNameFile.xlsx')
+            df = pd.read_excel('misc'+dirSep+'sampleNameFile.xlsx')
             levels = []
             levelValueNums = []
             for level in df.columns:
@@ -636,7 +641,7 @@ class columnLevelValuesPage(tk.Frame):
             lt1 = tk.Label(mainWindow, text='Level Value '+str(col),width=10).grid(row=int((col-1)/col_wrap)*2,column=((col-1)%col_wrap)+1)
         entryList = []
         if 'sampleNameFile.xlsx' in os.listdir('misc'):
-            df = pd.read_excel('misc/sampleNameFile.xlsx')
+            df = pd.read_excel('misc'+dirSep+'sampleNameFile.xlsx')
             if 'Time' in df.columns:
                 times = list(map(float,list(pd.unique(df['Time']))))
                 sortedTimes = list(map(str,sorted(times)))
@@ -692,7 +697,7 @@ class conditionLevelValuesPage(tk.Frame):
         labelList = experimentParameters['conditionLevelNames']
         rowNum = 0
         if 'sampleNameFile.xlsx' in os.listdir('misc'):
-            df = pd.read_excel('misc/sampleNameFile.xlsx')
+            df = pd.read_excel('misc'+dirSep+'sampleNameFile.xlsx')
         for conditionLevelNumber in range(numConditionLevels):
             if 'sampleNameFile.xlsx' in os.listdir('misc'):
                 j = 0
@@ -738,7 +743,7 @@ class conditionLevelValuesPage(tk.Frame):
                     shortenedExperimentParameters[keyToKeep] = experimentParameters[keyToKeep]
             shortenedExperimentParameters['levelLabelDict'] = experimentParameters['allLevelValues']
             for dataType in dataTypeList:
-                with open('misc/experimentParameters-'+folderName+'-'+dataType+'.json', 'w') as fp:
+                with open('misc'+dirSep+'experimentParameters-'+folderName+'-'+dataType+'.json', 'w') as fp:
                     json.dump(shortenedExperimentParameters, fp)
             #{"A1-12": {"A1-4": ["Barcode 1-", "Barcode 2-"], "A5-8": ["Barcode 1+", "Barcode 2-"], "A9-12": ["Barcode 1-", "Barcode 2+"]}}
             #{"A1-4": ["A1", "A2", "A4", "A3"], "A5-8": ["A5", "A6", "A8", "A7"], "A9-12": ["A9", "A10", "A12", "A11"]}
@@ -746,21 +751,21 @@ class conditionLevelValuesPage(tk.Frame):
                 #Both
                 if '+' in globalMultiplexingVar:
                     for plate in experimentParameters['barcodingDict']:
-                        if plate not in os.listdir('inputData/singleCellCSVFiles/'):
-                            subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+plate])
+                        if plate not in os.listdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep):
+                            os.mkdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep+plate)
                 else:
                     if 'Barcoding' in globalMultiplexingVar:
                         for plate in experimentParameters['barcodingDict']:
-                            if plate not in os.listdir('inputData/singleCellCSVFiles/'):
-                                subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+plate])
+                            if plate not in os.listdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep):
+                                os.mkdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep+plate)
                     elif '96' in globalMultiplexingVar:
                         for plate in experimentParameters['unpackingDict']:
-                            if plate not in os.listdir('inputData/singleCellCSVFiles/'):
-                                subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+plate])
+                            if plate not in os.listdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep):
+                                os.mkdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep+plate)
                     else:
                         for plateNum in range(1,experimentParameters['numPlates']+1):
-                            if 'A'+str(plateNum) not in os.listdir('inputData/singleCellCSVFiles/'):
-                                subprocess.run(['mkdir','inputData/singleCellCSVFiles/A'+str(plateNum)])
+                            if 'A'+str(plateNum) not in os.listdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep):
+                                os.mkdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep+'A'+str(plateNum))
             master.switch_frame(ExperimentSetupStartPage,folderName,backPage)
 
         buttonWindow = tk.Frame(self)

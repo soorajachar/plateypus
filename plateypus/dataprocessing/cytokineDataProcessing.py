@@ -11,6 +11,11 @@ import tkinter as tk
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
 from itertools import groupby
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 from plateypus.dataprocessing.miscFunctions import Hill,InverseHill,r_squared,cleanUpFlowjoCSV
 idx = pd.IndexSlice
 
@@ -71,7 +76,7 @@ class CalibrationParameterPage(tk.Frame):
             numCalibrationSamples = int(t1.get())
             initialStandardVolume = float(t2.get())
             calibrationParameterDict = {'Number': numCalibrationSamples,'Volume': initialStandardVolume}
-            with open('misc/CBAcalibrationParameters-'+folderName+'.json','w') as f:
+            with open('misc'+dirSep+'CBAcalibrationParameters-'+folderName+'.json','w') as f:
                 json.dump(calibrationParameterDict,f)
             master.switch_frame(secondaryhomepage,folderName,expNum,ex_data,bPage)
 
@@ -94,8 +99,8 @@ def parseCytokineCSVHeaders(columns):
     return newMultiIndexList
 
 def performCommaCheck(fileName):
-    with open('inputData/bulkCSVFiles/'+fileName, 'r') as istr:
-        with open('inputData/bulkCSVFiles/'+fileName, 'w') as ostr:
+    with open('inputData'+dirSep+'bulkCSVFiles'+dirSep+fileName, 'r') as istr:
+        with open('inputData'+dirSep+'bulkCSVFiles'+dirSep+fileName, 'w') as ostr:
             for line in istr:
                 if line[-1] != ',':
                     line = line.rstrip('\n') + ','
@@ -105,12 +110,12 @@ def performCommaCheck(fileName):
 def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCalibrationSamples,initialStandardVolume):
     #Get cytokine calibration curve data
     tempExperimentParameters = {'overallPlateDimensions':[8,12]}
-    calibrationFileNames = glob.glob('inputData/bulkCSVFiles/Calibration*')
+    calibrationFileNames = glob.glob('inputData'+dirSep+'bulkCSVFiles'+dirSep+'Calibration*')
     calibrationNames = []
     kitNames = []
     for calibrationFileName in calibrationFileNames:
         #performCommaCheck(calibrationFileName.split('/')[-1])
-        newName = calibrationFileName.split('.')[0].split('_')[0].split('/')[-1]
+        newName = calibrationFileName.split('.')[0].split('_')[0].split(dirSep)[-1]
         kitNames.append(newName)
     sortedData,sortedFiles = cleanUpFlowjoCSV(kitNames,folderName,'cyt',tempExperimentParameters)
     for i,newName in enumerate(kitNames):
@@ -282,21 +287,21 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
         g2 = sns.scatterplot(data=plottingStandardsDf[plottingStandardsDf['Kit Name'] == kitName],x=xaxistitle,y=yaxistitle,hue='Cytokine',ax=axis,legend=False,palette=currentpalette)
         axis.set_xscale('log')
         axis.set_yscale('log')
-    plt.savefig('plots/calibrationCurves-'+folderName+'-'+concUnitPrefix+'.png',bbox_inches='tight')
+    plt.savefig('plots'+dirSep+'calibrationCurves-'+folderName+'-'+concUnitPrefix+'.png',bbox_inches='tight')
     #Save fitting parameters and LOD for curve fit for each cytokine
-    with open('misc/fittingParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "wb") as f:
+    with open('misc'+dirSep+'fittingParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "wb") as f:
         pickle.dump(fullFittingParametersDf, f)
-    with open('misc/LODParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "wb") as f:
+    with open('misc'+dirSep+'LODParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "wb") as f:
         pickle.dump(fullConcLODDf, f)
 
 def createCytokineDataFrame(folderName,finalDataFrame,concUnitPrefix):
          
         columnName = finalDataFrame.columns.name
-        with open('outputData/pickleFiles/cytokineGFIPickleFile-'+folderName+'.pkl', "wb") as f:
+        with open('outputData'+dirSep+'pickleFiles'+dirSep+'cytokineGFIPickleFile-'+folderName+'.pkl', "wb") as f:
             pickle.dump(finalDataFrame, f)
         
-        fittingParameters = pickle.load(open('misc/fittingParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "rb"))
-        LODParameters = pickle.load(open('misc/LODParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "rb"))
+        fittingParameters = pickle.load(open('misc'+dirSep+'fittingParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "rb"))
+        LODParameters = pickle.load(open('misc'+dirSep+'LODParameters-'+folderName+'-'+concUnitPrefix+'.pkl', "rb"))
         #Begin converting GFI dataframe into corresponding concentration dataframe
         concentrationList = []
         #Step through dataframe one cytokine at a time

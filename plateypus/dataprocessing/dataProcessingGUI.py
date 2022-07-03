@@ -10,9 +10,13 @@ from plateypus.dataprocessing import proliferationDataProcessing as pdp
 from plateypus.dataprocessing import killingDataProcessing as kdp
 from plateypus.dataprocessing import singleCellDataProcessing as scdp
 #import automatedCBAProcessingGUI as autoCBA
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 
-
-secondPath = '../../outputData'
+secondPath = '..'+dirSep+'..'+dirSep+'outputData'
 
 concUnit = 1e9
 unitPrefixDictionary = {1e12:'pM',1e9:'nM',1e6:'uM',1e3:'mM',1e0:'M'}
@@ -87,7 +91,7 @@ class DataProcessingStartPage(tk.Frame):
             else:
                 requiredFiles = []
             for requiredFile in requiredFiles:
-                if requiredFile not in os.listdir('misc')+os.listdir('inputData/bulkCSVFiles')+os.listdir('outputData/pickleFiles'):
+                if requiredFile not in os.listdir('misc')+os.listdir('inputData'+dirSep+'bulkCSVFiles')+os.listdir('outputData'+dirSep+'pickleFiles'):
                     button.config(state=tk.DISABLED)
         
         buttonWindow = tk.Frame(self)
@@ -102,16 +106,16 @@ def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells):
         parameterExtension = 'cell'
     else:
         parameterExtension = dataType
-    experimentParameters = json.load(open('misc/experimentParameters-'+folderName+'-'+parameterExtension+'.json','r'))
+    experimentParameters = json.load(open('misc'+dirSep+'experimentParameters-'+folderName+'-'+parameterExtension+'.json','r'))
     if experimentParameters['format'] == 'plate':
         experimentFormat = 'plate'
-        experimentLevelLayoutDict = pickle.load(open('misc/layoutDict-'+folderName+'-'+parameterExtension+'.pkl','rb'))
+        experimentLevelLayoutDict = pickle.load(open('misc'+dirSep+'layoutDict-'+folderName+'-'+parameterExtension+'.pkl','rb'))
     else:
         experimentFormat = 'tube'
-        experimentLevelLayoutDict = pickle.load(open('misc/tubeLayout-'+folderName+'-'+parameterExtension+'.pkl','rb'))
+        experimentLevelLayoutDict = pickle.load(open('misc'+dirSep+'tubeLayout-'+folderName+'-'+parameterExtension+'.pkl','rb'))
     #experimentLevelLayoutDict = idp.tilePlateLayouts(experimentParameters,levelLayouts)
     if(dataType == 'cyt'):
-        calibrationParameters = json.load(open('misc/CBAcalibrationParameters-'+folderName+'.json','r'))
+        calibrationParameters = json.load(open('misc'+dirSep+'CBAcalibrationParameters-'+folderName+'.json','r'))
         numberOfCalibrationSamples = calibrationParameters['Number']
         initialStandardVolume = calibrationParameters['Volume']
         cydp.calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCalibrationSamples,initialStandardVolume)

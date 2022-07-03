@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os,subprocess,pickle,math
+import os,shutil,pickle,math
 import tkinter as tk
 import tkinter.ttk
 import tkinter.font as tkfont
@@ -24,8 +24,8 @@ class NewProjectWindow(tk.Frame):
 
         def load_save():
             self.save = fd.askdirectory()
-            if self.save[-1] != '/':
-                self.save+='/'
+            if self.save[-1] != dirSep:
+                self.save+=dirSep
             outputPathLabel['text'] = self.save
             outputPathLabel['font'] = 'Helvetica 14 bold'
         
@@ -39,18 +39,18 @@ class NewProjectWindow(tk.Frame):
         def createProject():
             projectName = e1.get()
             rawPathName = self.save 
-            if rawPathName[-1] != '/':
-                rawPathName+='/'
+            if rawPathName[-1] != dirSep:
+                rawPathName+=dirSep
             if projectName not in os.listdir(rawPathName):
-                subprocess.run(['mkdir',rawPathName+projectName])
+                os.mkdir(rawPathName+projectName)
             if 'pathDict.pkl' in os.listdir(master.homedirectory+'misc'):
-                pathDict = pickle.load(open(master.homedirectory+'misc/pathDict.pkl','rb'))
+                pathDict = pickle.load(open(master.homedirectory+'misc'+dirSep+'pathDict.pkl','rb'))
             else:
                 pathDict = {}
             if projectName in pathDict.keys():
                 del pathDict[projectName]
             pathDict[projectName] = rawPathName
-            with open(master.homedirectory+'misc/pathDict.pkl','wb') as f:
+            with open(master.homedirectory+'misc'+dirSep+'pathDict.pkl','wb') as f:
                 pickle.dump(pathDict,f)
             tk.messagebox.showinfo("Project Created", "Project\n"+projectName+"\nhas been created.")
 
@@ -69,7 +69,7 @@ class RemoveProjectWindow(tk.Frame):
         mainWindow.pack(side=tk.TOP,padx=10)
         
         l1 = tk.Label(mainWindow, text="Project name to remove (will not remove files, only path): ")
-        pathDict = pickle.load(open(master.homedirectory+'misc/pathDict.pkl','rb'))
+        pathDict = pickle.load(open(master.homedirectory+'misc'+dirSep+'pathDict.pkl','rb'))
         projects = list(pathDict.keys())
         projectVar = tk.StringVar()
         projectMenu = tk.OptionMenu(mainWindow,projectVar,*projects)
@@ -78,7 +78,7 @@ class RemoveProjectWindow(tk.Frame):
         def removeProject():
             projectName = projectVar.get()
             del pathDict[projectName]
-            with open(master.homedirectory+'misc/pathDict.pkl','wb') as f:
+            with open(master.homedirectory+'misc'+dirSep+'pathDict.pkl','wb') as f:
                 pickle.dump(pathDict,f)
             tk.messagebox.showinfo("Project Removed", "Project\n"+projectName+"\nhas been removed.")
 
@@ -99,7 +99,7 @@ class NewExperimentWindow(tk.Frame):
         mainWindow = tk.Frame(self)
         mainWindow.pack(side=tk.TOP,padx=10)
          
-        pathDict = pickle.load(open(master.homedirectory+'misc/pathDict.pkl','rb'))
+        pathDict = pickle.load(open(master.homedirectory+'misc'+dirSep+'pathDict.pkl','rb'))
         projects = list(pathDict.keys())
         projectTitle = tk.Label(mainWindow,text='Project name: ')
         projectMenu = tkinter.ttk.Combobox(mainWindow,values = projects)
@@ -116,25 +116,25 @@ class NewExperimentWindow(tk.Frame):
         def createExperiment():
             experimentName = e2.get()
             amendedExperimentName = experimentName.replace('-','_')
-            amendedExperimentName = amendedExperimentName.replace('/','_')
+            amendedExperimentName = amendedExperimentName.replace(dirSep,'_')
             amendedExperimentName = amendedExperimentName.replace(' ','_')
             experimentName = e1.get()+'-'+amendedExperimentName
             projectName = projectMenu.get()
             pathName = pathDict[projectName]
-            subprocess.run(['mkdir',pathName+projectName+'/'+experimentName])
+            os.mkdir(pathName+projectName+dirSep+experimentName)
             subfolders = ['inputData','outputData','plots','misc']
             subsubfoldersDict = {'inputData':['fcsFiles','singleCellCSVFiles','bulkCSVFiles'],'outputData':['excelFiles','pickleFiles','analysisFiles']}
             subsubsubfoldersDict = {'analysisFiles':['scaledData','reducedData','clusteredData','subsettedData','clusterFrequencyData']}
             for subfolder in subfolders:
-                subprocess.run(['mkdir',pathName+projectName+'/'+experimentName+'/'+subfolder])
+                os.mkdir(pathName+projectName+dirSep+experimentName+dirSep+subfolder)
                 if subfolder in subsubfoldersDict.keys():
                     subsubfolders = subsubfoldersDict[subfolder]
                     for subsubfolder in subsubfolders:
-                        subprocess.run(['mkdir',pathName+projectName+'/'+experimentName+'/'+subfolder+'/'+subsubfolder])
+                        os.mkdir(pathName+projectName+dirSep+experimentName+dirSep+subfolder+dirSep+subsubfolder)
                         if subsubfolder in subsubsubfoldersDict.keys():
                             subsubsubfolders = subsubsubfoldersDict[subsubfolder]
                             for subsubsubfolder in subsubsubfolders:
-                                subprocess.run(['mkdir',pathName+projectName+'/'+experimentName+'/'+subfolder+'/'+subsubfolder+'/'+subsubsubfolder])
+                                os.mkdir(pathName+projectName+dirSep+experimentName+dirSep+subfolder+dirSep+subsubfolder+dirSep+subsubsubfolder)
             
             tk.messagebox.showinfo("Experiment Created", "Experiment\n"+experimentName+"\nin Project \n"+projectName+"\nhas been created.")
 

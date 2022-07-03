@@ -1,5 +1,5 @@
 #!/usr/bin/env python3  
-import os,pickle
+import os,pickle,shutil
 import statistics
 import numpy as np
 import pandas as pd
@@ -7,13 +7,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 #from logicle import logicle,quantile 
 from datetime import datetime
-import subprocess
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 import matplotlib.lines as linesmpl
 from plateypus.dataprocessing.miscFunctions import find_nearest,returnTicks,returnGates,returnGatesLinear
 from scipy.signal import find_peaks
 from scipy.stats import gaussian_kde
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 
 class ProliferationSelectionPage(tk.Frame):
     def __init__(self,master,fName,expn,exdata,shp,bp):
@@ -30,7 +34,7 @@ class ProliferationSelectionPage(tk.Frame):
         global bPage
         bPage = bp
         
-        singleCellDf = pd.read_hdf('outputData/pickleFiles/initialSingleCellDf-channel-'+folderName+'.h5',key='df')
+        singleCellDf = pd.read_hdf('outputData'+dirSep+'pickleFiles'+dirSep+'initialSingleCellDf-channel-'+folderName+'.h5',key='df')
         markers = list(singleCellDf.columns)
         celltypes = singleCellDf.index.unique('CellType').tolist()
         
@@ -143,12 +147,12 @@ class GatingPage(tk.Frame):
                 global logicleDataUnstacked
                 logicleDataUnstacked = logicleDataStacked.groupby(level=levelNames,sort=False).first().to_frame('MFI')
                 iterationRange = logicleDataUnstacked.shape[0] 
-            with open('misc/iterationRange.pkl','wb') as f:
+            with open('misc'+dirSep+'iterationRange.pkl','wb') as f:
                 pickle.dump(iterationRange,f)
-            with open('misc/rowValIterationRange.pkl','wb') as f:
+            with open('misc'+dirSep+'rowValIterationRange.pkl','wb') as f:
                 pickle.dump(0,f)
             groupedGateList = []
-            with open('misc/groupedGateList.pkl','wb') as f:
+            with open('misc'+dirSep+'groupedGateList.pkl','wb') as f:
                 pickle.dump(groupedGateList,f)
             master.switch_frame(Unsplit_Proliferation_Gating_GUI)
 
@@ -170,8 +174,8 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
         
         plotFrame = tk.Frame(self)
         plotFrame.pack()
-        row = pickle.load(open('misc/rowValIterationRange.pkl','rb'))
-        groupedGateList = pickle.load(open('misc/groupedGateList.pkl','rb'))
+        row = pickle.load(open('misc'+dirSep+'rowValIterationRange.pkl','rb'))
+        groupedGateList = pickle.load(open('misc'+dirSep+'groupedGateList.pkl','rb'))
         if groupVariable == 'Condition-Time':
             currentDf = logicleDataStacked.to_frame('MFI')
         else:
@@ -267,13 +271,13 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
         def collectInputs():
             for names in range(len(pd.unique(plottingDf[groupVariable]))):
                 groupedGateList.append(self.getAllX())
-            with open('misc/groupedGateList.pkl','wb') as f:
+            with open('misc'+dirSep+'groupedGateList.pkl','wb') as f:
                 pickle.dump(groupedGateList,f)
-            row = pickle.load(open('misc/rowValIterationRange.pkl','rb'))
+            row = pickle.load(open('misc'+dirSep+'rowValIterationRange.pkl','rb'))
             row+=1
-            with open('misc/rowValIterationRange.pkl','wb') as f:
+            with open('misc'+dirSep+'rowValIterationRange.pkl','wb') as f:
                 pickle.dump(row,f)
-            if row != pickle.load(open('misc/iterationRange.pkl','rb')):
+            if row != pickle.load(open('misc'+dirSep+'iterationRange.pkl','rb')):
                 master.switch_frame(Unsplit_Proliferation_Gating_GUI)
             else:
                 i = 0
@@ -298,7 +302,7 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
                         singleCellProliferationDf.loc[indexingTuple,:] = generationValues
 
                 print(singleCellProliferationDf)
-                with open('outputData/pickleFiles/singleCellDataFrame-proliferation-'+folderName+'.pkl', 'wb') as f:
+                with open('outputData'+dirSep+'pickleFiles'+dirSep+'singleCellDataFrame-proliferation-'+folderName+'.pkl', 'wb') as f:
                     pickle.dump(singleCellProliferationDf,f)
                 master.switch_frame(secondaryhomepage,folderName,expNum,ex_data,bPage)
 
@@ -368,7 +372,7 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
         return [self.getParentX()]+self.getChildX()
 
 def generateBulkProliferationStatistics(folderName,experimentNumber):
-    singleCellProliferationDfStacked = pickle.load(open('outputData/pickleFiles/singleCellDataFrame-proliferation-'+folderName+'.pkl','rb'))
+    singleCellProliferationDfStacked = pickle.load(open('outputData'+dirSep+'pickleFiles'+dirSep+'singleCellDataFrame-proliferation-'+folderName+'.pkl','rb'))
     idx = pd.IndexSlice
     numGenerations = len(singleCellProliferationDfStacked.loc[:,'Generation'].unique())
     singleCellProliferationDfUnstacked = singleCellProliferationDfStacked.unstack('Event')
