@@ -4,6 +4,11 @@ import tkinter as tk
 import tkinter.ttk
 import tkinter.font as tkfont
 from tkinter import filedialog as fd
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 
 def setMaxWidth(stringList, element):
     f = tkfont.nametofont(element.cget("font"))
