@@ -118,7 +118,8 @@ def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells):
         calibrationParameters = json.load(open('misc'+dirSep+'CBAcalibrationParameters-'+folderName+'.json','r'))
         numberOfCalibrationSamples = calibrationParameters['Number']
         initialStandardVolume = calibrationParameters['Volume']
-        cydp.calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCalibrationSamples,initialStandardVolume)
+        species = calibrationParameters['Species']
+        cydp.calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCalibrationSamples,initialStandardVolume, species)
         basecytdf = idp.createBaseDataFrame(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
         cytdf = cydp.createCytokineDataFrame(folderName,basecytdf,concUnitPrefix)
         idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,cytdf,ex_data) 
