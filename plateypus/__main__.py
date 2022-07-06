@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import pickle,os,subprocess
+import pickle
 import tkinter as tk
 import tkinter.ttk
 import pandas as pd
@@ -11,6 +11,11 @@ from plateypus.plotting.plottingGUI import PlotExperimentWindow
 import plateypus
 from PIL import Image,ImageTk
 from importlib_metadata import version
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 
 #Root class; handles frame switching in gui
 class MainApp(tk.Tk):
@@ -19,9 +24,9 @@ class MainApp(tk.Tk):
 
         self.title('plateypus '+version('plateypus'))
         self._frame = None
-        self.homedirectory = '/'.join(os.path.abspath(plateypus.__file__).split('/')[:-1])
-        if self.homedirectory[-1] != '/':
-            self.homedirectory+='/'
+        self.homedirectory = dirSep.join(os.path.abspath(plateypus.__file__).split(dirSep)[:-1])
+        if self.homedirectory[-1] != dirSep:
+            self.homedirectory+=dirSep
         print('plateypus location: '+self.homedirectory)
         self.switch_frame(ExperimentSelectionPage)
 
@@ -75,11 +80,11 @@ class ExperimentSelectionPage(tk.Frame):
             self.experimentMenu['width'] = len(max(experiments,key=len))
         
         if 'misc' not in os.listdir(master.homedirectory):
-            subprocess.run(['mkdir',master.homedirectory+'misc'])
+            os.mkdir(master.homedirectory+'misc')
         if 'pathDict.pkl' not in os.listdir(master.homedirectory+'misc'):
             self.pathDict = {}
         else:
-            self.pathDict = pickle.load(open(master.homedirectory+'misc/pathDict.pkl','rb'))
+            self.pathDict = pickle.load(open(master.homedirectory+'misc'+dirSep+'pathDict.pkl','rb'))
         projects = list(self.pathDict.keys())
         self.projectMenu = tkinter.ttk.Combobox(expSelectionFrame,values = projects)
         if len(self.pathDict) > 0:
@@ -97,7 +102,7 @@ class ExperimentSelectionPage(tk.Frame):
             projectName = self.projectMenu.get()
             pathName = self.pathDict[projectName]
             selectedExperiment = self.experimentMenu.get()
-            os.chdir(pathName+projectName+'/'+selectedExperiment)
+            os.chdir(pathName+projectName+dirSep+selectedExperiment)
             master.switch_frame(ExperimentActionWindow,selectedExperiment)
 
         buttonWindow = tk.Frame(self)

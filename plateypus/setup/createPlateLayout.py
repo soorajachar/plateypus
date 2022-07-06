@@ -1,5 +1,5 @@
 #!/usr/bin/env python3 
-import pickle,math,matplotlib,sys,os,string,subprocess
+import pickle,math,matplotlib,sys,os,string,shutil
 from sys import platform as sys_pf
 if sys_pf == 'darwin':
     import matplotlib
@@ -12,6 +12,11 @@ import seaborn as sns
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.widgets import RectangleSelector
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 from plateypus.dataprocessing.miscFunctions import rainbow_text
 
 idx = pd.IndexSlice
@@ -397,7 +402,7 @@ def createLayoutVisual(baseLayoutDf,currentLayout,levelIndex,currentLevel,levelV
         titlecolors.append(modifiedPalette[i+len(ogpalette)])
     #plt.savefig('plateLayout-'+currentLevel+'.png',bbox_inches='tight')
     if 'plateLayouts' not in os.listdir('plots'):
-        subprocess.run(['mkdir','plots/plateLayouts'])
+        os.mkdir('plots'+dirSep+'plateLayouts')
     legendHandlesLabels = fig_ax1.get_legend_handles_labels()
     i=0
     newLegendLabels = []
@@ -421,7 +426,7 @@ def createLayoutVisual(baseLayoutDf,currentLayout,levelIndex,currentLevel,levelV
                 newLegendHandles.append(legendHandles[i+offset])
         i+=1
     fig_ax1.legend(bbox_to_anchor=(1, 1),frameon=False,handles=newLegendHandles, labels=newLegendLabels)
-    plt.savefig('plots/plateLayouts/plateLayout-'+currentLevel+'-'+dt+'.png',bbox_inches='tight')
+    plt.savefig('plots'+dirSep+'plateLayouts'+dirSep+'plateLayout-'+currentLevel+'-'+dt+'.png',bbox_inches='tight')
     plt.clf()
 
 class PlateLayoutPage(tk.Frame):
@@ -969,7 +974,7 @@ class PlateLayoutPage(tk.Frame):
                 
                 if len(nonUniquePositions) == 0:
                     for dt in dataTypeList:
-                        with open('misc/layoutDict-'+folderName+'-'+dt+'.pkl','wb') as f:
+                        with open('misc'+dirSep+'layoutDict-'+folderName+'-'+dt+'.pkl','wb') as f:
                             pickle.dump(finalLayoutDict,f)
                         for i in finalLayoutDict['keys']:
                             level = levels[i]

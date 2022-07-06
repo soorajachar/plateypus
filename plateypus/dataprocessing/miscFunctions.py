@@ -1,5 +1,5 @@
 #!/usr/bin/env python3  
-import os,sys,pickle,math,re,subprocess,string
+import sys,pickle,math,re,subprocess,string
 from sys import platform as sys_pf
 if sys_pf == 'darwin':
     import matplotlib
@@ -11,6 +11,11 @@ import tkinter as tk
 import itertools
 from matplotlib import transforms
 import tkinter.font as tkfont
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 
 def r_squared(xdata,ydata,func,popt):
     residuals = ydata- func(xdata, *popt)
@@ -65,12 +70,12 @@ def cleanUpFlowjoCSV(fileArray,folderName,dataType,experimentParameters):
     orderWellID['SD'] = len(orderWellID.keys())+2
     allWellPoses = [''.join(x) for x in list(itertools.product(string.ascii_uppercase[:16],list(map(str,list(range(1,25))))))]
     for name in fileArray:
-        temp = pd.read_csv('inputData/bulkCSVFiles/'+str(name)+'_'+dataTypeForCSV+'.csv')
+        temp = pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+str(name)+'_'+dataTypeForCSV+'.csv')
         temp2 = [] 
         notFoundWellIDPos = True
         wellIDPos = -3
         for i in range(0,temp.shape[0]):
-            fullfilename = 'inputData/singleCellCSVFiles/'+name+'/'+temp.iloc[i,0][:temp.iloc[i,0].find('.')]
+            fullfilename = 'inputData'+dirSep+'singleCellCSVFiles'+dirSep+name+dirSep+temp.iloc[i,0][:temp.iloc[i,0].find('.')]
             #CyTEK Explorer
             if ' Well' in temp.iloc[i,0]:
                 wellID = temp.iloc[i,0] .split(' ')[0]
@@ -275,9 +280,9 @@ def exitEnabledSubprocessRun(command,script,inputVariable,hasInput):
         subprocess.run([command,script]+[inputVariable])
     else:
         subprocess.run([command,script])
-    if pickle.load(open('inputFiles/gui-exitBoolean.pkl','rb')):
+    if pickle.load(open('inputFiles'+dirSep+'gui-exitBoolean.pkl','rb')):
         exitBoolean = False 
-        with open('inputFiles/gui-exitBoolean.pkl','wb') as f:
+        with open('inputFiles'+dirSep+'gui-exitBoolean.pkl','wb') as f:
             pickle.dump(exitBoolean,f)
         sys.exit(0)
 

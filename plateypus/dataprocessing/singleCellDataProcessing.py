@@ -1,9 +1,14 @@
 #! /usr/bin/env python3
 #!/usr/bin/env python3 
-import pickle,os,sys,string,subprocess
+import pickle,os,sys,string,shutil
 import numpy as np
 import pandas as pd
 import tkinter as tk
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 from plateypus.dataprocessing.miscFunctions import reindexDataFrame,printProgressBar,extractValues,reorderDfByInputOrder,returnSpecificExtensionFiles
 idx = pd.IndexSlice
 
@@ -17,7 +22,7 @@ def produceSingleCellHeaders(cellTypes):
     return newMultiIndexList
 
 def grabCellTypeList(experimentParameters):
-    path = 'inputData/singleCellCSVFiles/'
+    path = 'inputData'+dirSep+'singleCellCSVFiles'+dirSep
     if experimentParameters['format'] == 'plate':
         nrows = experimentParameters['overallPlateDimensions'][0]
         ncols = experimentParameters['overallPlateDimensions'][1]
@@ -40,7 +45,7 @@ def grabCellTypeList(experimentParameters):
                     folder = fileName
                     break
 
-        for fileName in os.listdir(path+folder+'/'):
+        for fileName in os.listdir(path+folder+dirSep):
             if '.DS' not in fileName:
                 splitFile = fileName.split('_')
                 parsingVal = ''
@@ -53,7 +58,7 @@ def grabCellTypeList(experimentParameters):
                     cellTypeList.append(cellType)
     else:
         cellTypeList = []
-        sampleNameDf = pd.read_pickle('misc/tubeLayout-'+os.getcwd().split('/')[-1]+'-cell.pkl')
+        sampleNameDf = pd.read_pickle('misc'+dirSep+'tubeLayout-'+os.getcwd().split(dirSep)[-1]+'-cell.pkl')
         fullSampleFileName = sampleNameDf.iloc[0,0]
         dotIndex = fullSampleFileName.rfind('.')
         sampleFileName = fullSampleFileName[:dotIndex]
@@ -68,7 +73,7 @@ def grabCellTypeList(experimentParameters):
 
 def createTubeSingleCellDataFrame(folderName,experimentParameters,fileNameDf):
     
-    path = 'inputData/singleCellCSVFiles/'
+    path = 'inputData'+dirSep+'singleCellCSVFiles'+dirSep
     
     fileNameDf = fileNameDf.stack().to_frame('fileName')
 
@@ -122,19 +127,19 @@ def createTubeSingleCellDataFrame(folderName,experimentParameters,fileNameDf):
             columnsToKeep.append(col)
     completeDataFrame = completeDataFrame.iloc[:,columnsToKeep]
 
-    completeDataFrame.to_hdf('outputData/pickleFiles/initialSingleCellDf-channel-'+folderName+'.h5', key='df', mode='w')
+    completeDataFrame.to_hdf('outputData'+dirSep+'pickleFiles'+dirSep+'initialSingleCellDf-channel-'+folderName+'.h5', key='df', mode='w')
     print(completeDataFrame)
 
 def debarcodeSingleCellData(experimentParameters):
     barcodingDict = experimentParameters['barcodingDict']
     for barcodedPlateName in barcodingDict:
-        inputPath = 'inputData/singleCellCSVFiles/'+barcodedPlateName+'/'
+        inputPath = 'inputData'+dirSep+'singleCellCSVFiles'+dirSep+barcodedPlateName+dirSep
         for debarcodedPlateName in barcodingDict[barcodedPlateName]:
             #Create folder if not there; if there, delete folder before proceeding (avoids overlap)
-            outputPath = 'inputData/singleCellCSVFiles/'+debarcodedPlateName+'/'
-            if debarcodedPlateName in os.listdir('inputData/singleCellCSVFiles/'):
-                subprocess.run(['rm','-r',outputPath[:-1]])
-            subprocess.run(['mkdir',outputPath[:-1]])
+            outputPath = 'inputData'+dirSep+'singleCellCSVFiles'+dirSep+debarcodedPlateName+dirSep
+            if debarcodedPlateName in os.listdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep):
+                shutil.rmtree(outputPath[:-1])
+            os.mkdir(outputPath[:-1])
             
             barcodes = barcodingDict[barcodedPlateName][debarcodedPlateName]
             #Search through all files in barcoded plate folder, move to each debarcoded plate folder
@@ -146,7 +151,7 @@ def debarcodeSingleCellData(experimentParameters):
                         break
                 if allBarcodesInFileName:
                     #Copy file to debarcoded plate folder
-                    subprocess.run(['cp',inputPath+fileName,outputPath+fileName])
+                    shutil.copyfile(inputPath+fileName,outputPath+fileName)
                     #Rename file; if __ exists, use suffix after __ as cell population name. otherwise no suffix
                     #In either case, remove barcode suffix
                     if '__' in fileName:
@@ -154,7 +159,7 @@ def debarcodeSingleCellData(experimentParameters):
                         newFileName = '_'.join(fileName.split('.')[0].split('__')[0].split('_')[:6]+[population])+'.csv'
                     else:
                         newFileName = '_'.join(fileName.split('.')[0].split('_')[:6]+['allCells'])+'.csv'
-                    subprocess.run(['mv',outputPath+fileName,outputPath+newFileName])
+                    shutil.move(outputPath+fileName,outputPath+newFileName)
                 printProgressBar(k + 1, len([x for x in os.listdir(inputPath) if '.DS' not in x]), prefix = ' Debarcoding '+barcodedPlateName+' to '+debarcodedPlateName+':', suffix = 'Complete', length = 50)
 
 #If multiplexing option chosen
@@ -178,13 +183,13 @@ def demultiplexSingleCellData(experimentParameters):
         for combinedPlateName in list(unpackingDict.keys()):
             for unpackedPlateName in unpackingDict[combinedPlateName]:
                 if unpackedPlateName != '':
-                    if unpackedPlateName not in returnSpecificExtensionFiles('inputData/singleCellCSVFiles/','',False):
-                        subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+unpackedPlateName])
+                    if unpackedPlateName not in returnSpecificExtensionFiles('inputData'+dirSep+'singleCellCSVFiles'+dirSep,'',False):
+                        os.mkdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep+unpackedPlateName)
         fileNameDict = {}
         combinedPlateNames = list(unpackingDict.keys())
         for combinedPlateName in combinedPlateNames:
             #scale_Specimen_001_P9_P09_369_TCells.csv
-            allFileNames = returnSpecificExtensionFiles('inputData/singleCellCSVFiles/'+combinedPlateName,'',False)
+            allFileNames = returnSpecificExtensionFiles('inputData'+dirSep+'singleCellCSVFiles'+dirSep+combinedPlateName,'',False)
             unpackedPlateNames = unpackingDict[combinedPlateName]
             for k,fileName in enumerate(allFileNames):
                 sampleID = fileName.split('_')[3]
@@ -204,8 +209,8 @@ def demultiplexSingleCellData(experimentParameters):
                 trueFileName = newFileName
                 #print(fileName+'->'+newFileName)
                 fileNameDict['_'.join(trueFileName.split('_')[1:-1])] = '_'.join(fileName.split('_')[1:-1])
-                completeNewFileName = unpackedFolder+'/'+trueFileName
-                subprocess.run(['cp','inputData/singleCellCSVFiles/'+combinedPlateName+'/'+fileName,'inputData/singleCellCSVFiles/'+completeNewFileName])
+                completeNewFileName = unpackedFolder+dirSep+trueFileName
+                shutil.copyfile('inputData'+dirSep+'singleCellCSVFiles'+dirSep+combinedPlateName+dirSep+fileName,'inputData'+dirSep+'singleCellCSVFiles'+dirSep+completeNewFileName)
                 printProgressBar(k + 1, len(allFileNames), prefix = ' Unpacking '+combinedPlateName+':', suffix = 'Complete', length = 50)
     #Repacking
     else:
@@ -230,12 +235,12 @@ def demultiplexSingleCellData(experimentParameters):
         fileNameDict = {}
         combinedPlateNames = list(unpackingDict.keys())
         for combinedPlateName in combinedPlateNames:
-            if combinedPlateName in os.listdir('inputData/singleCellCSVFiles/'):
+            if combinedPlateName in os.listdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep):
                 suffix = '-unpacked'
-                subprocess.run(['mv','inputData/singleCellCSVFiles/'+combinedPlateName,'inputData/singleCellCSVFiles/'+combinedPlateName+'-unpacked'])
+                shutil.move('inputData'+dirSep+'singleCellCSVFiles'+dirSep+combinedPlateName,'inputData'+dirSep+'singleCellCSVFiles'+dirSep+combinedPlateName+'-unpacked')
             else:
                 suffix = ''
-            subprocess.run(['mkdir','inputData/singleCellCSVFiles/'+combinedPlateName])
+            os.mkdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep+combinedPlateName)
             for plateName in unpackingDict[combinedPlateName]:
                 if plateName == combinedPlateName:
                     suffix = '-unpacked'
@@ -246,7 +251,7 @@ def demultiplexSingleCellData(experimentParameters):
                     specificWellIDConversionDict[well] = wellIDConversionDict[well]
                 invertedWellIDConversionDict = {v: k for k, v in specificWellIDConversionDict.items()}
                 #scale_Specimen_001_P9_P09_369_TCells.csv
-                allFileNames = returnSpecificExtensionFiles('inputData/singleCellCSVFiles/'+plateName+suffix,'',False)
+                allFileNames = returnSpecificExtensionFiles('inputData'+dirSep+'singleCellCSVFiles'+dirSep+plateName+suffix,'',False)
                 unpackedPlateNames = unpackingDict[combinedPlateName]
                 for k,fileName in enumerate(allFileNames):
                     sampleID = fileName.split('_')[3]
@@ -254,15 +259,15 @@ def demultiplexSingleCellData(experimentParameters):
                     newSampleID2 = newSampleID[0]+newSampleID[1:].zfill(3)
                     newFileName = '_'.join(['_'.join(fileName.split('_')[:3]),newSampleID,newSampleID2,'_'.join(fileName.split('_')[-2:])])
                     fileNameDict['_'.join(newFileName.split('_')[1:-1])] = '_'.join(fileName.split('_')[1:-1])
-                    subprocess.run(['cp','inputData/singleCellCSVFiles/'+plateName+suffix+'/'+fileName,'inputData/singleCellCSVFiles/'+combinedPlateName+'/'+newFileName])
+                    shutil.copyfile('inputData'+dirSep+'singleCellCSVFiles'+dirSep+plateName+suffix+dirSep+fileName,'inputData'+dirSep+'singleCellCSVFiles'+dirSep+combinedPlateName+dirSep+newFileName)
                     printProgressBar(k + 1, len(allFileNames), prefix = ' Repacking '+plateName+':', suffix = 'Complete', length = 50)
 
-    with open('misc/fileNameDict.pkl','wb') as f:
+    with open('misc'+dirSep+'fileNameDict.pkl','wb') as f:
         pickle.dump(fileNameDict,f)
 
 def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,useBlankWells):
     
-    path = 'inputData/singleCellCSVFiles/'
+    path = 'inputData'+dirSep+'singleCellCSVFiles'+dirSep
     #Change CyTEK file names to match BD file names
     for folder in os.listdir(path):
         if '.DS' not in folder:
@@ -272,7 +277,7 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
                         newFileNameComponents = fileName.split(' Well')
                         newFileName = newFileNameComponents[0].split('_')[0]+'_Specimen_001_'+newFileNameComponents[0].split('_')[1]+'_'+newFileNameComponents[0].split('_')[1][0]+newFileNameComponents[0].split('_')[1][1:].zfill(3)+newFileNameComponents[1]
                         #print('singleCellCSVFiles/'+folder+'/'+fileName+'->'+'singleCellCSVFiles/'+folder+'/'+newFileName)
-                        subprocess.run(['mv',path+folder+'/'+fileName,path+folder+'/'+newFileName])
+                        shutil.move(path+folder+dirSep+fileName,path+folder+dirSep+newFileName)
     
     if 'barcodingDict' in experimentParameters:
         debarcodeSingleCellData(experimentParameters)
@@ -309,7 +314,7 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
                 sampleDf.iloc[row,col] = 'Blank'
     #Drop blanks
     sampleDf = sampleDf.query("Time != 'Blank'")
-    sampleDf.to_excel('outputData/excelFiles/fcsLabelingKey.xlsx')
+    sampleDf.to_excel('outputData'+dirSep+'excelFiles'+dirSep+'fcsLabelingKey.xlsx')
     
     cellTypeList = grabCellTypeList(experimentParameters)
 
@@ -320,7 +325,7 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
         for plateName in list(np.unique(levelLayout['plateID'])):
             orderValDict2 = {}
             if 'DS' not in plateName:
-                for fileName in os.listdir(path+plateName+'/'):
+                for fileName in os.listdir(path+plateName+dirSep):
                     if 'DS' not in fileName:
                         splitFile = fileName.split('_')
                         parsingVal = ''
@@ -332,8 +337,10 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
                         if currentCellType == cellType:
                             orderVal = fileName[parsingPose:parsingPose+3]
                             wellID = fileName[:parsingPose-1].split('_')[-2]
-                            orderValDict2[wellID] = path+plateName+'/'+fileName
+                            orderValDict2[wellID] = path+plateName+dirSep+fileName
             orderValDict[plateName] = orderValDict2
+        #print(orderValDict)
+        #sys.exit(0)
         sampleTupleList,sampleList = [],[]
         for row in range(sampleDf.shape[0]):
             sampleID = list(sampleDf.iloc[row,:].name)
@@ -390,7 +397,7 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
     
     #Remove all unnecessary folders (only keep input/output)
     foldersToKeep = []
-    for folder in [x for x in os.listdir('inputData/singleCellCSVFiles/') if '.DS' not in x]:
+    for folder in [x for x in os.listdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep) if '.DS' not in x]:
         #Keep all folders
         if 'unpackingDict' in experimentParameters and 'barcodingDict' in experimentParameters and experimentParameters['overallPlateDimensions'][0] == 16:
             if folder in experimentParameters['barcodingDict'] or folder in experimentParameters['unpackingDict']:
@@ -398,9 +405,9 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
         else:
             foldersToKeep.append(folder)
 
-    for folder in [x for x in os.listdir('inputData/singleCellCSVFiles/') if '.DS' not in x]:
+    for folder in [x for x in os.listdir('inputData'+dirSep+'singleCellCSVFiles'+dirSep) if '.DS' not in x]:
         if folder not in foldersToKeep:
-            subprocess.run(['rm','-r','inputData/singleCellCSVfiles/'+folder])
+            shutil.rmtree('inputData'+dirSep+'singleCellCSVfiles'+dirSep+folder)
 
     completeDataFrame = pd.concat(completeDfList)
     completeDataFrame.columns.name = 'Marker'
@@ -413,5 +420,5 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
             columnsToKeep.append(col)
     completeDataFrame = completeDataFrame.iloc[:,columnsToKeep]
 
-    completeDataFrame.to_hdf('outputData/pickleFiles/initialSingleCellDf-channel-'+folderName+'.h5', key='df', mode='w')
+    completeDataFrame.to_hdf('outputData'+dirSep+'pickleFiles'+dirSep+'initialSingleCellDf-channel-'+folderName+'.h5', key='df', mode='w')
     print(completeDataFrame)

@@ -2,6 +2,11 @@
 import string,os
 import pandas as pd
 import numpy as np
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 from plateypus.dataprocessing.miscFunctions import reorderDfByInputOrder
 
 def generateBulkKillingStatistics(experimentParameters,folderName,experimentNumber,dataType,layoutDict):
@@ -32,7 +37,7 @@ def generateBulkKillingStatistics(experimentParameters,folderName,experimentNumb
         return fullExperimentDf
 
 def createIncucyteDataframe(plateNames,plateLayoutDict,levelLabelDict,unwrappingOrder='col'):
-    path = 'inputData/bulkCSVFiles/'
+    path = 'inputData'+dirSep+'bulkCSVFiles'+dirSep
     if 'A1_killing.csv' in os.listdir(path):
         csvBool = True
     else:

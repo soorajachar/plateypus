@@ -6,6 +6,11 @@ import pandas as pd
 import seaborn as sns
 from itertools import groupby
 from matplotlib.colors import LogNorm,SymLogNorm
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 from ..dataprocessing.miscFunctions import reindexDataFrame
 
 dividerLength = 0.16
@@ -113,7 +118,7 @@ def draw_faceted_heatmap(data,indexingdf,xaxis,yaxis,zaxis,lognorm,cbarticks,log
     for fn in os.listdir('misc'):
         if 'experimentParameters' in fn:
             experimentParametersBool = True
-            experimentParameters = json.load(open('misc/'+fn,'r')) 
+            experimentParameters = json.load(open('misc'+dirSep+fn,'r')) 
     if experimentParametersBool:
         data = reorderDfByExperimentParameters(data,experimentParameters)
     
