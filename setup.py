@@ -8,6 +8,7 @@ install_requires = [
 'openpyxl',
 'tables',
 'pillow',
+'colorcet',
 'importlib_metadata'
 ]
 
@@ -28,7 +29,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="plateypus",
-    version="0.5.1",
+    version="0.5.3",
     author = "Sooraj Achar",
     author_email = "acharsr@nih.gov",
     description = "Processes and plots high throughput cytometry experiments through a GUI",
