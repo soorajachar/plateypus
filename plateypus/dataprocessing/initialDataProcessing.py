@@ -332,7 +332,7 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
             for column,columnTuple in enumerate(newLevelList):
                 columnSeries = pd.Series(rawData.values[:,column+1],index=mi)
                 columnSeriesList.append(columnSeries)
-                columnTupleList.append((columnTuple,))
+                columnTupleList.append(tuple(columnTuple))
             #print(columnTupleList)
             #print(columnSeriesList)
             #print(rawData)

@@ -86,7 +86,7 @@ def parseCytokineCSVHeaders(columns):
             cytokine = populationNameVsStatisticSplit[0].split('/')[-1]
         else:
             cytokine = populationNameVsStatisticSplit[0].split('/')[-2]
-        newMultiIndexList.append(cytokine)
+        newMultiIndexList.append([cytokine])
     return newMultiIndexList
 
 def performCommaCheck(fileName):
@@ -139,6 +139,7 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
     allCytokinesHaveMWInDict = True 
     for calibration in sortedData:
         cytokines = parseCytokineCSVHeaders(calibration.columns)
+        cytokines = [x[0] for x in cytokines]
         for cytokine in cytokines:
             if cytokine not in completeCytokineMWDict:
                 allCytokinesHaveMWInDict = False
@@ -146,13 +147,13 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
     for calibration in sortedData:
         data = np.array(calibration.values[:,1:-1],dtype=float)
         cytokines = parseCytokineCSVHeaders(calibration.columns)
+        cytokines = [x[0] for x in cytokines]
         fittingParameters = np.zeros((data.shape[1],4))
         concLOD = np.zeros((data.shape[1],4))
         serialDilutionFactor = 2 # serialDilutionFactor dilution between each standard well
 
         
         if len(cytokines) > 12:
-            print('New dataProcessing')
             #Initial concentration of cytokine standards given by individual Flex kit manuals in pg/mL when diluted in 4mL
             all_conc = {'Angiogenin': 2500,'CD121a': 10000,'CD121b': 10000,'CD178': 2500,'CD40L': 2500,'CD54': 10000,'CD62L': 10000,'Eotaxin': 2500,'FGF': 2500,'Fractalkine': 10000,'G-CSF': 2500,'GM-CSF': 2500,\
                 'Granzyme A': 10000,'Granzyme B': 10000,'IFNg': 2500,'IL-10': 2500,'IL-11': 10000,'IL-12': 10000,'IL-17A': 2500,'IL-17F': 2500,'IL-1A': 2500,'IL-1B': 2500,'IL-2': 2500,'IL-21': 10000,'IL-3': 2500,\
