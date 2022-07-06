@@ -4,7 +4,6 @@ from sys import platform as sys_pf
 if sys_pf == 'darwin':
     import matplotlib
     matplotlib.use("TkAgg")
-import colorcet as cc
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -285,7 +284,7 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
     
     numCyt = len(pd.unique(plottingPointsDf['Cytokine']))
     if numCyt <= 12:
-        fullpalette = sns.color_palette(sns.color_palette(cc.glasbey),numCyt)
+        fullpalette = sns.color_palette(sns.color_palette(),numCyt)
         g = sns.relplot(data=plottingPointsDf,x=xaxistitle,y=yaxistitle,hue='Cytokine',col='Kit Name',kind='line',col_order=pd.unique(plottingPointsDf['Kit Name']),hue_order=pd.unique(plottingPointsDf['Cytokine']),height=7,palette=fullpalette)
         #Plot vertical lines at lower and upper concentration limits of detection
         colorDict = {}
