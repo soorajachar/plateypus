@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
-import os,subprocess
+import os,shutil
 import tkinter as tk
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 
 class RemoveExperimentWindow(tk.Frame):
     def __init__(self,master,backpage):
@@ -20,7 +25,7 @@ class RemoveExperimentWindow(tk.Frame):
 
         def removeExperiment():
             experimentName = selectionMenu.get()
-            subprocess.run(['rm','-r','experiments/'+experimentName])
+            shutil.rmtree('experiments'+dirSep+experimentName)
 
         b = tk.Button(mainWindow,text='Remove experiment',command=lambda:removeExperiment())
         

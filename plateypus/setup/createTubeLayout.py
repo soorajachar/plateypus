@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-import os,pickle
+import pickle
 import pandas as pd
 import numpy as np
 import tkinter as tk
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 from plateypus.dataprocessing.miscFunctions import setMaxWidth
 
 expParamDict = {'cyt':'cyt','cell':'cell','prolif':'cell','singlecell':'cell'}
@@ -54,22 +59,22 @@ class TubeLayoutPage(tk.Frame):
         #Automatically import file names into layout dict if excel/csv template in correct folder
         if 'sampleNameFile.xlsx' in os.listdir('misc') or 'sampleNameFile.csv' in os.listdir('misc'):
             if 'sampleNameFile.xlsx' in os.listdir('misc'): 
-                sampleNameDf = pd.read_excel('misc/sampleNameFile.xlsx')
+                sampleNameDf = pd.read_excel('misc'+dirSep+'sampleNameFile.xlsx')
             else:
-                sampleNameDf = pd.read_csv('misc/sampleNameFile.csv')
+                sampleNameDf = pd.read_csv('misc'+dirSep+'sampleNameFile.csv')
         else:
             sampleNameDf = []
 
         #Should be in this format: headers are: sampleFileName Level0Name Level1Name
         fcsFiles = []
-        if 'A1_cell.csv' not in os.listdir('inputData/bulkCSVFiles/'):
-            for fcsName in os.listdir('inputData/fcsFiles'):
+        if 'A1_cell.csv' not in os.listdir('inputData'+dirSep+'bulkCSVFiles'+dirSep):
+            for fcsName in os.listdir('inputData'+dirSep+'fcsFiles'):
                 if '.fcs' in fcsName:
                     fcsFiles.append(fcsName)
             if len(fcsFiles) == 0:
                 fcsFiles = ['                 ']
         else:
-            bulkStatFile = pd.read_csv('inputData/bulkCSVFiles/A1_cell.csv')
+            bulkStatFile = pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_cell.csv')
             for row in range(bulkStatFile.shape[0]):
                 if bulkStatFile.iloc[row,0] not in ['Mean','SD']:
                     fcsFiles.append(bulkStatFile.iloc[row,0])
@@ -143,7 +148,7 @@ class TubeLayoutPage(tk.Frame):
             mi = pd.MultiIndex.from_tuples(indexTuples,names=allLevelNames)
             data = fullSampleList 
             df1 = pd.Series(data,index=mi)
-            df1.to_pickle('misc/tempDf.pkl')
+            df1.to_pickle('misc'+dirSep+'tempDf.pkl')
             df2 = df1.unstack('Time')
             
             #Reindex df after unstacking by original order
@@ -165,7 +170,7 @@ class TubeLayoutPage(tk.Frame):
             else:
                 dataTypes = [dataType]
             for dt in dataTypes:
-                with open('misc/tubeLayout-'+folderName+'-'+dt+'.pkl','wb') as f:
+                with open('misc'+dirSep+'tubeLayout-'+folderName+'-'+dt+'.pkl','wb') as f:
                     pickle.dump(reindexedDf,f)
             
             master.switch_frame(secondaryhomepage,folderName,backPage)

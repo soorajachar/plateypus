@@ -1,8 +1,14 @@
 #!/usr/bin/env python3 
-import json,pickle,math,matplotlib,sys,os,string,subprocess
+import json,pickle,math,matplotlib,sys,os,string
+import shutil
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 from plateypus.dataprocessing.miscFunctions import cleanUpFlowjoCSV,reorderDfByInputOrder
 from plateypus.dataprocessing import cytokineDataProcessing,singleCellDataProcessing,cellDataProcessing
 
@@ -13,13 +19,13 @@ plateColumnNumbers = list(range(1,25))
 
 def returnMultiIndex(sortedData,sortedFiles,dataType,folderName):
     if(dataType == 'cyt'):
-        newMultiIndex = cytokineDataProcessing.parseCytokineCSVHeaders(pd.read_csv('inputData/bulkCSVFiles/A1_'+dataType+'.csv').columns)
+        newMultiIndex = cytokineDataProcessing.parseCytokineCSVHeaders(pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_'+dataType+'.csv').columns)
     elif(dataType == 'cell'):
         if 'antibodyPanel-'+folderName+'.csv' in os.listdir('misc'):
-            panelData = pd.read_csv('misc/antibodyPanel-'+folderName+'.csv',)
-            newMultiIndex = cellDataProcessing.parseCellCSVHeaders(pd.read_csv('inputData/bulkCSVFiles/A1_'+dataType+'.csv').columns,panelData=panelData)
+            panelData = pd.read_csv('misc'+dirSep+'antibodyPanel-'+folderName+'.csv',)
+            newMultiIndex = cellDataProcessing.parseCellCSVHeaders(pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_'+dataType+'.csv').columns,panelData=panelData)
         else:
-            newMultiIndex = cellDataProcessing.parseCellCSVHeaders(pd.read_csv('inputData/bulkCSVFiles/A1_'+dataType+'.csv').columns)
+            newMultiIndex = cellDataProcessing.parseCellCSVHeaders(pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_'+dataType+'.csv').columns)
     elif(dataType == 'cytcorr'):
         newMultiIndex = []
     if dataType != 'singlecell':
@@ -28,7 +34,7 @@ def returnMultiIndex(sortedData,sortedFiles,dataType,folderName):
         return sortedFiles,newMultiIndex
 
 def decodeBarcodedPlates(experimentParameters,folderName,dataType,reverse):
-    path = 'inputData/bulkCSVFiles/'
+    path = 'inputData'+dirSep+'bulkCSVFiles'+dirSep
     barcodingDict = experimentParameters['barcodingDict']
     bIndex  = 0
     alignmentColumnOrder = []
@@ -108,7 +114,7 @@ def unpackMultiplexedPlates(experimentParameters,folderName,dataType,reverse):
     if not reverse:
         for multiplexedPlateName in multiplexedPlateNames:
             multiplexedWellPoses = experimentParameters['unpackingDict'][multiplexedPlateName]
-            with open('inputData/bulkCSVFiles/'+multiplexedPlateName+'_'+dataType+'.csv', 'r') as f:
+            with open('inputData'+dirSep+'bulkCSVFiles'+dirSep+multiplexedPlateName+'_'+dataType+'.csv', 'r') as f:
                 multiplexedCSVLines = f.readlines()
             for multiplexedWellPos in multiplexedWellPoses:
                 if multiplexedWellPos != '':
@@ -132,7 +138,7 @@ def unpackMultiplexedPlates(experimentParameters,folderName,dataType,reverse):
                                 newWellID = wellIDConversionDict[wellID]
                                 newLine = line.replace(wellID,newWellID)
                                 newCSVLines.append(newLine)
-                    with open('inputData/bulkCSVFiles/'+multiplexedWellPos+'_'+dataType+'.csv', 'w') as f:
+                    with open('inputData'+dirSep+'bulkCSVFiles'+dirSep+multiplexedWellPos+'_'+dataType+'.csv', 'w') as f:
                         for item in newCSVLines:
                             f.write("%s" % item)
     #Repacking
@@ -147,10 +153,10 @@ def unpackMultiplexedPlates(experimentParameters,folderName,dataType,reverse):
                 invertedWellIDConversionDict = {v: k for k, v in specificWellIDConversionDict.items()}
                 if multiplexedWellPos != '':
                     #Read unpacked csv, rename to name-unpacked.csv, delete old name (as repacked csv names can overlap with these)
-                    with open('inputData/bulkCSVFiles/'+multiplexedWellPos+'_'+dataType+'.csv', 'r') as f:
+                    with open('inputData'+dirSep+'bulkCSVFiles'+dirSep+multiplexedWellPos+'_'+dataType+'.csv', 'r') as f:
                         multiplexedCSVLines = f.readlines()
-                    subprocess.run(['cp','inputData/bulkCSVFiles/'+multiplexedWellPos+'_'+dataType+'.csv','inputData/bulkCSVFiles/'+multiplexedWellPos+'-unpacked_'+dataType+'.csv'])
-                    subprocess.run(['rm','inputData/bulkCSVFiles/'+multiplexedWellPos+'_'+dataType+'.csv'])
+                    shutil.copyfile('inputData'+dirSep+'bulkCSVFiles'+dirSep+multiplexedWellPos+'_'+dataType+'.csv','inputData'+dirSep+'bulkCSVFiles'+dirSep+multiplexedWellPos+'-unpacked_'+dataType+'.csv')
+                    os.remove('inputData'+dirSep+'bulkCSVFiles'+dirSep+multiplexedWellPos+'_'+dataType+'.csv')
                     
                     for lineNum,line in enumerate(multiplexedCSVLines):
                         #If first plate to repack, use first line
@@ -171,13 +177,13 @@ def unpackMultiplexedPlates(experimentParameters,folderName,dataType,reverse):
                             newLine = line.replace(wellID,newWellID)
                             newCSVLines.append(newLine)
                      
-            with open('inputData/bulkCSVFiles/'+multiplexedPlateName+'_'+dataType+'.csv', 'w') as f:
+            with open('inputData'+dirSep+'bulkCSVFiles'+dirSep+multiplexedPlateName+'_'+dataType+'.csv', 'w') as f:
                 for item in newCSVLines:
                     f.write("%s" % item)
 
 def performCommaCheck(fileName):
-    with open('inputData/bulkCSVFiles/'+fileName, 'r') as istr:
-        with open('inputData/bulkCSVFiles/temp-'+fileName, 'w') as ostr:
+    with open('inputData'+dirSep+'bulkCSVFiles'+dirSep+fileName, 'r') as istr:
+        with open('inputData'+dirSep+'bulkCSVFiles'+dirSep+'temp-'+fileName, 'w') as ostr:
             for line in istr:
                 if line[-1] != ',':
                     line = line.rstrip('\n') + ','
@@ -185,23 +191,23 @@ def performCommaCheck(fileName):
                 else:
                     line = line.rstrip('\n')
                     print(line, file=ostr)
-    subprocess.run(['rm','inputData/bulkCSVFiles/'+fileName])
-    subprocess.run(['mv','inputData/bulkCSVFiles/temp-'+fileName,'inputData/bulkCSVFiles/'+fileName])
+    os.remove('inputData'+dirSep+'bulkCSVFiles'+dirSep+fileName)
+    shutil.move('inputData'+dirSep+'bulkCSVFiles'+dirSep+'temp-'+fileName,'inputData'+dirSep+'bulkCSVFiles'+dirSep+fileName)
 
 def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataType,layoutDict):
     if experimentParameters['format'] == 'tube':
-        fullFormatDf = pickle.load(open('misc/tubeLayout-'+folderName+'-cell.pkl','rb'))
+        fullFormatDf = pickle.load(open('misc'+dirSep+'tubeLayout-'+folderName+'-cell.pkl','rb'))
         dfList = []
         levelLabelDict = experimentParameters['levelLabelDict']
-        for fileName in os.listdir('inputData/bulkCSVFiles/'):
+        for fileName in os.listdir('inputData'+dirSep+'bulkCSVFiles'+dirSep):
             if '.csv' in fileName:
                 performCommaCheck(fileName)
                 
                 bulkTubeCSVFileName = fileName
-                columnMultiIndexTuples = cellDataProcessing.parseCellCSVHeaders(pd.read_csv('inputData/bulkCSVFiles/'+bulkTubeCSVFileName).columns)
+                columnMultiIndexTuples = cellDataProcessing.parseCellCSVHeaders(pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+bulkTubeCSVFileName).columns)
                 columnMultiIndex = pd.MultiIndex.from_tuples(columnMultiIndexTuples,names=['CellType','Marker','Statistic'])
 
-                fullData = pd.read_csv('inputData/bulkCSVFiles/'+bulkTubeCSVFileName,header=0)
+                fullData = pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+bulkTubeCSVFileName,header=0)
                 if 'Unnamed' in fullData.columns[-1]:
                     data = fullData.iloc[:-2,1:-1].values
                 else:
@@ -218,9 +224,9 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
                 #Can use sample name file to assign time values
                 if 'sampleNameFile.xlsx' in os.listdir('misc') or 'sampleNameFile.csv' in os.listdir('misc'):
                     if 'sampleNameFile.xlsx' in os.listdir('misc'): 
-                        sampleNameDf = pd.read_excel('misc/sampleNameFile.xlsx')
+                        sampleNameDf = pd.read_excel('misc'+dirSep+'sampleNameFile.xlsx')
                     else:
-                        sampleNameDf = pd.read_csv('misc/sampleNameFile.csv')
+                        sampleNameDf = pd.read_csv('misc'+dirSep+'sampleNameFile.csv')
                     if 'Time' in sampleNameDf.columns:
                         for time in times:
                             timeIndices = []
@@ -372,14 +378,14 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
     return fullExperimentDf
 
 def convertDataFramesToExcel(folderName,secondPath,dataType,df):
-    writer = pd.ExcelWriter('outputData/excelFiles/excelFile-'+folderName+'-'+dataType+'.xlsx')
+    writer = pd.ExcelWriter('outputData'+dirSep+'excelFiles'+dirSep+'excelFile-'+folderName+'-'+dataType+'.xlsx')
     if dataType == 'cyt':
-        dfg = pickle.load(open('outputData/pickleFiles/cytokineGFIPickleFile-'+folderName+'.pkl','rb'))
-        dfc = pickle.load(open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
+        dfg = pickle.load(open('outputData'+dirSep+'pickleFiles'+dirSep+'cytokineGFIPickleFile-'+folderName+'.pkl','rb'))
+        dfc = pickle.load(open('outputData'+dirSep+'pickleFiles'+dirSep+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
         dfg.to_excel(writer,'MFI')
         dfc.to_excel(writer,'Concentration')
     elif dataType == 'killing':
-        dfk = pickle.load(open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
+        dfk = pickle.load(open('outputData'+dirSep+'pickleFiles'+dirSep+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
         dfk.to_excel(writer,'Killing Index')
     else:
         for statistic in list(pd.unique(df.index.get_level_values('Statistic'))):
@@ -389,7 +395,7 @@ def convertDataFramesToExcel(folderName,secondPath,dataType,df):
 
 def saveFinalDataFrames(folderName,secondPath,experimentNumber,dataType,fullExperimentDf,excel_data):
     fullExperimentDf = fullExperimentDf.astype(float)
-    with open('outputData/pickleFiles/'+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl', "wb") as f:
+    with open('outputData'+dirSep+'pickleFiles'+dirSep+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl', "wb") as f:
         pickle.dump(fullExperimentDf, f)
     convertDataFramesToExcel(folderName,secondPath,dataType,fullExperimentDf)
     print(fullExperimentDf)

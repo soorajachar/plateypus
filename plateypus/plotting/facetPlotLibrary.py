@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-import os,itertools,subprocess
+import os,itertools,shutil
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from operator import itemgetter
+import os
+if os.name == 'nt':
+    dirSep = '\\'
+else:
+    dirSep = '/'
 import plateypus.plotting.facetPlot1D as fp1D
 import plateypus.plotting.facetPlotCategorical as fpCategorical
 import plateypus.plotting.facetPlot2D as fp2D
@@ -196,8 +201,8 @@ def createFacetPlotName(folderName,dataType,plotType,subPlotType,legendParameter
     else:
         initialString = delimiter1.join([subPlotType,dataType,folderName,legendParameterString,levelNameString,figureLevelNameString,axisScalingString])
     fullTitleString = initialString+modifiedString
-    if '/' in fullTitleString:
-        fullTitleString = fullTitleString.replace("/", "_")
+    if dirSep in fullTitleString:
+        fullTitleString = fullTitleString.replace(dirSep, "_")
     if '.' in fullTitleString:
         fullTitleString = fullTitleString.replace(".", "_")
     if ' ' in fullTitleString:
@@ -354,7 +359,7 @@ def plotFacetedFigures(folderName,plotType,subPlotType,dataType,subsettedDfList,
         if plotAllVar:
             fullTitleString = createFacetPlotName(folderName,dataType,plotType,subPlotType,legendParameterToLevelNameDict,subsettedDfTitle,levelsPlottedIndividually,useModifiedDf,plotOptions)
             if 'temporaryFirstPlot.png' in os.listdir('plots'):
-                subprocess.run(['rm','plots/temporaryFirstPlot.png'])
+                os.remove('plots'+dirSep+'temporaryFirstPlot.png')
         else:
             fullTitleString = 'temporaryFirstPlot'
         if len(subsettedDf.index) > 0:
@@ -513,11 +518,11 @@ def plotSubsettedFigure(subsettedDf,plottingDf,kwargs,facetgridkwargs,plotSpecif
     #Save figure
     if subfolderName != '':
         if subfolderName not in os.listdir(plotFolderName):
-            subprocess.run(['mkdir',plotFolderName+'/'+subfolderName])
-        fg.fig.savefig(plotFolderName+'/'+subfolderName+'/'+fullTitleString+'.png',bbox_inches='tight')
+            os.mkdir(plotFolderName+dirSep+subfolderName)
+        fg.fig.savefig(plotFolderName+dirSep+subfolderName+dirSep+fullTitleString+'.png',bbox_inches='tight')
     else:
-        fg.fig.savefig(plotFolderName+'/'+fullTitleString+'.png',bbox_inches='tight')
+        fg.fig.savefig(plotFolderName+dirSep+fullTitleString+'.png',bbox_inches='tight')
     if secondPathBool:
-        fg.fig.savefig('../../outputFigures/'+fullTitleString+'.png',bbox_inches='tight')
+        fg.fig.savefig('..'+dirSep+'..'+dirSep+'outputFigures'+dirSep+fullTitleString+'.png',bbox_inches='tight')
     print(fullTitleString+' plot saved')
     plt.clf()
