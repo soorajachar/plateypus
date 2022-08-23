@@ -291,7 +291,7 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
     
     numCyt = len(pd.unique(plottingPointsDf['Cytokine']))
     if numCyt <= 12:
-        fullpalette = sns.color_palette(cc.glasbey,numCyt)
+        fullpalette = sns.color_palette(sns.color_palette(cc.glasbey),numCyt)
         g = sns.relplot(data=plottingPointsDf,x=xaxistitle,y=yaxistitle,hue='Cytokine',col='Kit Name',kind='line',col_order=pd.unique(plottingPointsDf['Kit Name']),hue_order=pd.unique(plottingPointsDf['Cytokine']),height=7,palette=fullpalette)
         #Plot vertical lines at lower and upper concentration limits of detection
         colorDict = {}
