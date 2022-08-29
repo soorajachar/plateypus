@@ -24,6 +24,8 @@ idx = pd.IndexSlice
 bdMouseThKitDict = {'IFNg':17200,'IL-2':17200,'IL-4':14000,'IL-6':21900,'IL-10':18900,'IL-17A':15500,'TNFa':17500}
 #Inflammatory Mouse  BD Biosciences CBA Kit Cytokines
 bdMouseInfKitDict = {'IFNg':17200,'IL-6':21900,'IL-10':18900,'TNFa':17500,'IL-12p70':57480,'MCP-1':16000}
+#Th1/2/17 Human  BD Biosciences CBA Kit Cytokines
+bdHumanThKitDict = {'IFNg':16900,'IL-2':15386,'IL-4':15000,'IL-6':21000,'IL-10':18600,'IL-17A':30700,'TNFa':17500}
 #Inflammatory Human BD Biosciences CBA Kit Cytokines
 bdHumanInfKitDict = {'IL-12p70':70000,'IL-1B':17300,'IL-8':8904}
 #Chemokine Human BD Biosciences CBA Kit Cytokines
@@ -37,7 +39,7 @@ bdHumanFlexKit = {'Angiogenin': 14000,'CD121a': 37400,'CD121b': 38800,'CD178': 1
  'GM-CSF': 14500,'Granzyme A': 28000,'Granzyme B': 27500,'IFNg': 16900,'IL-10': 18600,'IL-11': 19100,'IL-12': 57000,'IL-17A': 30700,'IL-17F': 14903,'IL-1A': 18047,'IL-1B': 17300,'IL-2': 15386,\
  'IL-21': 15500,'IL-3': 15000,'IL-4': 15000,'IL-5': 26522,'IL-6': 21000,'IL-7': 17400,'IL-8': 8904,'IL-9': 14000,'IP-10': 8600,'LT-Alp': 18600,'MIG': 11700,'MIP-1A': 7500,'RANTES': 7809,'TGF-B': 12700,'TNF': 17500,'TNFRI': 22700,'TNFRII': 26600,'VEGF': 19000}
 
-listOfHumanKitDicts = [bdHumanInfKitDict,bdHumanChemokineKitDict,bdHumanFlexKit]
+listOfHumanKitDicts = [bdHumanThKitDict, bdHumanInfKitDict,bdHumanChemokineKitDict,bdHumanFlexKit]
 listofMouseKitDicts = [legendPlexMouseThKitDict,bdMouseThKitDict,bdMouseInfKitDict,legendPlexMouseMacrophageKitDict]
 
 class CalibrationParameterPage(tk.Frame):
