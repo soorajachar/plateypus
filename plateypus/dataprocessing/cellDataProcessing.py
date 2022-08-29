@@ -137,7 +137,6 @@ def parseCellCSVHeaders(columns,panelData=[]):
                 result = uppercase[int(index)]+result
                 n = int((n-1)/26)
             print('Column '+str(indexVal)+' ('+result+'): '+str(p))
-        sys.exit(0)
 
     return newMultiIndexList
 
