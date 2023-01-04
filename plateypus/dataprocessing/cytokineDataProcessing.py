@@ -36,11 +36,14 @@ legendPlexMouseThKitDict = {'IFNg':15652,'IL-5':26200,'TNFa':25896,'IL-2':17231,
 legendPlexMouseMacrophageKitDict = {'G-CSF':18800,'GM-CSF':14000,'IL-12':75000,'IL-12p40':40000,'IL-18':18000,'IL-1b':17500,'IL-23':55000,'IL-34':39000,'IL-7':17000,'KC':11000,'MCP-1':12000,'TARC':8000,'TGFb':25000}
 # Human Soluble Protein Flex CBA Kit
 bdHumanFlexKit = {'Angiogenin': 14000,'CD121a': 37400,'CD121b': 38800,'CD178': 18000,'CD40L': 16300,'CD54': 95000,'CD62L': 60190,'Eotaxin': 8400,'FGF': 16310,'Fractalkine': 8770,'G-CSF': 18600,\
- 'GM-CSF': 14500,'Granzyme A': 28000,'Granzyme B': 27500,'IFNg': 16900,'IL-10': 18600,'IL-11': 19100,'IL-12': 57000,'IL-17A': 30700,'IL-17F': 14903,'IL-1A': 18047,'IL-1B': 17300,'IL-2': 15386,\
- 'IL-21': 15500,'IL-3': 15000,'IL-4': 15000,'IL-5': 26522,'IL-6': 21000,'IL-7': 17400,'IL-8': 8904,'IL-9': 14000,'IP-10': 8600,'LT-Alp': 18600,'MIG': 11700,'MIP-1A': 7500,'RANTES': 7809,'TGF-B': 12700,'TNF': 17500,'TNFRI': 22700,'TNFRII': 26600,'VEGF': 19000}
+    'GM-CSF': 14500,'Granzyme A': 28000,'Granzyme B': 27500,'IFNg': 16900,'IL-10': 18600,'IL-11': 19100,'IL-12': 57000,'IL-17A': 30700,'IL-17F': 14903,'IL-1A': 18047,'IL-1B': 17300,'IL-2': 15386,\
+    'IL-21': 15500,'IL-3': 15000,'IL-4': 15000,'IL-5': 26522,'IL-6': 21000,'IL-7': 17400,'IL-8': 8904,'IL-9': 14000,'IP-10': 8600,'LT-Alp': 18600,'MIG': 11700,'MIP-1A': 7500,'RANTES': 7809,'TGF-B': 12700,'TNF': 17500,'TNFRI': 22700,'TNFRII': 26600,'VEGF': 19000}
+# Mouse Soluble Protein Flex CBA Kit
+bdMouseFlexKit = {'IFNg':17200, 'IL-2':17200, 'IL-5':26200, 'IL-4':1400, 'IL-3':15200, 'KC':11000, 'IL-6':21900, 'IL-21':14400, 'MCP-1':16000, 'IL-13':12300, 'IL-10':18900, 'IL-17A':15500, 'MIP-1a':7820, \
+    'TNF':17500, 'IL-17F':14900, 'IL-12_IL-23p40':70000, 'RANTES':7800, 'MIG':12200, 'IL-1a':17500, 'IL-1b':17500, 'CD62E':115000, 'CD62L':76000}
 
 listOfHumanKitDicts = [bdHumanThKitDict, bdHumanInfKitDict,bdHumanChemokineKitDict,bdHumanFlexKit]
-listofMouseKitDicts = [legendPlexMouseThKitDict,bdMouseThKitDict,bdMouseInfKitDict,legendPlexMouseMacrophageKitDict]
+listofMouseKitDicts = [legendPlexMouseThKitDict,bdMouseThKitDict,bdMouseInfKitDict,legendPlexMouseMacrophageKitDict, bdMouseFlexKit]
 
 class CalibrationParameterPage(tk.Frame):
     def __init__(self, master,folderName,expNum,ex_data,shp,bPage):
@@ -162,12 +165,20 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
 
         
         if len(cytokines) > 12:
+            if species == 'Human':
             #Initial concentration of cytokine standards given by individual Flex kit manuals in pg/mL when diluted in 4mL
-            all_conc = {'Angiogenin': 2500,'CD121a': 10000,'CD121b': 10000,'CD178': 2500,'CD40L': 2500,'CD54': 10000,'CD62L': 10000,'Eotaxin': 2500,'FGF': 2500,'Fractalkine': 10000,'G-CSF': 2500,'GM-CSF': 2500,\
-                'Granzyme A': 10000,'Granzyme B': 10000,'IFNg': 2500,'IL-10': 2500,'IL-11': 10000,'IL-12': 10000,'IL-17A': 2500,'IL-17F': 2500,'IL-1A': 2500,'IL-1B': 2500,'IL-2': 2500,'IL-21': 10000,'IL-3': 2500,\
-                'IL-4': 2500,'IL-5': 2500,'IL-6': 2500,'IL-7': 2500,'IL-8': 2500,'IL-9': 2500,'IP-10': 2500,'LT-Alp': 2500,'MIG': 2500,'MIP-1A': 2500,'RANTES': 2500,'TGF-B': 10000,'TNF': 2500,'TNFRI': 10000,'TNFRII': 2500,'VEGF': 2500}
-            conc = np.array([all_conc[cyt] for cyt in cytokines])
-            initialConc = (conc*1e-12) /((initialStandardVolume*1e-3)/4)
+                all_conc = {'Angiogenin': 2500,'CD121a': 10000,'CD121b': 10000,'CD178': 2500,'CD40L': 2500,'CD54': 10000,'CD62L': 10000,'Eotaxin': 2500,'FGF': 2500,'Fractalkine': 10000,'G-CSF': 2500,'GM-CSF': 2500,\
+                    'Granzyme A': 10000,'Granzyme B': 10000,'IFNg': 2500,'IL-10': 2500,'IL-11': 10000,'IL-12': 10000,'IL-17A': 2500,'IL-17F': 2500,'IL-1A': 2500,'IL-1B': 2500,'IL-2': 2500,'IL-21': 10000,'IL-3': 2500,\
+                    'IL-4': 2500,'IL-5': 2500,'IL-6': 2500,'IL-7': 2500,'IL-8': 2500,'IL-9': 2500,'IP-10': 2500,'LT-Alp': 2500,'MIG': 2500,'MIP-1A': 2500,'RANTES': 2500,'TGF-B': 10000,'TNF': 2500,'TNFRI': 10000,'TNFRII': 2500,'VEGF': 2500}
+                conc = np.array([all_conc[cyt] for cyt in cytokines])
+                #Smaller initial dilution (2mL instead of 4mL for example) increase the initial concentration of the first calibration sample
+                initialConc = (conc*1e-12) /((initialStandardVolume*1e-3)/4)
+            else:
+                all_conc = {'IFNg':2500, 'IL-2':2500, 'IL-5':2500, 'IL-4':2500, 'IL-3':2500, 'KC':2500, 'IL-6':2500, 'IL-21':10000, 'MCP-1':2500, 'IL-13':2500, 'IL-10':2500, 'IL-17A':2500, 'MIP-1a':2500, \
+                    'TNF':2500, 'IL-17F':2500, 'IL-12_IL-23p40':10000, 'RANTES':2500, 'MIG':2500, 'IL-1a':2500, 'IL-1b':2500, 'CD62E':10000, 'CD62L':10000}
+                conc = np.array([all_conc[cyt] for cyt in cytokines])
+                #Smaller initial dilution (2mL instead of 4mL for example) increase the initial concentration of the first calibration sample
+                initialConc = (conc*1e-12) /((initialStandardVolume*1e-3)/4)
         else:
             #Initial concentration all cytokine standards is given by CBA kit manual as 5000 pg/mL: when standards are diluted in 2mL
             conc = np.tile([5000], len(cytokines))
@@ -310,6 +321,9 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
             g2 = sns.scatterplot(data=plottingStandardsDf[plottingStandardsDf['Kit Name'] == kitName],x=xaxistitle,y=yaxistitle,hue='Cytokine',ax=axis,legend=False,palette=currentpalette)
             axis.set_xscale('log')
             axis.set_yscale('log')
+            if not allCytokinesHaveMWInDict:
+                axis.set_ylabel('Concentration of Cytokine Standards (pg/mL)')
+                concUnitPrefix = 'pg_mL'
         plt.savefig('plots/calibrationCurves-'+folderName+'-'+concUnitPrefix+'.png',bbox_inches='tight', dpi=200)
     else:
         fullpalette = sns.color_palette(sns.color_palette(),len(pd.unique(plottingPointsDf['Kit Name'])))
@@ -328,6 +342,9 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
             g2 = sns.scatterplot(data=plottingStandardsDf[plottingStandardsDf['Cytokine'] == cytName],x=xaxistitle,y=yaxistitle,hue='Kit Name',ax=axis,legend=False)
             axis.set_xscale('log')
             axis.set_yscale('log')
+            if not allCytokinesHaveMWInDict:
+                axis.set_ylabel('Concentration of Cytokine Standards (pg/mL)')
+                concUnitPrefix = 'pg_mL'
         plt.tight_layout()
         g.fig.savefig('plots'+dirSep+'calibrationCurves-'+folderName+'-'+concUnitPrefix+'.png',bbox_inches='tight', dpi=200)
     #Save fitting parameters and LOD for curve fit for each cytokine
