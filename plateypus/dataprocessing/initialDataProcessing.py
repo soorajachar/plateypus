@@ -382,15 +382,15 @@ def convertDataFramesToExcel(folderName,secondPath,dataType,df):
     if dataType == 'cyt':
         dfg = pickle.load(open('outputData'+dirSep+'pickleFiles'+dirSep+'cytokineGFIPickleFile-'+folderName+'.pkl','rb'))
         dfc = pickle.load(open('outputData'+dirSep+'pickleFiles'+dirSep+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
-        dfg.to_excel(writer,'MFI')
-        dfc.to_excel(writer,'Concentration')
+        dfg.to_excel(writer,'MFI', merge_cells=False)
+        dfc.to_excel(writer,'Concentration', merge_cells=False)
     elif dataType == 'killing':
         dfk = pickle.load(open('outputData'+dirSep+'pickleFiles'+dirSep+dataTypeDataFrameFileNames[dataType]+'-'+folderName+'.pkl','rb'))
-        dfk.to_excel(writer,'Killing Index')
+        dfk.to_excel(writer,'Killing Index', merge_cells=False)
     else:
         for statistic in list(pd.unique(df.index.get_level_values('Statistic'))):
             statisticDf = df.xs(statistic,level='Statistic')
-            statisticDf.to_excel(writer,statistic)
+            statisticDf.to_excel(writer,statistic, merge_cells=False)
     writer.save()
 
 def saveFinalDataFrames(folderName,secondPath,experimentNumber,dataType,fullExperimentDf,excel_data):
