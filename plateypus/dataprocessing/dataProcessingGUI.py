@@ -44,7 +44,7 @@ class DataProcessingStartPage(tk.Frame):
         l2d = tk.Label(mainWindow,text="Single Cell:",padx = 20).grid(row=5,column=0,sticky=tk.W)
         
         def createDataFrame(dataType):
-            dataProcessingMaster(folderName,expNum,dataType,ex_data,v3.get())
+            dataProcessingMaster(folderName,expNum,dataType,ex_data,v3.get())#,v4.get())
         
         l3 = tk.Label(mainWindow, text="""Action: """).grid(row=0,column=1,sticky=tk.W)
         
@@ -78,6 +78,13 @@ class DataProcessingStartPage(tk.Frame):
         v3 = tk.BooleanVar(value=False)
         cb = tk.Checkbutton(cbWindow, variable=v3)
         cb.grid(row=0,column=1,sticky=tk.W)
+        
+        #rbWindow = tk.Frame(mainWindow)
+        #rbWindow.grid(row=4,column=1,sticky=tk.W)
+        #l4 = tk.Label(rbWindow,text='Well wrap:').grid(row=0,column=0,sticky=tk.W)
+        #v4 = tk.StringVar(value=False)
+        #cb = tk.Checkbutton(cbWindow, variable=v3)
+        #cb.grid(row=0,column=1,sticky=tk.W)
 
         for i,button in enumerate([cytDfButton,cellDfButton,prolifDfButton,prolifGenerationGatesButton,singleCellDfButton,killingDfButton]):
             if i == 0:

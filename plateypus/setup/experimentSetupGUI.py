@@ -93,7 +93,7 @@ class ExperimentSetupStartPage(tk.Frame):
                         if bulkStatFile.iloc[row,0] not in ['Mean','SD']:
                             fcsFiles.append(bulkStatFile.iloc[row,0])
 
-                master.switch_frame(TubeLayoutPage,folderName,experimentParameters['levelLabelDict'],len(fcsFiles),v3.get(),ExperimentSetupStartPage,bPage)
+                master.switch_frame(TubeLayoutPage,folderName,experimentParameters['levelLabelDict'],len(fcsFiles),'cell',ExperimentSetupStartPage,bPage)
         
         def collectInput():
             global dataTypeList

@@ -9,7 +9,7 @@ else:
     dirSep = '/'
 from plateypus.dataprocessing.miscFunctions import reorderDfByInputOrder
 
-def generateBulkKillingStatistics(experimentParameters,folderName,experimentNumber,dataType,layoutDict):
+def generateBulkKillingStatistics(experimentParameters,folderName,experimentNumber,dataType,layoutDict,unwrappingOrder='col'):
         numRowPlates = 1 
         numColumnPlates = experimentParameters['numPlates']
 
@@ -31,7 +31,7 @@ def generateBulkKillingStatistics(experimentParameters,folderName,experimentNumb
         plateLayoutDict = layoutDict['keys']
         blankLayout = layoutDict['blank'].astype(object)
         
-        fullExperimentDf,plateLayoutDf = createIncucyteDataframe(plateNames,{**plateLayoutDict,**{'Blank':blankLayout}},{**levelLabelDict,**{'Blank':['Yes','No']}}) 
+        fullExperimentDf,plateLayoutDf = createIncucyteDataframe(plateNames,{**plateLayoutDict,**{'Blank':blankLayout}},{**levelLabelDict,**{'Blank':['Yes','No']}},unwrappingOrder) 
         
         fullExperimentDf = reorderDfByInputOrder(experimentParameters,fullExperimentDf)
         return fullExperimentDf
