@@ -8,6 +8,7 @@ from plateypus.dataprocessing import cytokineDataProcessing as cydp
 from plateypus.dataprocessing import cellDataProcessing as cdp
 from plateypus.dataprocessing import proliferationDataProcessing as pdp
 from plateypus.dataprocessing import killingDataProcessing as kdp
+from plateypus.dataprocessing import pcrDataProcessing as pcrdp
 from plateypus.dataprocessing import singleCellDataProcessing as scdp
 #import automatedCBAProcessingGUI as autoCBA
 import os
@@ -42,6 +43,7 @@ class DataProcessingStartPage(tk.Frame):
         l2c = tk.Label(mainWindow,text="Proliferation:",padx = 20).grid(row=3,column=0,sticky=tk.W)
         l2e = tk.Label(mainWindow,text="Killing:",padx = 20).grid(row=4,column=0,sticky=tk.W)
         l2d = tk.Label(mainWindow,text="Single Cell:",padx = 20).grid(row=5,column=0,sticky=tk.W)
+        l2f = tk.Label(mainWindow,text="PCR:",padx = 20).grid(row=6,column=0,sticky=tk.W)
         
         def createDataFrame(dataType):
             dataProcessingMaster(folderName,expNum,dataType,ex_data,v3.get())#,v4.get())
@@ -78,6 +80,9 @@ class DataProcessingStartPage(tk.Frame):
         v3 = tk.BooleanVar(value=False)
         cb = tk.Checkbutton(cbWindow, variable=v3)
         cb.grid(row=0,column=1,sticky=tk.W)
+        
+        killingDfButton = tk.Button(mainWindow,text='Create dataframe',command=lambda: createDataFrame('pcr'))
+        killingDfButton.grid(row=6,column=2,sticky=tk.W)
         
         #rbWindow = tk.Frame(mainWindow)
         #rbWindow.grid(row=4,column=1,sticky=tk.W)
@@ -139,6 +144,10 @@ def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells):
     elif(dataType == 'killing'):
         killingdf = kdp.generateBulkKillingStatistics(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
         idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,killingdf,ex_data) 
+    elif(dataType == 'pcr'):
+        pcrdp.convertPCRinput(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
+        pcrdf = idp.createBaseDataFrame(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict).droplevel(['CellType','Marker']).rename({'MFI':'Cp'})
+        idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,pcrdf,ex_data) 
         
         #Re-add parsed time values back into experiment parameter file
         #levelLabelDict = experimentParameters['levelLabelDict']
@@ -153,5 +162,5 @@ def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells):
             scdp.createPlateSingleCellDataFrame(folderName,experimentParameters,experimentLevelLayoutDict,useBlankWells)
         else:
             scdf = scdp.createTubeSingleCellDataFrame(folderName,experimentParameters,experimentLevelLayoutDict)
-    niceDatatypeNameDict = {'cyt':'Cytokine','cell':'Bulk cell','prolif':'Proliferation','singlecell':'Single cell','killing':'Killing'}
+    niceDatatypeNameDict = {'cyt':'Cytokine','cell':'Bulk cell','prolif':'Proliferation','singlecell':'Single cell','killing':'Killing','pcr':'PCR'}
     tk.messagebox.showinfo("Dataframe Created", niceDatatypeNameDict[dataType]+" dataframe created!")

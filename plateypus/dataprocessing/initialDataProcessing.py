@@ -13,14 +13,14 @@ from plateypus.dataprocessing.miscFunctions import cleanUpFlowjoCSV,reorderDfByI
 from plateypus.dataprocessing import cytokineDataProcessing,singleCellDataProcessing,cellDataProcessing
 
 dataTypeLevelNames = {'cyt':['Cytokine'],'cell':['CellType','Marker','Statistic'],'prolif':['Statistic'],'singlecell':['CellType']}
-dataTypeDataFrameFileNames = {'cyt':'cytokineConcentrationPickleFile','cell':'cellStatisticPickleFile','prolif':'proliferationStatisticPickleFile','singlecell':'initialSingleCellPickleFile','killing':'killingIndexPickleFile'}
+dataTypeDataFrameFileNames = {'cyt':'cytokineConcentrationPickleFile','cell':'cellStatisticPickleFile','prolif':'proliferationStatisticPickleFile','singlecell':'initialSingleCellPickleFile','killing':'killingIndexPickleFile','pcr':'pcrStatisticPickleFile'}
 plateRowLetters = list(string.ascii_uppercase)[:16]
 plateColumnNumbers = list(range(1,25))
 
 def returnMultiIndex(sortedData,sortedFiles,dataType,folderName):
     if(dataType == 'cyt'):
         newMultiIndex = cytokineDataProcessing.parseCytokineCSVHeaders(pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_'+dataType+'.csv').columns)
-    elif(dataType == 'cell'):
+    elif(dataType == 'cell' or dataType == 'pcr'):
         if 'antibodyPanel-'+folderName+'.csv' in os.listdir('misc'):
             panelData = pd.read_csv('misc'+dirSep+'antibodyPanel-'+folderName+'.csv',)
             newMultiIndex = cellDataProcessing.parseCellCSVHeaders(pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_'+dataType+'.csv').columns,panelData=panelData)
@@ -265,6 +265,8 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
         fullExperimentDf = pd.concat(dfList)
     else:
         realDataType = dataType
+        if realDataType == 'pcr':
+            dataType = 'cell'
         
         #Reverse order; first decode 96 well barcoded plates, then repack the unbarcoded 96 well plates to a 384 well plate 
         if experimentParameters['overallPlateDimensions'][0] == 16 and 'unpackingDict' in list(experimentParameters.keys()):
@@ -307,7 +309,7 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
         del conditionLevelValues[list(levelLabelDict.keys())[-1]]
         allLevelValues = experimentParameters['levelLabelDict']
         
-        sortedData,sortedFiles = cleanUpFlowjoCSV(plateNames,folderName,dataType,experimentParameters)
+        sortedData,sortedFiles = cleanUpFlowjoCSV(plateNames,folderName,realDataType,experimentParameters)
         allRawData,newLevelList = returnMultiIndex(sortedData,sortedFiles,realDataType,folderName)
 
         #print(allRawData)
@@ -343,7 +345,7 @@ def createBaseDataFrame(experimentParameters,folderName,experimentNumber,dataTyp
             #print(columnSeriesList)
             #print(rawData)
             #print(newLevelList)
-            platedf = pd.concat(columnSeriesList,axis=0,keys=columnTupleList,names=dataTypeLevelNames[realDataType])
+            platedf = pd.concat(columnSeriesList,axis=0,keys=columnTupleList,names=dataTypeLevelNames[dataType])
             dfList.append(platedf)
 
         idx=pd.IndexSlice 
