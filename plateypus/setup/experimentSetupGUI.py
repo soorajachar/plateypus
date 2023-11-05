@@ -13,7 +13,7 @@ else:
     dirSep = '/'
 
 experimentParameters = {}
-dataTypeDict = {'Cytokine':'cyt','Bulk/Single cell':'cell','Killing':'killing'}
+dataTypeDict = {'Cytokine':'cyt','Bulk/Single cell':'cell','Killing':'killing','PCR':'pcr'}
 
 class ExperimentSetupStartPage(tk.Frame):
     def __init__(self, master,fName,bPage):

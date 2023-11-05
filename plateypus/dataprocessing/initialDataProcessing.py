@@ -19,7 +19,11 @@ plateColumnNumbers = list(range(1,25))
 
 def returnMultiIndex(sortedData,sortedFiles,dataType,folderName):
     if(dataType == 'cyt'):
-        newMultiIndex = cytokineDataProcessing.parseCytokineCSVHeaders(pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_'+dataType+'.csv').columns)
+        if 'cytRenamingDict-'+folderName+'.json' in os.listdir('misc'):
+            cytRenamingDict = json.load(open('misc'+dirSep+'cytRenamingDict-'+folderName+'.json','r'))
+        else:
+            cytRenamingDict = {}
+        newMultiIndex,_ = cytokineDataProcessing.parseCytokineCSVHeaders(pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_'+dataType+'.csv').columns,[],cytRenamingDict)
     elif(dataType == 'cell' or dataType == 'pcr'):
         if 'antibodyPanel-'+folderName+'.csv' in os.listdir('misc'):
             panelData = pd.read_csv('misc'+dirSep+'antibodyPanel-'+folderName+'.csv',)

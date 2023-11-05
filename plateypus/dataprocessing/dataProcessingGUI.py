@@ -45,9 +45,79 @@ class DataProcessingStartPage(tk.Frame):
         l2d = tk.Label(mainWindow,text="Single Cell:",padx = 20).grid(row=5,column=0,sticky=tk.W)
         l2f = tk.Label(mainWindow,text="PCR:",padx = 20).grid(row=6,column=0,sticky=tk.W)
         
-        def createDataFrame(dataType):
-            dataProcessingMaster(folderName,expNum,dataType,ex_data,v3.get())#,v4.get())
+        def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells,homedirectoryLoc):
+            completed = True
+            if dataType == 'singlecell' or dataType == 'prolif':
+                parameterExtension = 'cell'
+            else:
+                parameterExtension = dataType
+            experimentParameters = json.load(open('misc'+dirSep+'experimentParameters-'+folderName+'-'+parameterExtension+'.json','r'))
+            if experimentParameters['format'] == 'plate':
+                experimentFormat = 'plate'
+                experimentLevelLayoutDict = pickle.load(open('misc'+dirSep+'layoutDict-'+folderName+'-'+parameterExtension+'.pkl','rb'))
+            else:
+                experimentFormat = 'tube'
+                experimentLevelLayoutDict = pickle.load(open('misc'+dirSep+'tubeLayout-'+folderName+'-'+parameterExtension+'.pkl','rb'))
+            #experimentLevelLayoutDict = idp.tilePlateLayouts(experimentParameters,levelLayouts)
+            if(dataType == 'cyt'):
+                calibrationParameters = json.load(open('misc'+dirSep+'CBAcalibrationParameters-'+folderName+'.json','r'))
+                numberOfCalibrationSamples = calibrationParameters['Number']
+                initialStandardVolume = calibrationParameters['Volume']
+                species = calibrationParameters['Species']
+                kit = calibrationParameters['Kit']
+                sdf = calibrationParameters['SerialDilutionFactor']
+                completeCytokineMWDf = pd.read_pickle(homedirectoryLoc+'misc'+dirSep+'kitDf.pkl').query("Species == @species and Kit == @kit")
+                
+                if 'cytRenamingDict-'+folderName+'.json' in os.listdir('misc'):
+                    cytRenamingDict = json.load(open('misc'+dirSep+'cytRenamingDict-'+folderName+'.json','r'))
+                else:
+                    cytRenamingDict = {}
+                unparsedCytokines = cydp.calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCalibrationSamples,initialStandardVolume,sdf,completeCytokineMWDf,cytRenamingDict=cytRenamingDict)
+                #Offer user chance to rename cytokines that cannot be parsed from csv
+                if len(unparsedCytokines) > 0:
+                    completed = False
+                    master.switch_frame(cydp.CytokineParsingPage,completeCytokineMWDf,unparsedCytokines,folderName,expNum,ex_data,DataProcessingStartPage,bPage)
+                    #master.switch_frame(cydp.CytokineParsingPage,completeCytokineMWDf,unparsedCytokines,folderName,expNum,ex_data,DataProcessingStartPage,bPage)
+                    #cytRenamingDict = json.load(open('misc'+dirSep+'cytRenamingDict-'+folderName+'.json','r'))
+                    #unparsedCytokines = cydp.calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCalibrationSamples,initialStandardVolume,sdf,completeCytokineMWDf,cytRenamingDict=cytRenamingDict)
+                else:
+                    basecytdf = idp.createBaseDataFrame(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
+                    cytdf = cydp.createCytokineDataFrame(folderName,basecytdf,concUnitPrefix)
+                    idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,cytdf,ex_data) 
+            elif(dataType == 'cell'):
+                celldf = idp.createBaseDataFrame(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
+                idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,celldf,ex_data) 
+            elif(dataType == 'prolif'):
+                prolifdf = pdp.generateBulkProliferationStatistics(folderName,expNum)
+                idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,prolifdf,ex_data) 
+            elif(dataType == 'killing'):
+                killingdf = kdp.generateBulkKillingStatistics(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
+                idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,killingdf,ex_data) 
+            elif(dataType == 'pcr'):
+                pcrdp.convertPCRinput(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
+                pcrdf = idp.createBaseDataFrame(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict).droplevel(['CellType','Marker']).rename({'MFI':'Cp'})
+                idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,pcrdf,ex_data) 
+                
+                #Re-add parsed time values back into experiment parameter file
+                #levelLabelDict = experimentParameters['levelLabelDict']
+                #levelLabelDict['Time'] = list(killingDf.columns) 
+                #experimentParameters['levelLabelDict'] = levelLabelDict
+                #with open('misc/experimentParameters-'+folderName+'-'+dataType+'.json', 'w') as fp:
+                #    json.dump(experimentParameters, fp)
+
+            elif(dataType == 'singlecell'):
+                dataType = 'singlecell'
+                if experimentFormat == 'plate':
+                    scdp.createPlateSingleCellDataFrame(folderName,experimentParameters,experimentLevelLayoutDict,useBlankWells)
+                else:
+                    scdf = scdp.createTubeSingleCellDataFrame(folderName,experimentParameters,experimentLevelLayoutDict)
+            niceDatatypeNameDict = {'cyt':'Cytokine','cell':'Bulk cell','prolif':'Proliferation','singlecell':'Single cell','killing':'Killing','pcr':'PCR'}
+            if completed:
+                tk.messagebox.showinfo("Dataframe Created", niceDatatypeNameDict[dataType]+" dataframe created!")
         
+        def createDataFrame(dataType):
+            dataProcessingMaster(folderName,expNum,dataType,ex_data,v3.get(),master.homedirectory)#,v4.get())
+
         l3 = tk.Label(mainWindow, text="""Action: """).grid(row=0,column=1,sticky=tk.W)
         
         cytCalibrationParametersButton = tk.Button(mainWindow,text='Enter CBA bead calibration parameters',command=lambda: master.switch_frame(cydp.CalibrationParameterPage,folderName,expNum,ex_data,DataProcessingStartPage,bPage))
@@ -112,55 +182,3 @@ class DataProcessingStartPage(tk.Frame):
         #tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(backPage,folderName)).grid(row=5,column=1)
         tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
-
-def dataProcessingMaster(folderName,expNum,dataType,ex_data,useBlankWells):
-    if dataType == 'singlecell' or dataType == 'prolif':
-        parameterExtension = 'cell'
-    else:
-        parameterExtension = dataType
-    experimentParameters = json.load(open('misc'+dirSep+'experimentParameters-'+folderName+'-'+parameterExtension+'.json','r'))
-    if experimentParameters['format'] == 'plate':
-        experimentFormat = 'plate'
-        experimentLevelLayoutDict = pickle.load(open('misc'+dirSep+'layoutDict-'+folderName+'-'+parameterExtension+'.pkl','rb'))
-    else:
-        experimentFormat = 'tube'
-        experimentLevelLayoutDict = pickle.load(open('misc'+dirSep+'tubeLayout-'+folderName+'-'+parameterExtension+'.pkl','rb'))
-    #experimentLevelLayoutDict = idp.tilePlateLayouts(experimentParameters,levelLayouts)
-    if(dataType == 'cyt'):
-        calibrationParameters = json.load(open('misc'+dirSep+'CBAcalibrationParameters-'+folderName+'.json','r'))
-        numberOfCalibrationSamples = calibrationParameters['Number']
-        initialStandardVolume = calibrationParameters['Volume']
-        species = calibrationParameters['Species']
-        cydp.calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCalibrationSamples,initialStandardVolume, species)
-        basecytdf = idp.createBaseDataFrame(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
-        cytdf = cydp.createCytokineDataFrame(folderName,basecytdf,concUnitPrefix)
-        idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,cytdf,ex_data) 
-    elif(dataType == 'cell'):
-        celldf = idp.createBaseDataFrame(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
-        idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,celldf,ex_data) 
-    elif(dataType == 'prolif'):
-        prolifdf = pdp.generateBulkProliferationStatistics(folderName,expNum)
-        idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,prolifdf,ex_data) 
-    elif(dataType == 'killing'):
-        killingdf = kdp.generateBulkKillingStatistics(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
-        idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,killingdf,ex_data) 
-    elif(dataType == 'pcr'):
-        pcrdp.convertPCRinput(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict)
-        pcrdf = idp.createBaseDataFrame(experimentParameters,folderName,expNum,dataType,experimentLevelLayoutDict).droplevel(['CellType','Marker']).rename({'MFI':'Cp'})
-        idp.saveFinalDataFrames(folderName,secondPath,expNum,dataType,pcrdf,ex_data) 
-        
-        #Re-add parsed time values back into experiment parameter file
-        #levelLabelDict = experimentParameters['levelLabelDict']
-        #levelLabelDict['Time'] = list(killingDf.columns) 
-        #experimentParameters['levelLabelDict'] = levelLabelDict
-        #with open('misc/experimentParameters-'+folderName+'-'+dataType+'.json', 'w') as fp:
-        #    json.dump(experimentParameters, fp)
-
-    elif(dataType == 'singlecell'):
-        dataType = 'singlecell'
-        if experimentFormat == 'plate':
-            scdp.createPlateSingleCellDataFrame(folderName,experimentParameters,experimentLevelLayoutDict,useBlankWells)
-        else:
-            scdf = scdp.createTubeSingleCellDataFrame(folderName,experimentParameters,experimentLevelLayoutDict)
-    niceDatatypeNameDict = {'cyt':'Cytokine','cell':'Bulk cell','prolif':'Proliferation','singlecell':'Single cell','killing':'Killing','pcr':'PCR'}
-    tk.messagebox.showinfo("Dataframe Created", niceDatatypeNameDict[dataType]+" dataframe created!")

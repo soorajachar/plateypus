@@ -13,7 +13,7 @@ import plateypus.dataprocessing.miscFunctions as mf
 import plateypus.plotting.facetPlotLibrary as fpl 
 import plateypus.plotting.interactiveGUIElements as ipe
 
-expParamDict = {'cyt':'cyt','cell':'cell','prolif':'cell','singlecell':'cell','killing':'killing'}
+expParamDict = {'cyt':'cyt','cell':'cell','prolif':'cell','singlecell':'cell','killing':'killing','pcr':'pcr'}
 
 #Get level names and values into an easily accessible dictionary
 def createLabelDict(df):
@@ -84,6 +84,7 @@ class PlotExperimentWindow(tk.Frame):
         rb2c = tk.Radiobutton(mainWindow,text="Proliferation",padx = 20, variable=v2, value='prolif')
         rb2d = tk.Radiobutton(mainWindow,text="Single Cell",padx = 20, variable=v2, value='singlecell')
         rb2e = tk.Radiobutton(mainWindow,text="Killing",padx = 20, variable=v2, value='killing')
+        rb2f = tk.Radiobutton(mainWindow,text="PCR",padx = 20, variable=v2, value='pcr')
         
         l2.grid(row=0,column=0)
         rb2a.grid(row=1,column=0,sticky=tk.W)
@@ -91,6 +92,7 @@ class PlotExperimentWindow(tk.Frame):
         rb2c.grid(row=3,column=0,sticky=tk.W)
         rb2d.grid(row=4,column=0,sticky=tk.W)
         rb2e.grid(row=5,column=0,sticky=tk.W)
+        rb2f.grid(row=6,column=0,sticky=tk.W)
         
         def collectInputs():
             global useModifiedDf

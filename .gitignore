@@ -8,5 +8,5 @@ plateypus.egg-info/
 plateypus/__pycache__/
 plateypus/dataprocessing/__pycache__/
 plateypus/setup/__pycache__/
-plateypus/misc/*
+plateypus/misc/pathDict.pkl
 platypus/plotting/__pycache__/
