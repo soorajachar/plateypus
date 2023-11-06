@@ -66,7 +66,8 @@ class DataProcessingStartPage(tk.Frame):
                 species = calibrationParameters['Species']
                 kit = calibrationParameters['Kit']
                 sdf = calibrationParameters['SerialDilutionFactor']
-                completeCytokineMWDf = pd.read_pickle(homedirectoryLoc+'misc'+dirSep+'kitDf.pkl').query("Species == @species and Kit == @kit")
+                #completeCytokineMWDf = pd.read_pickle(homedirectoryLoc+'misc'+dirSep+'kitDf.pkl').query("Species == @species and Kit == @kit")
+                completeCytokineMWDf = pd.read_csv(homedirectoryLoc+'misc'+dirSep+'kitDf.csv').set_index(['Species','Kit']).query("Species == @species and Kit == @kit")
                 
                 if 'cytRenamingDict-'+folderName+'.json' in os.listdir('misc'):
                     cytRenamingDict = json.load(open('misc'+dirSep+'cytRenamingDict-'+folderName+'.json','r'))

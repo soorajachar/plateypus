@@ -88,7 +88,8 @@ class CalibrationParameterPage(tk.Frame):
         
         l3 = tk.Label(mainWindow, text='Species of CBA samples: ').grid(row=0, column=3)
 
-        kitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+        #kitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+        kitDf = pd.read_csv(master.homedirectory+'misc'+dirSep+'kitDf.csv').set_index(['Species','Kit'])
         self.kitDict = {x:kitDf.query("Species == @x").index.unique('Kit').tolist() for x in kitDf.index.unique('Species').tolist()}
         
         speciesVar = tk.StringVar(self)
@@ -145,7 +146,8 @@ class KitCreationPage(tk.Frame):
         tk.Label(mainWindow, text='MW (Daltons): ').grid(row=2,column=0)
         tk.Label(mainWindow, text='Mass (pg): ').grid(row=3,column=0)
 
-        cytDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'cytokineMWDf.pkl').set_index('Cytokine',append=True)
+        #cytDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'cytokineMWDf.pkl').set_index('Cytokine',append=True)
+        cytDf = pd.read_csv(master.homedirectory+'misc'+dirSep+'cytokineMWDf.csv').set_index(['Species','Cytokine'])
         self.cytokineDict = {x:cytDf.query("Species == @x").index.unique('Cytokine').tolist() for x in cytDf.index.unique('Species').tolist()}
         self.mwDict = {x+'--'+y:z for x,y,z in zip(list(cytDf.index.get_level_values('Species')),list(cytDf.index.get_level_values('Cytokine')),cytDf['MW'])}
         
@@ -156,7 +158,8 @@ class KitCreationPage(tk.Frame):
         kitButtonWindow = tk.Frame(mainWindow)
         kitButtonWindow.grid(row=5,column=0,columnspan=2,pady=(20,0))
         
-        kitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+        #kitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+        kitDf = pd.read_csv(master.homedirectory+'misc'+dirSep+'kitDf.csv').set_index(['Species','Kit'])
         species = self.cb1.get()
         self.kitNameCombo = Combobox(kitButtonWindow,values=kitDf.query("Species == @species").index.unique('Kit').tolist())
         tk.Label(kitButtonWindow,text='Kit: ').grid(row=0,column=0)
@@ -168,7 +171,8 @@ class KitCreationPage(tk.Frame):
             populate_slave2()
             
             species = self.cb1.get()
-            kitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+            #kitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+            kitDf = pd.read_csv(master.homedirectory+'misc'+dirSep+'kitDf.csv').set_index(['Species','Kit'])
             self.kitNameCombo['values'] = kitDf.query("Species == @species").index.unique('Kit').tolist() 
             
             return True #must return True or validatecommand will quit
@@ -186,8 +190,8 @@ class KitCreationPage(tk.Frame):
         self.massEntry.insert(0,str(10000))
 
         def populate_slave2():
-            self.mwEntry.delete(0,tk.END)
             if self.cb1.get()+'--'+self.cb2.get() in self.mwDict:
+                self.mwEntry.delete(0,tk.END)
                 mw = self.mwDict[self.cb1.get()+'--'+self.cb2.get()]
                 self.mwEntry.insert(0,str(mw))
             return True #must return True or validatecommand will quit
@@ -231,7 +235,8 @@ class KitCreationPage(tk.Frame):
         kitButtonWindow2 = tk.Frame(mainWindow)
         kitButtonWindow2.grid(row=6,column=0,columnspan=2)
         def add_kit():
-            oldKitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+            #oldKitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+            oldKitDf = pd.read_csv(master.homedirectory+'misc'+dirSep+'kitDf.csv').set_index(['Species','Kit'])
             listLength = len(self.currentKitCytokineList)
             newKitDf = pd.DataFrame({'Species':[self.cb1.get()]*listLength,'Kit':[self.kitNameCombo.get()]*listLength,'Cytokine':self.currentKitCytokineList,'MW':self.currentKitMWList,'Mass':self.currentKitMassList}).set_index(oldKitDf.index.names)
             kitDf = pd.concat([oldKitDf,newKitDf])
@@ -244,7 +249,16 @@ class KitCreationPage(tk.Frame):
             additionalMessage = '\nThis kit contains these cytokines: \n'+','.join(self.currentKitCytokineList)
             answer = askyesno(title='Confirmation',message='Are you sure you want to add '+self.cb1.get()+' '+self.kitNameCombo.get()+' kit?'+additionalMessage)
             if answer:
-                kitDf.drop_duplicates().to_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+                #kitDf.drop_duplicates().to_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+                temp = kitDf.reset_index().drop_duplicates()
+                dList = []
+                for species in pd.unique(temp['Species']):
+                    sDf  = temp.query("Species == @species")
+                    for kit in pd.unique(sDf['Kit']):
+                        kDf = sDf.query("Kit == @kit")
+                        dList.append(kDf)
+                temp = pd.concat(dList)
+                temp.to_csv(master.homedirectory+'misc'+dirSep+'kitDf.csv',index=None)
                 self.currentKitCytokineList = []
                 self.currentKitMWList = []
                 populate_slave()
@@ -255,8 +269,10 @@ class KitCreationPage(tk.Frame):
             k = self.kitNameCombo.get() 
             answer = askyesno(title='Confirmation', message='Are you sure you want to remove '+spec+' '+k+' kit?')
             if answer:
-                kitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
-                kitDf.query("Kit != @k").to_pickle(master.homedirectory+dirSep+'misc/kitDf.pkl')
+                #kitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
+                kitDf = pd.read_csv(master.homedirectory+'misc'+dirSep+'kitDf.csv').set_index(['Species','Kit'])
+                #kitDf.query("Kit != @k").to_pickle(master.homedirectory+dirSep+'misc/kitDf.pkl')
+                kitDf.query("Kit != @k").reset_index().to_csv(master.homedirectory+dirSep+'misc/kitDf.csv',index=None)
                 populate_slave()
                 showinfo(title='Kit removed',message=spec+' '+k+' kit removed!')
 
