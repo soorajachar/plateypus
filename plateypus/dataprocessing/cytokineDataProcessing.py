@@ -283,7 +283,9 @@ class KitCreationPage(tk.Frame):
         buttonWindow.pack(side=tk.TOP,pady=10)
          
         def collectInputs():
-            master.switch_frame(shp,folderName,expNum,ex_data,bPage)
+            answer = askyesno(title='Confirmation', message='Are you sure you want to exit cytokine kit creation?')
+            if answer:
+                master.switch_frame(shp,folderName,expNum,ex_data,bPage)
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)

@@ -397,7 +397,7 @@ def convertDataFramesToExcel(folderName,secondPath,dataType,df):
         for statistic in list(pd.unique(df.index.get_level_values('Statistic'))):
             statisticDf = df.xs(statistic,level='Statistic')
             statisticDf.to_excel(writer,statistic, merge_cells=False)
-    writer.save()
+    writer.close()
 
 def saveFinalDataFrames(folderName,secondPath,experimentNumber,dataType,fullExperimentDf,excel_data):
     fullExperimentDf = fullExperimentDf.astype(float)
