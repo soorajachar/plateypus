@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import pickle
+import pickle,shutil
 import tkinter as tk
 import tkinter.ttk
 import pandas as pd
@@ -85,6 +85,12 @@ class ExperimentSelectionPage(tk.Frame):
             self.pathDict = {}
         else:
             self.pathDict = pickle.load(open(master.homedirectory+'misc'+dirSep+'pathDict.pkl','rb'))
+        
+        if 'cytokineMWDf.csv' not in os.listdir(master.homedirectory+'misc'):
+            shutil.copy(master.homedirectory+'misc'+dirSep+'cytokineMWDf_template.csv',master.homedirectory+'misc'+dirSep+'cytokineMWDf.csv')
+        if 'kitDf.csv' not in os.listdir(master.homedirectory+'misc'):
+            shutil.copy(master.homedirectory+'misc'+dirSep+'kitDf_template.csv',master.homedirectory+'misc'+dirSep+'kitDf.csv')
+
         projects = list(self.pathDict.keys())
         self.projectMenu = tkinter.ttk.Combobox(expSelectionFrame,values = projects)
         if len(self.pathDict) > 0:

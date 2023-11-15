@@ -1,2 +1,4 @@
-exclude plateypus/misc/*
+exclude plateypus/misc/pathDict.pkl
+exclude plateypus/misc/cytokineMWDf.csv
+exclude plateypus/misc/kitDf.csv
 include plateypus/plateypusLogo.png

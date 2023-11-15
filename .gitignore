@@ -8,4 +8,6 @@ plateypus/__pycache__/
 plateypus/dataprocessing/__pycache__/
 plateypus/setup/__pycache__/
 plateypus/misc/pathDict.pkl
+plateypus/misc/kitDf.csv
+plateypus/misc/cytokineMWDf.csv
 platypus/plotting/__pycache__/
