@@ -78,7 +78,7 @@ class CalibrationParameterPage(tk.Frame):
         t1 = tk.Entry(mainWindow)
         t1.grid(row=1,column=0,sticky=tk.W)
 
-        l2 = tk.Label(mainWindow,text='Volume of initial CBA calibration solution: ').grid(row=0,column=1)
+        l2 = tk.Label(mainWindow,text='Volume of initial CBA calibration solution (mL): ').grid(row=0,column=1)
         t2 = tk.Entry(mainWindow)
         t2.grid(row=1,column=1,sticky=tk.W)
         
