@@ -88,7 +88,6 @@ class CalibrationParameterPage(tk.Frame):
         
         l3 = tk.Label(mainWindow, text='Species of CBA samples: ').grid(row=0, column=3)
 
-        #kitDf = pd.read_pickle(master.homedirectory+'misc'+dirSep+'kitDf.pkl')
         kitDf = pd.read_csv(master.homedirectory+'misc'+dirSep+'kitDf.csv').set_index(['Species','Kit'])
         self.kitDict = {x:kitDf.query("Species == @x").index.unique('Kit').tolist() for x in kitDf.index.unique('Species').tolist()}
         
@@ -97,7 +96,7 @@ class CalibrationParameterPage(tk.Frame):
         
         kitMenu = tk.OptionMenu(mainWindow, kitVar, '')
         kitMenu.grid(row=1, column=4)
-
+        
         def update_options(*args):
             kits = self.kitDict[speciesVar.get()]
             kitVar.set(kits[0])
@@ -107,7 +106,7 @@ class CalibrationParameterPage(tk.Frame):
 
             for kit in kits:
                 menu.add_command(label=kit, command=lambda k=kit: kitVar.set(k))
-        
+            
         speciesVar.trace('w', update_options)
         speciesVar.set('Mouse')
         
@@ -116,14 +115,14 @@ class CalibrationParameterPage(tk.Frame):
 
         l4 = tk.Label(mainWindow, text='Cytokine kit used:').grid(row=0, column=4)
         
-        tk.Button(mainWindow, text="Create new kit",command=lambda: master.switch_frame(KitCreationPage,folderName,expNum,ex_data,secondaryhomepage,bPage)).grid(row=2,column=4)
+        tk.Button(mainWindow, text="Create new kit",command=lambda: master.switch_frame(KitCreationPage,folderName,expNum,ex_data,secondaryhomepage,bPage)).grid(row=3,column=4)
          
         def collectInputs():
             numCalibrationSamples = int(t1.get())
             initialStandardVolume = float(t2.get())
             kit = kitVar.get()
             sdf = float(t4.get())
-            calibrationParameterDict = {'Number': numCalibrationSamples,'Volume': initialStandardVolume, 'Kit':kit, 'SerialDilutionFactor':sdf, 'Species':speciesVar.get()}
+            calibrationParameterDict = {'Number': numCalibrationSamples,'Volume': initialStandardVolume, 'Kit':[kit], 'SerialDilutionFactor':sdf, 'Species':speciesVar.get()}
             with open('misc'+dirSep+'CBAcalibrationParameters-'+folderName+'.json','w') as f:
                 json.dump(calibrationParameterDict,f)
             master.switch_frame(secondaryhomepage,folderName,expNum,ex_data,bPage)
@@ -504,7 +503,7 @@ def calibrateExperiment(folderName,secondPath,concUnit,concUnitPrefix,numberOfCa
         plottingStandardsDf = fullCBAStandardsDf.reset_index()
         
         numCyt = len(pd.unique(plottingPointsDf['Cytokine']))
-        if numCyt <= 12:
+        if numCyt <= 13:
             fullpalette = sns.color_palette(sns.color_palette(cc.glasbey),numCyt)
             g = sns.relplot(data=plottingPointsDf,x=xaxistitle,y=yaxistitle,hue='Cytokine',col='Kit Name',kind='line',col_order=pd.unique(plottingPointsDf['Kit Name']),hue_order=pd.unique(plottingPointsDf['Cytokine']),height=7,palette=fullpalette)
             #Plot vertical lines at lower and upper concentration limits of detection

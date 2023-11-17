@@ -50,6 +50,18 @@ Human,BD_FullFlex,Granzyme A,28000,10000
 Human,BD_FullFlex,Granzyme B,27500,10000
 Human,BD_FullFlex,CD178,18000,10000
 Human,BD_FullFlex,FGF,16310,10000
+Human,BD_Th1217_and_Chemokine,IFNg,17200,10000
+Human,BD_Th1217_and_Chemokine,IL-2,15386,10000
+Human,BD_Th1217_and_Chemokine,TNFa,17500,10000
+Human,BD_Th1217_and_Chemokine,IL-4,15000,10000
+Human,BD_Th1217_and_Chemokine,IL-6,21000,10000
+Human,BD_Th1217_and_Chemokine,IL-10,18600,10000
+Human,BD_Th1217_and_Chemokine,IL-17A,30700,10000
+Human,BD_Th1217_and_Chemokine,RANTES,7809,10000
+Human,BD_Th1217_and_Chemokine,MCP-1,13000,10000
+Human,BD_Th1217_and_Chemokine,MIG,11700,10000
+Human,BD_Th1217_and_Chemokine,IL-8,8904,10000
+Human,BD_Th1217_and_Chemokine,IP-10,8600,10000
 Human,Chemokine,IL-8,8904,10000
 Human,Chemokine,RANTES,7809,10000
 Human,Chemokine,MIG,11700,10000

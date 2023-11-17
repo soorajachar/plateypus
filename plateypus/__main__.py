@@ -87,9 +87,9 @@ class ExperimentSelectionPage(tk.Frame):
             self.pathDict = pickle.load(open(master.homedirectory+'misc'+dirSep+'pathDict.pkl','rb'))
         
         if 'cytokineMWDf.csv' not in os.listdir(master.homedirectory+'misc'):
-            shutil.copy(master.homedirectory+'misc'+dirSep+'cytokineMWDf_template.csv',master.homedirectory+'misc'+dirSep+'cytokineMWDf.csv')
+            shutil.copy(master.homedirectory+'templates'+dirSep+'cytokineMWDf_template.csv',master.homedirectory+'misc'+dirSep+'cytokineMWDf.csv')
         if 'kitDf.csv' not in os.listdir(master.homedirectory+'misc'):
-            shutil.copy(master.homedirectory+'misc'+dirSep+'kitDf_template.csv',master.homedirectory+'misc'+dirSep+'kitDf.csv')
+            shutil.copy(master.homedirectory+'templates'+dirSep+'kitDf_template.csv',master.homedirectory+'misc'+dirSep+'kitDf.csv')
 
         projects = list(self.pathDict.keys())
         self.projectMenu = tkinter.ttk.Combobox(expSelectionFrame,values = projects)
