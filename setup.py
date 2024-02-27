@@ -3,7 +3,7 @@ from setuptools import setup,find_packages
     
 install_requires = [
 'matplotlib<=3.5.2',
-'pandas',
+'pandas<2.0.0',
 'seaborn',
 'scipy',
 'openpyxl',
@@ -30,7 +30,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="plateypus",
-    version="0.6.6",
+    version="0.6.7",
     author = "Sooraj Achar",
     author_email = "acharsr@nih.gov",
     description = "Processes and plots high throughput cytometry experiments through a GUI",

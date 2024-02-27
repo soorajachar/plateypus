@@ -60,6 +60,7 @@ class checkUncheckAllButton(tk.Button):
 
 class PlotExperimentWindow(tk.Frame):
     def __init__(self, master,fName,sPage):
+        print(os.getcwd())
         with open('misc'+dirSep+'normalPlottingBool.pkl','wb') as f:
             pickle.dump(True,f)
 
