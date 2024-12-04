@@ -225,7 +225,7 @@ class BlankSelectionPage(tk.Frame):
                 toggle_selector.RS.set_active(True)
          
         rectpropsdict = {'facecolor':'#FF0000','alpha':0.2,'edgecolor':'#FF0000'}
-        toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback,drawtype='box', useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
+        toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,props=rectpropsdict)
         self.ts = toggle_selector.RS
         self.canvas.mpl_connect('key_press_event', toggle_selector)
         
@@ -531,7 +531,7 @@ class PlateLayoutPage(tk.Frame):
                 toggle_selector.RS.set_active(True)
          
         rectpropsdict = {'facecolor':self.currentpalette[self.levelValueIndex+1],'alpha':0.2,'edgecolor':self.currentpalette[self.levelValueIndex+1]}
-        toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback,drawtype='box', useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
+        toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,props=rectpropsdict)
         self.ts = toggle_selector.RS
         toggle_selector.RS.background = self.trueBackground 
 
@@ -574,7 +574,8 @@ class PlateLayoutPage(tk.Frame):
             
             changeLevelValueInLevelValueLabelList()
             rectpropsdict = {'facecolor':self.currentpalette[self.levelValueIndex+1],'alpha':0.2,'edgecolor':self.currentpalette[self.levelValueIndex+1]}
-            toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,drawtype='box',button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
+            toggle_selector.RS.set_active(False)
+            toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,props=rectpropsdict)
             fig_ax1.draw_artist(self.path)
             self.canvas.blit(fig_ax1.bbox)
             self.background = self.canvas.copy_from_bbox(fig_ax1.bbox)
@@ -595,7 +596,7 @@ class PlateLayoutPage(tk.Frame):
                     modifiedPalette.append(self.currentpalette[i+1])
             self.path = sns.scatterplot(data=self.currentLayout,x='x',y='y',ax=fig_ax1,hue='key',hue_order=hueorder,palette=modifiedPalette,s=200,markers=['o','X'],alpha=0.5,style='blank',style_order=[-1,0])
             fig_ax1.legend_.remove()
-            toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,drawtype='box',button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
+            toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,props=rectpropsdict)
             fig_ax1.draw_artist(self.path)
             self.canvas.blit(fig_ax1.bbox)
             self.background = self.canvas.copy_from_bbox(fig_ax1.bbox)
@@ -633,7 +634,7 @@ class PlateLayoutPage(tk.Frame):
             changeLevelInLevelLabelList()
             changeLevelInLevelValueLabelList()
             #rectpropsdict = {'facecolor':self.currentpalette[self.levelValueIndex+1],'alpha':0.2,'edgecolor':self.currentpalette[self.levelValueIndex+1]}
-            #toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback,drawtype='box', useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
+            #toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,props=rectpropsdict)
             updateExperimentPlot()
 
         #Level labels
@@ -765,7 +766,7 @@ class PlateLayoutPage(tk.Frame):
                     changeLevelValue(True) 
                 else:
                     rectpropsdict = {'facecolor':self.currentpalette[self.levelValueIndex+1],'alpha':0.2,'edgecolor':self.currentpalette[self.levelValueIndex+1]}
-                    toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,drawtype='box',button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,rectprops=rectpropsdict)
+                    toggle_selector.RS = RectangleSelector(fig_ax1, line_select_callback, useblit=True,button=[1, 3], minspanx=1, minspany=1,spancoords='pixels',interactive=True,props=rectpropsdict)
                     fig_ax1.draw_artist(self.path)
                     self.canvas.blit(fig_ax1.bbox)
                     self.background = self.canvas.copy_from_bbox(fig_ax1.bbox)

@@ -90,7 +90,9 @@ class TubeLayoutPage(tk.Frame):
         tk.Label(mainWindow,text='Include?').grid(row=0,column=2)
         for i,level in enumerate(allLevelNames):
             tk.Label(mainWindow,text=level+': ').grid(row=0,column=i+3)
-            
+        
+        print(numSamples)
+
         for sample in range(numSamples):
             tk.Label(mainWindow,text='Sample '+str(sample+1)+': ').grid(row=sample+1,column=0)
             fcsVar = tk.StringVar()

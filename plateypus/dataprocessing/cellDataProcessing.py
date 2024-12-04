@@ -32,10 +32,13 @@ def parseCellCSVHeaders(columns,panelData=[]):
                     else:
                         statistic = 'CV'
                     channel = statisticVsChannelSplit[1][:-1]
+                    print(statisticVsChannelSplit)
                     if '-A' in channel:
                         if '::' not in statisticVsChannelSplit[1]:
-                            panelIndex = list(panelData['FCSDetectorName']).index(channel)
-                            marker = panelData['Marker'][panelIndex]
+                            if statisticVsChannelSplit[1][-2:] in ['-A','-W','-H']:
+                                marker = statisticVsChannelSplit[1][:-2]
+                            else:
+                                marker = statisticVsChannelSplit[1]
                         else:
                             marker = statisticVsChannelSplit[1].split(' :: ')[-1][:-1] 
                     else:

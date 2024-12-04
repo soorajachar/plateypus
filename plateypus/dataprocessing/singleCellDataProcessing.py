@@ -65,7 +65,7 @@ def grabCellTypeList(experimentParameters):
         for fileName in os.listdir(path):
             if '.DS' not in fileName and sampleFileName in fileName:
                 splitFile = fileName.split(sampleFileName[1:]+'_')
-                cellType = splitFile[1].split('.')[0]
+                cellType = splitFile[-1].split('.')[0]
                 if cellType not in cellTypeList:
                     cellTypeList.append(cellType)
 

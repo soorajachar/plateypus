@@ -79,14 +79,16 @@ class ExperimentSetupStartPage(tk.Frame):
                 fcsFiles = []
                 
                 if 'A1_cell.csv' not in os.listdir('inputData'+dirSep+'bulkCSVFiles'+dirSep):
-                    if len(os.listdir('inputData'+dirSep+'fcsFiles')) > 1:
+                    if 'sampleNameFile.xlsx' in os.listdir('misc'):
+                        print('waaaaaaaaat2')
+                        fcsFiles = list(pd.read_excel('misc'+dirSep+'sampleNameFile.xlsx',header=0).iloc[:,0].values.ravel())
+                    elif len(os.listdir('inputData'+dirSep+'fcsFiles')) > 1:
                         for fcsName in os.listdir('inputData'+dirSep+'fcsFiles'):
                             if '.fcs' in fcsName:
                                 fcsFiles.append(fcsName)
                         if len(fcsFiles) == 0:
                             fcsFiles = ['                 ']
-                    elif 'sampleNameFile.xlsx' in os.listdir('misc'):
-                        fcsFiles = list(pd.read_excel('misc'+dirSep+'sampleNameFile.xlsx',header=0).iloc[:,0].values.ravel())
+                        print(os.listdir('inputData'+dirSep+'fcsFiles'))
                 else:
                     bulkStatFile = pd.read_csv('inputData'+dirSep+'bulkCSVFiles'+dirSep+'A1_cell.csv')
                     for row in range(bulkStatFile.shape[0]):
