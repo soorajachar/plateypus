@@ -275,8 +275,22 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
                 if '.DS' not in fileName:
                     if ' Well' in fileName:
                         newFileNameComponents = fileName.split(' Well')
-                        newFileName = newFileNameComponents[0].split('_')[0]+'_Specimen_001_'+newFileNameComponents[0].split('_')[1]+'_'+newFileNameComponents[0].split('_')[1][0]+newFileNameComponents[0].split('_')[1][1:].zfill(3)+newFileNameComponents[1]
-                        #print('singleCellCSVFiles/'+folder+'/'+fileName+'->'+'singleCellCSVFiles/'+folder+'/'+newFileName)
+                        #New cytek format: export_A1 Well_001_A1_2h.fcs (plate name added in)
+                        if len(fileName.split('.')[0].split(' ')[1]) > 8:
+                            #Remove plate name
+                            #Account for double underscore pops (occur when barcoding + separate pops)
+                            if '__' in newFileNameComponents[1]:
+                                doubleUnderscoreName = newFileNameComponents[1].split('__')[1].split('.')[0]
+                                finalPop = newFileNameComponents[1].split('__')[0].split('_')[-1]
+                                finalPop = finalPop+'__'+doubleUnderscoreName
+                            else:
+                                finalPop = newFileNameComponents[1].split('_')[-1]
+                            newFileNameComponents[1] = newFileNameComponents[1][:4]+'_'+finalPop+'.csv'
+                            newFileName = newFileNameComponents[0].split('_')[0]+'_Specimen_001_'+newFileNameComponents[0].split('_')[1]+'_'+newFileNameComponents[0].split('_')[1][0]+newFileNameComponents[0].split('_')[1][1:].zfill(3)+newFileNameComponents[1]
+                        #Old cytek format: A1 Well_001.fcs
+                        else:
+                            newFileName = newFileNameComponents[0].split('_')[0]+'_Specimen_001_'+newFileNameComponents[0].split('_')[1]+'_'+newFileNameComponents[0].split('_')[1][0]+newFileNameComponents[0].split('_')[1][1:].zfill(3)+newFileNameComponents[1]
+                            #print('singleCellCSVFiles/'+folder+'/'+fileName+'->'+'singleCellCSVFiles/'+folder+'/'+newFileName)
                         shutil.move(path+folder+dirSep+fileName,path+folder+dirSep+newFileName)
     
     if 'barcodingDict' in experimentParameters:
