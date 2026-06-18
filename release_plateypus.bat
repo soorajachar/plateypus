@@ -275,7 +275,6 @@ python -m PyInstaller ^
   --icon "plateypus\plateypus.ico" ^
   --distpath pyinstaller_dist ^
   --workpath pyinstaller_build ^
-  --specpath packaging ^
   --collect-data plateypus ^
   --collect-submodules plateypus ^
   --add-data "plateypus\plateypusLogo.png;plateypus" ^
