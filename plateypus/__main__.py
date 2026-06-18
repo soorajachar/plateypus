@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from pathlib import Path
 import pickle,shutil
 import tkinter as tk
 import tkinter.ttk
@@ -8,7 +9,6 @@ from plateypus.setup.experimentSetupGUI import ExperimentSetupStartPage
 from plateypus.dataprocessing.miscFunctions import setMaxWidth
 from plateypus.dataprocessing.dataProcessingGUI import DataProcessingStartPage
 from plateypus.plotting.plottingGUI import PlotExperimentWindow 
-import plateypus
 from PIL import Image,ImageTk
 from importlib_metadata import version
 import os
@@ -24,10 +24,15 @@ class MainApp(tk.Tk):
 
         self.title('plateypus '+version('plateypus'))
         self._frame = None
-        self.homedirectory = dirSep.join(os.path.abspath(plateypus.__file__).split(dirSep)[:-1])
-        if self.homedirectory[-1] != dirSep:
-            self.homedirectory+=dirSep
-        print('plateypus location: '+self.homedirectory)
+
+        self.homedirectory = str(Path(__file__).resolve().parent) + dirSep
+        print('plateypus location: ' + self.homedirectory)
+
+        #self.homedirectory = dirSep.join(os.path.abspath(plateypus.__file__).split(dirSep)[:-1])
+        #if self.homedirectory[-1] != dirSep:
+        #    self.homedirectory+=dirSep
+        #print('plateypus location: '+self.homedirectory)
+        
         self.switch_frame(ExperimentSelectionPage)
 
     def switch_frame(self, frame_class,*args):
@@ -150,6 +155,9 @@ class ExperimentActionWindow(tk.Frame):
         tk.Button(buttonWindow, text="Back",command=lambda: backCommand()).pack(side=tk.LEFT)
         tk.Button(buttonWindow, text="Quit",command=lambda: quit()).pack(side=tk.LEFT)
 
-if __name__== "__main__":
+def main() -> None:
     app = MainApp()
     app.mainloop()
+
+if __name__ == "__main__":
+    main()
