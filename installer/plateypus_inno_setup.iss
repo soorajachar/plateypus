@@ -1,5 +1,5 @@
 #define MyAppName "plateypus"
-#define MyAppVersion "0.6.11"
+#define MyAppVersion "0.6.12"
 #define MyAppPublisher "Sooraj Achar"
 #define MyAppExeName "plateypus.exe"
 
