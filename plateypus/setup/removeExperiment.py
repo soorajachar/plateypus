@@ -35,4 +35,4 @@ class RemoveExperimentWindow(tk.Frame):
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(backpage)).pack(side=tk.LEFT)
-        tk.Button(buttonWindow, text="Quit",command=lambda: quit()).pack(side=tk.LEFT)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).pack(side=tk.LEFT)

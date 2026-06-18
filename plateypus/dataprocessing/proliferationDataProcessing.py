@@ -74,7 +74,7 @@ class ProliferationSelectionPage(tk.Frame):
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(secondaryhomepage,folderName,expNum,ex_data,bPage)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 class GatingPage(tk.Frame):
     def __init__(self,master):
@@ -161,7 +161,7 @@ class GatingPage(tk.Frame):
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(ProliferationSelectionPage,folderName,expNum,ex_data,secondaryhomepage,bPage)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 class Unsplit_Proliferation_Gating_GUI(tk.Frame):
     def __init__(self,master):
@@ -310,7 +310,7 @@ class Unsplit_Proliferation_Gating_GUI(tk.Frame):
         buttonWindow.pack(side=tk.TOP,pady=10)
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
     def clickOnParentLine(self, event):
         if event.artist == self.line:

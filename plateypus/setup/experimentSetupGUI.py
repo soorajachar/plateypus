@@ -110,7 +110,7 @@ class ExperimentSetupStartPage(tk.Frame):
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInput()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(backPage,folderName)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 class ExperimentFormatPage(tk.Frame):
     def __init__(self, master,folderName):
@@ -142,7 +142,7 @@ class ExperimentFormatPage(tk.Frame):
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(ExperimentSetupStartPage,folderName,backPage)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 class TubeExperimentParameterPage(tk.Frame):
     def __init__(self, master,folderName):
@@ -181,7 +181,7 @@ class TubeExperimentParameterPage(tk.Frame):
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(ExperimentFormatPage,folderName)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 class PlateExperimentParameterPage(tk.Frame):
     def __init__(self, master,folderName):
@@ -290,7 +290,7 @@ class PlateExperimentParameterPage(tk.Frame):
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(ExperimentFormatPage,folderName)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 class BarcodingPage(tk.Frame):
     def __init__(self, master,mpo,nb):
@@ -450,7 +450,7 @@ class BarcodingPage(tk.Frame):
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(PlateExperimentParameterPage,folderName)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 class MultiplexingPage(tk.Frame):
     def __init__(self, master,mpo):
@@ -521,7 +521,7 @@ class MultiplexingPage(tk.Frame):
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(PlateExperimentParameterPage,folderName)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
         
 class allLevelNamePage(tk.Frame):
     def __init__(self, master,folderName):
@@ -626,7 +626,7 @@ class allLevelNamePage(tk.Frame):
         
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=numAllLevels+1,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: backCommand()).grid(row=numAllLevels+1,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=numAllLevels+1,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=numAllLevels+1,column=2)
 
 class columnLevelValuesPage(tk.Frame):
     def __init__(self, master,folderName):
@@ -670,7 +670,7 @@ class columnLevelValuesPage(tk.Frame):
         
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=2*int(numColumnLevelValues/col_wrap)+2,column=5)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(allLevelNamePage,folderName)).grid(row=2*int(numColumnLevelValues/col_wrap)+2,column=6)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=2*int(numColumnLevelValues/col_wrap)+2,column=7)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=2*int(numColumnLevelValues/col_wrap)+2,column=7)
 
 class LinkedEntryButton(tk.Button):
     def __init__(self,parent,linkedentries,**kwargs):
@@ -775,4 +775,4 @@ class conditionLevelValuesPage(tk.Frame):
         
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=numConditionLevels+1,column=int(maxLevelValues/2))
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(columnLevelValuesPage,folderName)).grid(row=numConditionLevels+1,column=int(maxLevelValues/2)+1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=numConditionLevels+1,column=int(maxLevelValues/2)+2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=numConditionLevels+1,column=int(maxLevelValues/2)+2)

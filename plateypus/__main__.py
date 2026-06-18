@@ -32,7 +32,6 @@ if os.name == "nt":
 else:
     dirSep = "/"
 
-
 def path_with_trailing_separator(path_object):
     path_string = str(path_object)
 
@@ -66,6 +65,10 @@ class MainApp(tk.Tk):
         print("plateypus misc location: " + self.miscDirectory)
 
         self.switch_frame(ExperimentSelectionPage)
+
+    def quit_app(self) -> None:
+        self.quit()
+        self.destroy()
 
     def switch_frame(self, frame_class, *args):
         """
@@ -230,7 +233,7 @@ class ExperimentSelectionPage(tk.Frame):
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP, padx=10, pady=(50, 10))
 
-        tk.Button(buttonWindow, text="Quit", command=lambda: quit()).pack(side=tk.LEFT)
+        tk.Button(buttonWindow, text="Quit", command=master.quit_app).pack(side=tk.LEFT)
 
 
 class ExperimentActionWindow(tk.Frame):
@@ -312,7 +315,7 @@ class ExperimentActionWindow(tk.Frame):
             side=tk.LEFT
         )
 
-        tk.Button(buttonWindow, text="Quit", command=lambda: quit()).pack(side=tk.LEFT)
+        tk.Button(buttonWindow, text="Quit", command=master.quit_app).pack(side=tk.LEFT)
 
 
 def main() -> None:

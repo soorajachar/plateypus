@@ -59,7 +59,7 @@ class CytokineParsingPage(tk.Frame):
         buttonWindow.pack(side=tk.TOP,pady=10)
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 class CalibrationParameterPage(tk.Frame):
     def __init__(self, master,folderName,expNum,ex_data,shp,bPage):
@@ -131,7 +131,7 @@ class CalibrationParameterPage(tk.Frame):
         buttonWindow.pack(side=tk.TOP,pady=10)
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 class KitCreationPage(tk.Frame):
     def __init__(self, master,folderName,expNum,ex_data,shp,bPage):
@@ -287,7 +287,7 @@ class KitCreationPage(tk.Frame):
                 master.switch_frame(shp,folderName,expNum,ex_data,bPage)
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 def parseCytokineCSVHeaders(columns,cytokineMWDf,cytRenamingDict):
     #,Beads/IFNg | Geometric Mean (YG586-A),Beads/IL-2 | Geometric Mean (YG586-A),Beads/IL-4 | Geometric Mean (YG586-A),Beads/IL-6 | Geometric Mean (YG586-A),Beads/IL-10 | Geometric Mean (YG586-A),Beads/IL-17A | Geometric Mean (YG586-A),Beads/TNFa | Geometric Mean (YG586-A),

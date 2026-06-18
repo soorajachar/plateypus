@@ -136,7 +136,7 @@ class PlotExperimentWindow(tk.Frame):
 
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(switchPage,folderName)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)
 
 
 class PlotTypePage(tk.Frame):
@@ -208,7 +208,7 @@ class PlotTypePage(tk.Frame):
         buttonWindow.pack(side=tk.TOP)
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).pack(side=tk.LEFT)
         tk.Button(buttonWindow, text="Back",command=lambda: backCommand()).pack(side=tk.LEFT)
-        tk.Button(buttonWindow, text="Quit",command=lambda: quit()).pack(side=tk.LEFT)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).pack(side=tk.LEFT)
 
 class selectLevelsPage(tk.Frame):
     def __init__(self, master,fsp,fName,backPage,pt,shp):
@@ -258,7 +258,7 @@ class selectLevelsPage(tk.Frame):
         
         def quitCommand():
             exitBoolean = True
-            quit()
+            master.quit_app()
 
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
@@ -353,7 +353,7 @@ class selectLevelValuesPage(tk.Frame):
         
         def quitCommand():
             exitBoolean = True
-            quit()
+            master.quit_app()
         
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
@@ -407,7 +407,7 @@ class assignLevelsToParametersPage(tk.Frame):
         
         def quitCommand():
             exitBoolean = True
-            quit()
+            master.quit_app()
         
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP,pady=10)
@@ -685,4 +685,4 @@ class plotElementsGUIPage(tk.Frame):
         
         tk.Button(buttonWindow, text="Finish",command=lambda: okCommand()).grid(row=len(scalingList)+4,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(assignLevelsToParametersPage,includeLevelValueList)).grid(row=len(scalingList)+4,column=1)
-        tk.Button(buttonWindow, text="Quit",command=lambda: quit()).grid(row=len(scalingList)+4,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=len(scalingList)+4,column=2)

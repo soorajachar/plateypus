@@ -1,6 +1,11 @@
 .DS_Store
 build/
 dist/
+*.spec
+installer_output/
+packaging/plateypus_launcher.py
+.venv/
+env/
 plateypus.egg-info/
 .pytest_cache/
 **/__pycache__

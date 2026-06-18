@@ -182,4 +182,4 @@ class DataProcessingStartPage(tk.Frame):
 
         #tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).grid(row=5,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(backPage,folderName)).grid(row=5,column=1)
-        tk.Button(buttonWindow, text="Quit",command=quit).grid(row=5,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=5,column=2)

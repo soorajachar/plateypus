@@ -181,4 +181,4 @@ class TubeLayoutPage(tk.Frame):
         buttonWindow.pack(side=tk.TOP)
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs()).pack(side=tk.LEFT)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(secondaryhomepage,folderName,backPage)).pack(side=tk.LEFT)
-        tk.Button(buttonWindow, text="Quit",command=lambda: quit()).pack(side=tk.LEFT)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).pack(side=tk.LEFT)

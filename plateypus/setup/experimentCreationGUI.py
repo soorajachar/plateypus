@@ -65,7 +65,7 @@ class NewProjectWindow(tk.Frame):
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(backpage)).pack(side=tk.LEFT)
-        tk.Button(buttonWindow, text="Quit",command=lambda: quit()).pack(side=tk.LEFT)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).pack(side=tk.LEFT)
 
 class RemoveProjectWindow(tk.Frame):
     def __init__(self,master,backpage):
@@ -96,7 +96,7 @@ class RemoveProjectWindow(tk.Frame):
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(backpage)).pack(side=tk.LEFT)
-        tk.Button(buttonWindow, text="Quit",command=lambda: quit()).pack(side=tk.LEFT)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).pack(side=tk.LEFT)
 
 class NewExperimentWindow(tk.Frame):
     def __init__(self,master,backpage):
@@ -156,4 +156,4 @@ class NewExperimentWindow(tk.Frame):
         buttonWindow = tk.Frame(self)
         buttonWindow.pack(side=tk.TOP)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(backpage)).pack(side=tk.LEFT)
-        tk.Button(buttonWindow, text="Quit",command=lambda: quit()).pack(side=tk.LEFT)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).pack(side=tk.LEFT)

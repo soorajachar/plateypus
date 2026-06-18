@@ -323,7 +323,7 @@ class BlankSelectionPage(tk.Frame):
         
         tk.Button(buttonWindow, text="OK",command=lambda: collectInputs(),font='Helvetica 14 bold').grid(row=0,column=0)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(secondaryhomepage,folderName,bPage)).grid(row=0,column=1)
-        tk.Button(buttonWindow, text="Quit",command=lambda: quit()).grid(row=0,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=0,column=2)
 
 def createLayoutVisual(baseLayoutDf,currentLayout,levelIndex,currentLevel,levelValues,plateDimensions,numRowPlates,numColumnPlates,dt,infoDf,vlinelist,hlinelist):
     
@@ -1036,4 +1036,4 @@ class PlateLayoutPage(tk.Frame):
         self.FinishButton['state'] = 'disabled'
         #(self, master,folderName,levels,levelValues,maxNumLevelValues,numRowPlates,numColumnPlates,plateDimensions,dataType,shp)
         tk.Button(buttonWindow, text="Back",command=lambda: master.switch_frame(BlankSelectionPage,folderName,levels,levelValues,maxNumLevelValues,numColumnPlates,plateDimensions,dataTypeList,secondaryhomepage,backPage)).grid(row=0,column=1)
-        tk.Button(buttonWindow, text="Quit",command=lambda: quit()).grid(row=0,column=2)
+        tk.Button(buttonWindow, text="Quit",command=master.quit_app).grid(row=0,column=2)
