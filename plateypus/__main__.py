@@ -54,6 +54,13 @@ class MainApp(tk.Tk):
         self.homedirectory = path_with_trailing_separator(get_user_data_directory())
         self.miscDirectory = path_with_trailing_separator(get_misc_directory())
 
+        icon_path = os.path.join(self.resourceDirectory, "plateypus.ico")
+
+        try:
+            self.iconbitmap(default=icon_path)
+        except Exception as error:
+            print("Could not set plateypus window icon:", error)
+
         print("plateypus resource location: " + self.resourceDirectory)
         print("plateypus user data location: " + self.homedirectory)
         print("plateypus misc location: " + self.miscDirectory)
