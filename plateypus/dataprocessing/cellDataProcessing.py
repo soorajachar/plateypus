@@ -86,6 +86,8 @@ def parseCellCSVHeaders(columns,panelData=[]):
                         statistic = '% Positive'
                     else:
                         statistic = 'Count'
+            if marker[-1] == ')':
+                marker = marker[:-1]
             newMultiIndexList.append([cellType,marker,statistic])
     
     #Now determine population name

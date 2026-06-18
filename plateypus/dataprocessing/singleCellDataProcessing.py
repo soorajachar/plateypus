@@ -273,7 +273,9 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
         if '.DS' not in folder:
             for fileName in os.listdir(path+folder):
                 if '.DS' not in fileName:
+                    #Cytek
                     if ' Well' in fileName:
+                        #print('Cytek')
                         newFileNameComponents = fileName.split(' Well')
                         #New cytek format: export_A1 Well_001_A1_2h.fcs (plate name added in)
                         if len(fileName.split('.')[0].split(' ')[1]) > 8:
@@ -292,7 +294,23 @@ def createPlateSingleCellDataFrame(folderName,experimentParameters,levelLayout,u
                             newFileName = newFileNameComponents[0].split('_')[0]+'_Specimen_001_'+newFileNameComponents[0].split('_')[1]+'_'+newFileNameComponents[0].split('_')[1][0]+newFileNameComponents[0].split('_')[1][1:].zfill(3)+newFileNameComponents[1]
                             #print('singleCellCSVFiles/'+folder+'/'+fileName+'->'+'singleCellCSVFiles/'+folder+'/'+newFileName)
                         shutil.move(path+folder+dirSep+fileName,path+folder+dirSep+newFileName)
-    
+                    #export_A1_Single Cells
+                    else:
+                        #print('Attune')
+                        #Attune
+                        if 'export_' in fileName:
+                            newFileNameComponents = ['_'.join(fileName.split('_')[:2]),'_'.join(fileName.split('export_')[1].split('_')[2:])]
+                            if len(newFileNameComponents[0]) <= 3:
+                                if '__' in newFileNameComponents[1]:
+                                    doubleUnderscoreName = newFileNameComponents[1].split('__')[1].split('.')[0]
+                                    finalPop = newFileNameComponents[1].split('__')[0].split('_')[-1]
+                                    finalPop = finalPop+'__'+doubleUnderscoreName
+                                else:
+                                    finalPop = newFileNameComponents[1].split('_')[-1]
+                                newFileNameComponents[1] = newFileNameComponents[1][:4]+'_'+finalPop+'.csv'
+                                newFileName = newFileNameComponents[0].split('_')[0]+'_Specimen_001_'+newFileNameComponents[0].split('_')[1]+'_'+newFileNameComponents[0].split('_')[1][0]+newFileNameComponents[0].split('_')[1][1:].zfill(3)+newFileNameComponents[1]
+                                shutil.move(path+folder+dirSep+fileName,path+folder+dirSep+newFileName)
+
     if 'barcodingDict' in experimentParameters:
         debarcodeSingleCellData(experimentParameters)
     if 'unpackingDict' in experimentParameters:

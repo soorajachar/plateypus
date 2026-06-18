@@ -79,20 +79,24 @@ def cleanUpFlowjoCSV(fileArray,folderName,dataType,experimentParameters):
             #CyTEK Explorer
             if ' Well' in temp.iloc[i,0]:
                 wellID = temp.iloc[i,0] .split(' ')[0]
-            #FACS Diva
             else:
-                if '_' in temp.iloc[i,0]:
-                    #wellID = temp.iloc[i,0].split('.')[0].split('_')[-2]
-                    if notFoundWellIDPos:
-                        splitWellIDs = temp.iloc[i,0].split('.')[0].split('_')
-                        for i2,splitWellID in enumerate(splitWellIDs):
-                            if splitWellID in allWellPoses:
-                                wellIDPos = i2
-                                notFoundWellIDPos = False
-                                break
-                    wellID = temp.iloc[i,0].split('.')[0].split('_')[wellIDPos]
+                #Attune
+                if len(temp.iloc[i,0].split('.')[0]) <= 3:
+                    wellID = temp.iloc[i,0].split('.')[0]
+                #FACS Diva
                 else:
-                    wellID = temp.iloc[i,0]
+                    if '_' in temp.iloc[i,0]:
+                        #wellID = temp.iloc[i,0].split('.')[0].split('_')[-2]
+                        if notFoundWellIDPos:
+                            splitWellIDs = temp.iloc[i,0].split('.')[0].split('_')
+                            for i2,splitWellID in enumerate(splitWellIDs):
+                                if splitWellID in allWellPoses:
+                                    wellIDPos = i2
+                                    notFoundWellIDPos = False
+                                    break
+                        wellID = temp.iloc[i,0].split('.')[0].split('_')[wellIDPos]
+                    else:
+                        wellID = temp.iloc[i,0]
             temp.iloc[i,0] = orderWellID[wellID]
             #temp2.append([orderWellID[wellID],fullfilename])
             temp2.append([str(temp.iloc[i,0]).zfill(3),fullfilename])
