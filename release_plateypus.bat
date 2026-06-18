@@ -6,7 +6,7 @@ REM plateypus release script
 REM ============================================================
 
 REM CHANGE THESE EACH RELEASE
-set NEW_VERSION=0.6.12
+set NEW_VERSION=0.6.13
 set CONDA_ENV_NAME=plateypus-py310
 set COMMIT_MESSAGE=Release %NEW_VERSION%
 
